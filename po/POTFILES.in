@@ -1,0 +1,30 @@
+# List of source files containing translatable strings.
+# Copyright (c) 2012  Mobilect Power Corp.
+
+# Should use C source file, because of multi-line license string
+src/window.c
+
+# Vala sources
+src/admin-login-page.vala
+src/application.vala
+src/cpanel-administrators.vala
+src/cpanel-employees.vala
+src/cpanel-preferences.vala
+src/cpanel-tab.vala
+src/cpanel-time-records.vala
+src/cpanel.vala
+src/database.vala
+src/date-time-entry.vala
+src/employee-edit-dialog.vala
+src/employee-edit-widget.vala
+src/employee-list.vala
+src/employee-login-page.vala
+src/employee.vala
+src/login-page.vala
+src/mobilect-payroll.vala
+src/mobilect_payroll_vala.stamp
+src/time-record-edit-dialog.vala
+src/time-record-edit-widget.vala
+src/time-record-list.vala
+src/time-record.vala
+# src/window.vala

@@ -1,0 +1,251 @@
+/*
+ * Mobilect Payroll
+ * Copyright (C) 2012 - Arnel A. Borja (kyoushuu@yahoo.com)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+using Gda;
+
+
+namespace Mobilect {
+
+	namespace Payroll {
+
+		public errordomain DatabaseError {
+			USERNAME_NOT_FOUND,
+			EMPLOYEE_NOT_FOUND,
+			UNKNOWN
+		}
+
+		public class Database : Object {
+
+			private const string db_name = "mobilect-payroll";
+
+			public Connection cnc { get; private set; }
+			public DataHandler dh_string { get; private set; }
+
+			public Database () throws DatabaseError {
+				try {
+					cnc = Connection.open_from_string ("SQLite",
+					                                   "DB_DIR=.;DB_NAME=" + db_name,
+					                                   null,
+					                                   ConnectionOptions.NONE);
+
+					dh_string = cnc.get_provider ().get_data_handler_g_type (cnc, typeof (string));
+
+					execute_sql ("CREATE TABLE IF NOT EXISTS employees (" +
+					             "  id integer primary key autoincrement," +
+					             "  lastname string not null," +
+					             "  firstname string not null," +
+					             "  password string not null" +
+					             ")");
+
+					execute_sql ("CREATE TABLE IF NOT EXISTS time_records (" +
+					             "  id integer primary key autoincrement," +
+					             "  employee_id integer," +
+					             "  start timestamp not null," +
+					             "  end timestamp" +
+					             ")");
+
+					execute_sql ("CREATE TABLE IF NOT EXISTS administrators (" +
+					             "  id integer primary key autoincrement," +
+					             "  username string not null," +
+					             "  password string not null" +
+					             ")");
+
+					Set stmt_params;
+					var stmt = cnc.parse_sql_string ("INSERT OR IGNORE INTO administrators (id, username, password)" +
+					                                 "  VALUES (1, ##username::string, ##password::string)",
+					                                 out stmt_params);
+					stmt_params.get_holder ("username")
+						.set_value_str (null, "admin");
+					stmt_params.get_holder ("password")
+						.set_value_str (null,
+						                Checksum.compute_for_string (ChecksumType.SHA256,
+						                                             "admin", -1));
+					cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
+			private void execute_sql (string sql) throws Error {
+				try {
+					var stmt = cnc.parse_sql_string (sql, null);
+					cnc.statement_execute_non_select (stmt, null, null);
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
+			public EmployeeList get_employees () throws DatabaseError {
+				var list = new EmployeeList ();
+				list.database = this;
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT id, lastname, firstname" +
+					                                 "  FROM employees",
+					                                 null);
+					var data_model = cnc.statement_execute_select (stmt, null);
+
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						var cell_data_id = data_model.get_value_at (0, i);
+						var employee = new Employee (cell_data_id.get_int ());
+						employee.database = this;
+
+						var cell_data_lastname = data_model.get_value_at (1, i);
+						employee.lastname = dh_string.get_str_from_value (cell_data_lastname);
+
+						var cell_data_firstname = data_model.get_value_at (2, i);
+						employee.firstname = dh_string.get_str_from_value (cell_data_firstname);
+
+						list.add (employee);
+					}
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+
+				return list;
+			}
+
+			public Employee? get_employee (int id) {
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (id);
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT lastname, firstname" +
+					                                 "  FROM employees" +
+					                                 "  WHERE id=##id::int",
+					                                 out stmt_params);
+					stmt_params.get_holder ("id").set_value (value_id);
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					var employee = new Employee (id);
+					employee.database = this;
+
+					var cell_data_lastname = data_model.get_value_at (0, 0);
+					employee.lastname = dh_string.get_str_from_value (cell_data_lastname);
+
+					var cell_data_firstname = data_model.get_value_at (1, 0);
+					employee.firstname = dh_string.get_str_from_value (cell_data_firstname);
+
+					return employee;
+				} catch (Error e) {
+					return null;
+				}
+			}
+
+			public void add_employee (string lastname, string firstname, string password) throws DatabaseError {
+				Set stmt_params;
+
+
+				try {
+					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, password)" +
+					                                 "  VALUES (##lastname::string, ##firstname::string, ##password::string)",
+					                                 out stmt_params);
+					stmt_params.get_holder ("lastname").set_value_str (null, lastname);
+					stmt_params.get_holder ("firstname").set_value_str (null, firstname);
+					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
+					cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
+			public void add_time_record (int employee_id, DateTime start, DateTime? end) throws DatabaseError {
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (employee_id);
+
+				try {
+					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, start, end)" +
+					                                 "  VALUES (##employee_id::int, ##start::string, ##end::string::null)",
+					                                 out stmt_params);
+					stmt_params.get_holder ("employee_id").set_value (value_id);
+					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
+					cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (DatabaseError e) {
+					throw e;
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
+			public string get_admin_password_checksum (string username) throws DatabaseError {
+				Set stmt_params;
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT password" +
+					                                 "  FROM administrators" +
+					                                 "  WHERE username=##username::string",
+					                                 out stmt_params);
+					stmt_params.get_holder ("username").set_value_str (dh_string, username);
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					var cell_data = data_model.get_value_at (0, 0);
+					return cell_data.get_string ();
+				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
+					throw new DatabaseError.USERNAME_NOT_FOUND (_("Username \"%s\" not found.").printf (username));
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
+			public TimeRecordList get_time_records () throws Error {
+				var list = new TimeRecordList ();
+				list.database = this;
+
+				var stmt = cnc.parse_sql_string ("SELECT id, employee_id, start, end" +
+				                                 "  FROM time_records",
+				                                 null);
+				var data_model = cnc.statement_execute_select (stmt, null);
+
+				for (int i = 0; i < data_model.get_n_rows (); i++) {
+					Value cell_data;
+					var time_val = TimeVal ();
+
+					cell_data = data_model.get_value_at (0, i);
+					var time_record = new TimeRecord (cell_data.get_int ());
+					time_record.database = this;
+
+					cell_data = data_model.get_value_at (1, i);
+					time_record.employee_id = cell_data.get_int ();
+
+					cell_data = data_model.get_value_at (2, i);
+					if (time_val.from_iso8601 (dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
+						time_record.start = new DateTime.from_timeval_utc (time_val);
+					}
+
+					cell_data = data_model.get_value_at (3, i);
+					if (time_val.from_iso8601 (dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
+						time_record.end = new DateTime.from_timeval_utc (time_val);
+					}
+
+					list.add (time_record);
+				}
+
+				return list;
+			}
+
+		}
+
+	}
+
+}

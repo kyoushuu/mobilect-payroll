@@ -170,10 +170,10 @@ namespace Mobilect {
 						value.set_string (time_record.employee != null? time_record.employee.get_name () : null);
 						break;
 					case Columns.START_STRING:
-						value.set_string (time_record.get_start_string ());
+						value.set_string (time_record.get_start_string (true));
 						break;
 					case Columns.END_STRING:
-						value.set_string (time_record.get_end_string ());
+						value.set_string (time_record.get_end_string (true));
 						break;
 				}
 			}

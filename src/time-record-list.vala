@@ -180,6 +180,7 @@ namespace Mobilect {
 
 			public bool iter_children (out TreeIter iter, TreeIter? parent) {
 				if (parent != null || this.size == 0) {
+					iter = TreeIter ();
 					return false;
 				}
 
@@ -204,6 +205,7 @@ namespace Mobilect {
 
 			public bool iter_nth_child (out TreeIter iter, TreeIter? parent, int n) {
 				if (parent != null || n >= this.size) {
+					iter = TreeIter ();
 					return false;
 				}
 
@@ -211,6 +213,7 @@ namespace Mobilect {
 			}
 
 			public bool iter_parent (out TreeIter iter, TreeIter child) {
+				iter = TreeIter ();
 				return false;
 			}
 
@@ -220,13 +223,16 @@ namespace Mobilect {
 					create_iter (out iter, time_record);
 					return true;
 				} else {
+					iter = TreeIter ();
 					return false;
 				}
 			}
 
 			public bool get_iter_with_index (out TreeIter iter, int index) {
-				if (index >= this.size || index < 0)
+				if (index >= this.size || index < 0) {
+					iter = TreeIter ();
 					return false;
+				}
 
 				var time_record = (this as ArrayList<TimeRecord>).get (index);
 

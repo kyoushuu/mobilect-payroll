@@ -133,11 +133,15 @@ namespace Mobilect {
 					"  </toolbar>" +
 					"</ui>";
 
-				ui_manager = new UIManager ();
-				ui_manager.insert_action_group (action_group, -1);
-				ui_manager.add_ui_from_string (ui, -1);
-				this.add_accel_group (ui_manager.get_accel_group ());
-				box.add (ui_manager.get_widget ("/menubar"));
+				try {
+					ui_manager = new UIManager ();
+					ui_manager.insert_action_group (action_group, -1);
+					ui_manager.add_ui_from_string (ui, -1);
+					this.add_accel_group (ui_manager.get_accel_group ());
+					box.add (ui_manager.get_widget ("/menubar"));
+				} catch (Error e) {
+					stderr.printf ("Error: %s\n", e.message);
+				}
 
 				var toolbar = ui_manager.get_widget ("/toolbar");
 				(toolbar as Toolbar).set_style (ToolbarStyle.BOTH_HORIZ);

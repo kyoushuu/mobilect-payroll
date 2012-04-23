@@ -35,7 +35,7 @@ namespace Mobilect {
 			public const string ACTION_EDIT = "cpanel-employees-edit";
 
 			public CPanelEmployees (CPanel cpanel) {
-				base (cpanel, "cpanel-employees");
+				base (cpanel, ACTION);
 
 				this.changed_to.connect (() => {
 					reload ();

@@ -35,7 +35,7 @@ namespace Mobilect {
 			public const string ACTION_EDIT = "cpanel-time-records-edit";
 
 			public CPanelTimeRecords (CPanel cpanel) {
-				base (cpanel, "cpanel-time-records");
+				base (cpanel, ACTION);
 
 				this.changed_to.connect (() => {
 					reload ();

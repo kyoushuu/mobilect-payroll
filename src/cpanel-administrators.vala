@@ -26,8 +26,10 @@ namespace Mobilect {
 
 		public class CPanelAdministrators : CPanelTab {
 
+			public const string ACTION = "cpanel-administrators";
+
 			public CPanelAdministrators (CPanel cpanel) {
-				base (cpanel, "cpanel-administrators");
+				base (cpanel, ACTION);
 			}
 
 		}

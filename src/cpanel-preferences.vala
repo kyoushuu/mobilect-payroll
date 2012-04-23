@@ -26,8 +26,10 @@ namespace Mobilect {
 
 		public class CPanelPreferences : CPanelTab {
 
+			public const string ACTION = "cpanel-preferences";
+
 			public CPanelPreferences (CPanel cpanel) {
-				base (cpanel, "cpanel-preferences");
+				base (cpanel, ACTION);
 			}
 
 		}

@@ -103,12 +103,32 @@ namespace Mobilect {
 				}
 			}
 
-			public string get_start_string () {
-				return this.start.format ("%F %T");
+			public string get_start_string (bool to_local) {
+				var dt = this.start;
+
+				if (to_local) {
+					dt = dt.to_local ();
+				} else {
+					dt = dt.to_utc ();
+				}
+
+				return dt.format ("%F %T");
 			}
 
-			public string get_end_string () {
-				return this.end != null? this.end.format ("%F %T") : null;
+			public string? get_end_string (bool to_local) {
+				var dt = this.end;
+
+				if (dt == null) {
+					return null;
+				}
+
+				if (to_local) {
+					dt = dt.to_local ();
+				} else {
+					dt = dt.to_utc ();
+				}
+
+				return dt.format ("%F %T");
 			}
 
 			public void update () throws DatabaseError {
@@ -128,8 +148,8 @@ namespace Mobilect {
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
 					stmt_params.get_holder ("employee_id").set_value (value_employee_id);
-					stmt_params.get_holder ("start").set_value_str (database.dh_string, this.get_start_string ());
-					stmt_params.get_holder ("end").set_value_str (database.dh_string, this.get_end_string ());
+					stmt_params.get_holder ("start").set_value_str (database.dh_string, this.get_start_string (false));
+					stmt_params.get_holder ("end").set_value_str (database.dh_string, this.get_end_string (false));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (DatabaseError e) {
 					throw e;

@@ -216,16 +216,8 @@ namespace Mobilect {
 			}
 
 			public void reload () {
-				try {
-					this.list = this.cpanel.window.app.database.get_employees ();
-					this.tree_view.model = this.list ;
-				} catch (Error e) {
-					var m_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-					                                  MessageType.ERROR, ButtonsType.CLOSE,
-					                                  _("Error: %s"), e.message);
-					m_dialog.run ();
-					m_dialog.destroy ();
-				}
+				this.list = this.cpanel.window.app.database.get_employees ();
+				this.tree_view.model = this.list ;
 			}
 
 		}

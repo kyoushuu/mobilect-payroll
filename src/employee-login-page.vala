@@ -161,20 +161,12 @@ namespace Mobilect {
 			}
 
 			public void reload () {
-				try {
-					this.list = this.window.app.database.get_employees ();
-					this.name_combobox.model = this.list;
+				this.list = this.window.app.database.get_employees ();
+				this.name_combobox.model = this.list;
 
-					TreeIter iter;
-					if (this.list.get_iter_first (out iter)) {
-						this.name_combobox.set_active_iter (iter);
-					}
-				} catch (Error e) {
-					var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-					                                  MessageType.ERROR, ButtonsType.CLOSE,
-					                                  _("Error: %s"), e.message);
-					m_dialog.run ();
-					m_dialog.destroy ();
+				TreeIter iter;
+				if (this.list.get_iter_first (out iter)) {
+					this.name_combobox.set_active_iter (iter);
 				}
 			}
 

@@ -130,9 +130,18 @@ namespace Mobilect {
 										return;
 									}
 
-									this.list.database.add_time_record (time_record.employee_id,
-									                                    time_record.start,
-									                                    time_record.end);
+									try {
+										this.list.database.add_time_record (time_record.employee_id,
+										                                    time_record.start,
+										                                    time_record.end);
+									} catch (DatabaseError e) {
+										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+										                                  MessageType.ERROR, ButtonsType.CLOSE,
+										                                  _("Error: %s"), e.message);
+										e_dialog.run ();
+										e_dialog.destroy ();
+									}
+
 									reload ();
 								}
 
@@ -160,7 +169,16 @@ namespace Mobilect {
 								                                  _("Are you sure you want to remove the selected time record? The changes will be permanent."));
 
 								if (m_dialog.run () == ResponseType.YES) {
-									time_record.remove ();
+									try {
+										time_record.remove ();
+									} catch (DatabaseError e) {
+										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+										                                  MessageType.ERROR, ButtonsType.CLOSE,
+										                                  _("Error: %s"), e.message);
+										e_dialog.run ();
+										e_dialog.destroy ();
+									}
+
 									reload ();
 								}
 
@@ -208,7 +226,12 @@ namespace Mobilect {
 					                                       time_record);
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
-							dialog.time_record.update ();
+							try {
+								dialog.time_record.update ();
+							} catch (Error e) {
+								stderr.printf ("Error: %s\n", e.message);
+							}
+
 							reload ();
 						}
 

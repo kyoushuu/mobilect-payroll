@@ -110,8 +110,7 @@ namespace Mobilect {
 						accelerator = "<Control>A",
 						tooltip = "Add an time record to database",
 						callback = (a) => {
-							var time_record = new TimeRecord (0);
-							time_record.database = list.database;
+							var time_record = new TimeRecord (0, list.database, null);
 
 							var dialog = new TimeRecordEditDialog (_("Add Time Record"),
 							                                       this.cpanel.window,

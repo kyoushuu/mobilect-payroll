@@ -56,12 +56,51 @@ namespace Mobilect {
 			public DateTime start { get; set; }
 			public DateTime end { get; set; }
 
-			internal weak Database database { get; set; }
-
+			internal weak Database database { get; private set; }
 			internal weak TimeRecordList list { get; set; }
 
-			public TimeRecord (int id) {
+			public TimeRecord (int id, Database database, Employee? employee) {
 				this.id = id;
+				this.database = database;
+
+				Value cell_data;
+				var time_val = TimeVal ();
+
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (this.id);
+
+				if (id != 0) {
+					/* Get data from database */
+					try {
+						var stmt = database.cnc.parse_sql_string ("SELECT employee_id, start, end" +
+						                                          "  FROM time_records" +
+						                                          "  WHERE id=##id::int",
+						                                          out stmt_params);
+						stmt_params.get_holder ("id").set_value (value_id);
+						var data_model = database.cnc.statement_execute_select (stmt, stmt_params);
+
+						if (employee != null) {
+							this.employee = employee;
+						} else {
+							cell_data = data_model.get_value_at (0, 0);
+							this.employee_id = cell_data.get_int ();
+						}
+
+						cell_data = data_model.get_value_at (1, 0);
+						if (time_val.from_iso8601 (database.dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
+							this.start = new DateTime.from_timeval_local (time_val);
+						}
+
+						cell_data = data_model.get_value_at (2, 0);
+						if (time_val.from_iso8601 (database.dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
+							this.end = new DateTime.from_timeval_local (time_val);
+						}
+					} catch (Error e) {
+						stderr.printf ("Error: %s\n", e.message);
+					}
+				}
 			}
 
 			public string get_start_string () {

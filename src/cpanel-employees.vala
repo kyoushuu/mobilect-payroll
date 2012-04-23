@@ -96,8 +96,7 @@ namespace Mobilect {
 						accelerator = "<Control>A",
 						tooltip = "Add an employee to database",
 						callback = (a) => {
-							var employee = new Employee (0);
-							employee.database = list.database;
+							var employee = new Employee (0, list.database);
 
 							var dialog = new EmployeeEditDialog (_("Add Employee"),
 							                                     this.cpanel.window,
@@ -119,9 +118,18 @@ namespace Mobilect {
 
 							dialog.response.connect((d, r) => {
 								if (r == ResponseType.ACCEPT) {
-									this.list.database.add_employee (employee.lastname,
-									                                 employee.firstname,
-									                                 password_entry.text);
+									try {
+										this.list.database.add_employee (employee.lastname,
+										                                 employee.firstname,
+										                                 password_entry.text);
+									} catch (DatabaseError e) {
+										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+															              MessageType.ERROR, ButtonsType.CLOSE,
+															              _("Error: %s"), e.message);
+										e_dialog.run ();
+										e_dialog.destroy ();
+									}
+
 									reload ();
 								}
 
@@ -149,7 +157,16 @@ namespace Mobilect {
 								                                  _("Are you sure you want to remove the selected employee? The changes will be permanent."));
 
 								if (m_dialog.run () == ResponseType.YES) {
-									employee.remove ();
+									try {
+										employee.remove ();
+									} catch (DatabaseError e) {
+										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+															              MessageType.ERROR, ButtonsType.CLOSE,
+															              _("Error: %s"), e.message);
+										e_dialog.run ();
+										e_dialog.destroy ();
+									}
+
 									reload ();
 								}
 
@@ -197,7 +214,12 @@ namespace Mobilect {
 					                                     employee);
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
-							dialog.employee.update ();
+							try {
+								dialog.employee.update ();
+							} catch (Error e) {
+								stderr.printf ("Error: %s\n", e.message);
+							}
+
 							reload ();
 						}
 

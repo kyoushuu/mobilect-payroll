@@ -89,31 +89,22 @@ namespace Mobilect {
 				switch (index_) {
 					case Columns.OBJECT:
 						return typeof (TimeRecord);
-						break;
 					case Columns.ID:
 						return typeof (int);
-						break;
 					case Columns.EMPLOYEE:
 						return typeof (Employee);
-						break;
 					case Columns.EMPLOYEE_ID:
 						return typeof (int);
-						break;
 					case Columns.START:
 						return typeof (DateTime);
-						break;
 					case Columns.END:
 						return typeof (DateTime);
-						break;
 					case Columns.EMPLOYEE_STRING:
 						return typeof (string);
-						break;
 					case Columns.START_STRING:
 						return typeof (string);
-						break;
 					case Columns.END_STRING:
 						return typeof (string);
-						break;
 					default:
 						return Type.INVALID;
 				}

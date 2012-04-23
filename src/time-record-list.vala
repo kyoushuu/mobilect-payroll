@@ -239,10 +239,10 @@ namespace Mobilect {
 
 			private void create_iter (out TreeIter iter, TimeRecord time_record) {
 				/* We simply store a pointer to our custom record in the iter */
-				iter.stamp      = this.stamp;
-				iter.user_data  = time_record;
-				iter.user_data2 = null;   /* unused */
-				iter.user_data3 = null;   /* unused */
+				iter = TreeIter () {
+					stamp      = this.stamp,
+					user_data  = time_record
+				};
 			}
 
 		}

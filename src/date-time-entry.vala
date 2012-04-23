@@ -26,29 +26,29 @@ namespace Mobilect {
 
 		public class DateTimeEntry : Box {
 
-			public Entry time_entry { get; private set; }
 			public Entry date_entry { get; private set; }
+			public Entry time_entry { get; private set; }
 
 			public DateTimeEntry () {
-				this.time_entry = new Entry ();
-				time_entry.focus_out_event.connect ((e) => {
-					update_time_entry ();
-					return false;
-				});
-				time_entry.activate.connect ((e) => {
-					update_time_entry ();
-				});
-				this.add (time_entry);
-
 				this.date_entry = new Entry ();
 				this.date_entry.focus_out_event.connect ((e) => {
-					update_time_entry ();
+					update_entry ();
 					return false;
 				});
 				this.date_entry.activate.connect ((e) => {
-					update_time_entry ();
+					update_entry ();
 				});
 				this.add (date_entry);
+
+				this.time_entry = new Entry ();
+				time_entry.focus_out_event.connect ((e) => {
+					update_entry ();
+					return false;
+				});
+				time_entry.activate.connect ((e) => {
+					update_entry ();
+				});
+				this.add (time_entry);
 			}
 
 			public DateTime get_date_time () {
@@ -67,10 +67,8 @@ namespace Mobilect {
 				time_entry.text.scanf ("%02d:%02d:%02d",
 				                       out hour, out minute, out second);
 
-				var tz = new TimeZone.local ();
-				return new DateTime (tz,
-				                     year, month, day,
-				                     hour, minute, second);
+				return new DateTime.local (year, month, day,
+				                           hour, minute, second);
 			}
 
 			public void set_date_time (DateTime date_time) {
@@ -78,35 +76,28 @@ namespace Mobilect {
 				time_entry.text = date_time.format ("%T");
 			}
 
-			private void update_time_entry () {
-				int hour, minute, second;
-
-				/* %T format string */
-				this.time_entry.text.scanf ("%02d:%02d:%02d",
-				                            out hour, out minute, out second);
-
-				var tz = new TimeZone.local ();
-				var dt = new DateTime (tz, 1, 1, 1, hour, minute, second);
-				var text = dt.format ("%T");
-
-				if (this.time_entry.text != text) {
-					this.time_entry.text = text;
-				}
-			}
-
-			private void update_date_entry () {
+			private void update_entry () {
 				int year, month, day;
+				int hour, minute, second;
 
 				/* %F format string */
 				this.date_entry.text.scanf ("%04d-%02d-%02d",
 				                            out year, out month, out day);
 
-				var tz = new TimeZone.local ();
-				var dt = new DateTime (tz, year, month, day, 0, 0, 0);
-				var text = dt.format ("%F");
+				/* %T format string */
+				this.time_entry.text.scanf ("%02d:%02d:%02d",
+				                            out hour, out minute, out second);
 
-				if (this.date_entry.text != text) {
-					this.date_entry.text = text;
+				var dt = new DateTime.local (year, month, day,
+				                             hour, minute, second);
+				var text_date = dt.format ("%F");
+				var text_time = dt.format ("%T");
+
+				if (this.date_entry.text != text_date) {
+					this.date_entry.text = text_date;
+				}
+				if (this.time_entry.text != text_time) {
+					this.time_entry.text = text_time;
 				}
 			}
 

@@ -155,13 +155,13 @@ namespace Mobilect {
 
 								m_dialog.destroy ();
 							} else {
-								var m_dialog = new MessageDialog (this.cpanel.window,
+								var e_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
 								                                  _("No employee selected."));
-								m_dialog.run ();
-								m_dialog.destroy ();
+								e_dialog.run ();
+								e_dialog.destroy ();
 							}
 						}
 					},
@@ -205,13 +205,13 @@ namespace Mobilect {
 					});
 					dialog.show_all ();
 				} else {
-					var m_dialog = new MessageDialog (this.cpanel.window,
+					var e_dialog = new MessageDialog (this.cpanel.window,
 					                                  DialogFlags.MODAL,
 					                                  MessageType.ERROR,
 					                                  ButtonsType.OK,
 					                                  _("No employee selected."));
-					m_dialog.run ();
-					m_dialog.destroy ();
+					e_dialog.run ();
+					e_dialog.destroy ();
 				}
 			}
 

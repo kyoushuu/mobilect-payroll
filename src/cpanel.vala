@@ -78,7 +78,11 @@ namespace Mobilect {
 					"    </placeholder>" +
 					"  </toolbar>" +
 					"</ui>";
-				window.ui_manager.add_ui_from_string (ui_def, -1);
+				try {
+					window.ui_manager.add_ui_from_string (ui_def, -1);
+				} catch (Error e) {
+					stderr.printf ("Error: %s\n", e.message);
+				}
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
@@ -112,7 +116,11 @@ namespace Mobilect {
 
 				window.ui_manager.insert_action_group (tab.action_group, -1);
 				if (tab.ui_def != null) {
-					window.ui_manager.add_ui_from_string (tab.ui_def, -1);
+					try {
+						window.ui_manager.add_ui_from_string (tab.ui_def, -1);
+					} catch (Error e) {
+						stderr.printf ("Error: %s\n", e.message);
+					}
 				}
 			}
 

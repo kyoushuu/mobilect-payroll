@@ -24,12 +24,6 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public errordomain DatabaseError {
-			USERNAME_NOT_FOUND,
-			EMPLOYEE_NOT_FOUND,
-			UNKNOWN
-		}
-
 		public class Database : Object {
 
 			private const string db_name = "mobilect-payroll";
@@ -37,7 +31,7 @@ namespace Mobilect {
 			public Connection cnc { get; private set; }
 			public DataHandler dh_string { get; private set; }
 
-			public Database () throws DatabaseError {
+			public Database () throws ApplicationError {
 				try {
 					cnc = Connection.open_from_string ("SQLite",
 					                                   "DB_DIR=.;DB_NAME=" + db_name,
@@ -78,7 +72,7 @@ namespace Mobilect {
 						                                             "admin", -1));
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
@@ -87,7 +81,7 @@ namespace Mobilect {
 					var stmt = cnc.parse_sql_string (sql, null);
 					cnc.statement_execute_non_select (stmt, null, null);
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
@@ -157,7 +151,7 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_administrator (string username, string password) throws DatabaseError {
+			public void add_administrator (string username, string password) throws ApplicationError {
 				Set stmt_params;
 
 
@@ -169,11 +163,11 @@ namespace Mobilect {
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
-			public string get_admin_password_checksum (string username) throws DatabaseError {
+			public string get_admin_password_checksum (string username) throws ApplicationError {
 				Set stmt_params;
 
 				try {
@@ -187,9 +181,9 @@ namespace Mobilect {
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
 				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
-					throw new DatabaseError.USERNAME_NOT_FOUND (_("Username \"%s\" not found.").printf (username));
+					throw new ApplicationError.USERNAME_NOT_FOUND (_("Username \"%s\" not found.").printf (username));
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
@@ -238,7 +232,7 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string password) throws DatabaseError {
+			public void add_employee (string lastname, string firstname, string password) throws ApplicationError {
 				Set stmt_params;
 
 
@@ -251,7 +245,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
@@ -279,7 +273,7 @@ namespace Mobilect {
 				return list;
 			}
 
-			public void add_time_record (int employee_id, DateTime start, DateTime? end) throws DatabaseError {
+			public void add_time_record (int employee_id, DateTime start, DateTime? end) throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -293,10 +287,10 @@ namespace Mobilect {
 					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.to_utc ().format ("%F %T"));
 					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.to_utc ().format ("%F %T") : null);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (DatabaseError e) {
+				} catch (ApplicationError e) {
 					throw e;
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 

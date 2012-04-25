@@ -77,7 +77,7 @@ namespace Mobilect {
 								this.username_entry.text = "";
 								this.password_entry.text = "";
 							} else {
-								throw new WindowError.WRONG_PASSWORD (_("Wrong password."));
+								throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
 							}
 					} catch (Error e) {
 						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,

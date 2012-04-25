@@ -133,7 +133,7 @@ namespace Mobilect {
 										this.list.database.add_time_record (time_record.employee_id,
 										                                    time_record.start,
 										                                    time_record.end);
-									} catch (DatabaseError e) {
+									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
 										                                  _("Error: %s"), e.message);
@@ -170,7 +170,7 @@ namespace Mobilect {
 								if (m_dialog.run () == ResponseType.YES) {
 									try {
 										time_record.remove ();
-									} catch (DatabaseError e) {
+									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
 										                                  _("Error: %s"), e.message);

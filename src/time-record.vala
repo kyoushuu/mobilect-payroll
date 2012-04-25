@@ -131,7 +131,7 @@ namespace Mobilect {
 				return dt.format ("%F %T");
 			}
 
-			public void update () throws DatabaseError {
+			public void update () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 				var value_employee_id = Value (typeof (int));
@@ -151,14 +151,14 @@ namespace Mobilect {
 					stmt_params.get_holder ("start").set_value_str (database.dh_string, this.get_start_string (false));
 					stmt_params.get_holder ("end").set_value_str (database.dh_string, this.get_end_string (false));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (DatabaseError e) {
+				} catch (ApplicationError e) {
 					throw e;
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
-			public void remove () throws DatabaseError {
+			public void remove () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -171,7 +171,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 

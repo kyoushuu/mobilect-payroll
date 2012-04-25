@@ -25,11 +25,6 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public errordomain WindowError {
-			WRONG_PASSWORD,
-			ALREADY_LOGGED_IN
-		}
-
 		public class Window : Gtk.Window {
 
 			public int PAGE_LOGIN_EMPLOYEE;

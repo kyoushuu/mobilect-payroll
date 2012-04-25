@@ -88,7 +88,7 @@ namespace Mobilect {
 				return lastname + ", " + firstname;
 			}
 
-			public int get_open_time_records_num () throws DatabaseError {
+			public int get_open_time_records_num () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -105,15 +105,15 @@ namespace Mobilect {
 
 					return data_model.get_n_rows ();
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
-			public void log_employee_in () throws DatabaseError {
+			public void log_employee_in () throws ApplicationError {
 				database.add_time_record (this.id, new DateTime.now_local (), null);
 			}
 
-			public void log_employee_out () throws DatabaseError {
+			public void log_employee_out () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -138,9 +138,9 @@ namespace Mobilect {
 					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_local ().format ("%F %T"));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
-					throw new DatabaseError.EMPLOYEE_NOT_FOUND (_("Not logged in.").printf (id));
+					throw new ApplicationError.EMPLOYEE_NOT_FOUND (_("Not logged in.").printf (id));
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
@@ -209,7 +209,7 @@ namespace Mobilect {
 				return hours_span;
 			}
 
-			public void update () throws DatabaseError {
+			public void update () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -225,14 +225,14 @@ namespace Mobilect {
 					stmt_params.get_holder ("lastname").set_value_str (database.dh_string, this.lastname);
 					stmt_params.get_holder ("firstname").set_value_str (database.dh_string, this.firstname);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (DatabaseError e) {
+				} catch (ApplicationError e) {
 					throw e;
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
-			public void remove () throws DatabaseError {
+			public void remove () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -249,11 +249,11 @@ namespace Mobilect {
 					stmt_params.get_holder ("employee_id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 
-			public string get_password_checksum () throws DatabaseError {
+			public string get_password_checksum () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -270,7 +270,7 @@ namespace Mobilect {
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
 			}
 

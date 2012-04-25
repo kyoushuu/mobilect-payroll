@@ -99,10 +99,10 @@ namespace Mobilect {
 
 						if (employee.get_password_checksum () !=
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
-							throw new WindowError.WRONG_PASSWORD (_("Wrong password."));
+							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
 
 						if (employee.get_open_time_records_num () > 0)
-							throw new WindowError.ALREADY_LOGGED_IN (_("You are already logged in."));
+							throw new ApplicationError.ALREADY_LOGGED_IN (_("You are already logged in."));
 
 						employee.log_employee_in ();
 
@@ -135,7 +135,7 @@ namespace Mobilect {
 
 						if (employee.get_password_checksum () !=
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
-							throw new WindowError.WRONG_PASSWORD (_("Wrong password."));
+							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
 
 						employee.log_employee_out ();
 

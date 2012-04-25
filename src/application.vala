@@ -24,6 +24,14 @@ namespace Mobilect {
 
 	namespace Payroll {
 
+		public errordomain ApplicationError {
+			USERNAME_NOT_FOUND,
+			EMPLOYEE_NOT_FOUND,
+			WRONG_PASSWORD,
+			ALREADY_LOGGED_IN,
+			UNKNOWN
+		}
+
 		public class Application : Gtk.Application {
 
 			private const string db_name = "mobilect-payroll";

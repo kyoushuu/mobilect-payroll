@@ -95,19 +95,14 @@ namespace Mobilect {
 				switch (index_) {
 					case Columns.OBJECT:
 						return typeof (Employee);
-						break;
 					case Columns.ID:
 						return typeof (int);
-						break;
 					case Columns.LASTNAME:
 						return typeof (string);
-						break;
 					case Columns.FIRSTNAME:
 						return typeof (string);
-						break;
 					case Columns.NAME:
 						return typeof (string);
-						break;
 					default:
 						return Type.INVALID;
 				}

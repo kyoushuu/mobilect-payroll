@@ -30,11 +30,38 @@ namespace Mobilect {
 			public string lastname { get; set; }
 			public string firstname { get; set; }
 
-			internal weak Database database { get; set; }
+			internal weak Database database { get; private set; }
 			internal weak EmployeeList list { get; set; }
 
-			public Employee (int id) {
+			public Employee (int id, Database database) {
 				this.id = id;
+				this.database = database;
+
+
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (this.id);
+
+				if (id != 0) {
+					try {
+						/* Get employee data from database */
+						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname" +
+						                                          "  FROM employees" +
+						                                          "  WHERE id=##id::int",
+						                                          out stmt_params);
+						stmt_params.get_holder ("id").set_value (value_id);
+						var data_model = database.cnc.statement_execute_select (stmt, stmt_params);
+
+						var cell_data_lastname = data_model.get_value_at (0, 0);
+						this.lastname = database.dh_string.get_str_from_value (cell_data_lastname);
+
+						var cell_data_firstname = data_model.get_value_at (1, 0);
+						this.firstname = database.dh_string.get_str_from_value (cell_data_firstname);
+					} catch (Error e) {
+						stderr.printf ("Error: %s\n", e.message);
+					}
+				}
 			}
 
 			public string get_name () {

@@ -91,6 +91,108 @@ namespace Mobilect {
 				}
 			}
 
+			public AdministratorList get_administrators () {
+				var list = new AdministratorList ();
+				list.database = this;
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT id" +
+					                                 "  FROM administrators",
+					                                 null);
+					var data_model = cnc.statement_execute_select (stmt, null);
+
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						list.add (get_administrator (data_model.get_value_at (0, i).get_int ()));
+					}
+				} catch (Error e) {
+					list = new AdministratorList ();
+					list.database = this;
+				}
+
+				return list;
+			}
+
+			public Administrator? get_administrator (int id) {
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (id);
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT id" +
+					                                 "  FROM administrators" +
+					                                 "  WHERE id=##id::int",
+					                                 out stmt_params);
+					stmt_params.get_holder ("id").set_value (value_id);
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					if (data_model.get_n_rows () > 0) {
+						return new Administrator (id, this);
+					} else {
+						return null;
+					}
+				} catch (Error e) {
+					return null;
+				}
+			}
+
+			public Administrator? get_administrator_with_username (string username) {
+				Set stmt_params;
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT id" +
+					                                 "  FROM administrators" +
+					                                 "  WHERE username=##username::string",
+					                                 out stmt_params);
+					stmt_params.get_holder ("username").set_value_str (null, username);
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					if (data_model.get_n_rows () > 0) {
+						return new Administrator (data_model.get_value_at (0, 0).get_int (), this);
+					} else {
+						return null;
+					}
+				} catch (Error e) {
+					return null;
+				}
+			}
+
+			public void add_administrator (string username, string password) throws DatabaseError {
+				Set stmt_params;
+
+
+				try {
+					var stmt = cnc.parse_sql_string ("INSERT INTO administrators (username, password)" +
+					                                 "  VALUES (##username::string, ##password::string)",
+					                                 out stmt_params);
+					stmt_params.get_holder ("username").set_value_str (null, username);
+					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
+					cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
+			public string get_admin_password_checksum (string username) throws DatabaseError {
+				Set stmt_params;
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT password" +
+					                                 "  FROM administrators" +
+					                                 "  WHERE username=##username::string",
+					                                 out stmt_params);
+					stmt_params.get_holder ("username").set_value_str (dh_string, username);
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					var cell_data = data_model.get_value_at (0, 0);
+					return cell_data.get_string ();
+				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
+					throw new DatabaseError.USERNAME_NOT_FOUND (_("Username \"%s\" not found.").printf (username));
+				} catch (Error e) {
+					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
 			public EmployeeList get_employees () {
 				var list = new EmployeeList ();
 				list.database = this;
@@ -193,26 +295,6 @@ namespace Mobilect {
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (DatabaseError e) {
 					throw e;
-				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
-				}
-			}
-
-			public string get_admin_password_checksum (string username) throws DatabaseError {
-				Set stmt_params;
-
-				try {
-					var stmt = cnc.parse_sql_string ("SELECT password" +
-					                                 "  FROM administrators" +
-					                                 "  WHERE username=##username::string",
-					                                 out stmt_params);
-					stmt_params.get_holder ("username").set_value_str (dh_string, username);
-					var data_model = cnc.statement_execute_select (stmt, stmt_params);
-
-					var cell_data = data_model.get_value_at (0, 0);
-					return cell_data.get_string ();
-				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
-					throw new DatabaseError.USERNAME_NOT_FOUND (_("Username \"%s\" not found.").printf (username));
 				} catch (Error e) {
 					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}

@@ -153,6 +153,30 @@ namespace Mobilect {
 				}
 			}
 
+			public TimeRecordList get_time_records () {
+				var list = new TimeRecordList ();
+				list.database = this;
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT id" +
+						                             "  FROM time_records",
+						                             null);
+					var data_model = cnc.statement_execute_select (stmt, null);
+
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						Value cell_data = data_model.get_value_at (0, i);
+						var time_record = new TimeRecord (cell_data.get_int (), this, null);
+
+						list.add (time_record);
+					}
+				} catch (Error e) {
+					list = new TimeRecordList ();
+					list.database = this;
+				}
+
+				return list;
+			}
+
 			public void add_time_record (int employee_id, DateTime start, DateTime? end) throws DatabaseError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
@@ -192,42 +216,6 @@ namespace Mobilect {
 				} catch (Error e) {
 					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}
-			}
-
-			public TimeRecordList get_time_records () throws Error {
-				var list = new TimeRecordList ();
-				list.database = this;
-
-				var stmt = cnc.parse_sql_string ("SELECT id, employee_id, start, end" +
-				                                 "  FROM time_records",
-				                                 null);
-				var data_model = cnc.statement_execute_select (stmt, null);
-
-				for (int i = 0; i < data_model.get_n_rows (); i++) {
-					Value cell_data;
-					var time_val = TimeVal ();
-
-					cell_data = data_model.get_value_at (0, i);
-					var time_record = new TimeRecord (cell_data.get_int ());
-					time_record.database = this;
-
-					cell_data = data_model.get_value_at (1, i);
-					time_record.employee_id = cell_data.get_int ();
-
-					cell_data = data_model.get_value_at (2, i);
-					if (time_val.from_iso8601 (dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
-						time_record.start = new DateTime.from_timeval_utc (time_val);
-					}
-
-					cell_data = data_model.get_value_at (3, i);
-					if (time_val.from_iso8601 (dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
-						time_record.end = new DateTime.from_timeval_utc (time_val);
-					}
-
-					list.add (time_record);
-				}
-
-				return list;
 			}
 
 		}

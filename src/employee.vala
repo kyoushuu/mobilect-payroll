@@ -269,8 +269,6 @@ namespace Mobilect {
 
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
-				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
-					throw new DatabaseError.USERNAME_NOT_FOUND (_("Employee \"%d\" not found.").printf (id));
 				} catch (Error e) {
 					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}

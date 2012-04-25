@@ -130,14 +130,14 @@ namespace Mobilect {
 				return this.Columns.NUM;
 			}
 
-			public TreePath? get_path (TreeIter iter) requires (iter.user_data != null) {
+			public TreePath? get_path (TreeIter iter) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
 				var path = new TreePath ();
 				path.append_index (this.index_of (iter.user_data as Employee));
 
 				return path;
 			}
 
-			public void get_value (TreeIter iter, int column, out Value value) {
+			public void get_value (TreeIter iter, int column, out Value value) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
 				value.init (get_column_type (column));
 				var record = iter.user_data as Employee;
 
@@ -173,7 +173,7 @@ namespace Mobilect {
 				return false;
 			}
 
-			public int iter_n_children (TreeIter? iter) {
+			public int iter_n_children (TreeIter? iter) requires (iter.stamp == this.stamp) {
 				if (iter != null) {
 					return 0;
 				}
@@ -181,7 +181,7 @@ namespace Mobilect {
 				return this.size;
 			}
 
-			public bool iter_next (ref TreeIter iter) {
+			public bool iter_next (ref TreeIter iter) requires (iter.stamp == this.stamp) {
 				return get_iter_with_index (out iter, this.index_of (iter.user_data as Employee) + 1);
 			}
 

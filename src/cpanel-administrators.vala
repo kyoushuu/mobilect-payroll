@@ -32,6 +32,7 @@ namespace Mobilect {
 			public const string ACTION = "cpanel-administrators";
 			public const string ACTION_ADD = "cpanel-administrators-add";
 			public const string ACTION_REMOVE = "cpanel-administrators-remove";
+			public const string ACTION_EDIT = "cpanel-administrators-edit";
 
 			public CPanelAdministrators (CPanel cpanel) {
 				base (cpanel, ACTION);
@@ -63,6 +64,8 @@ namespace Mobilect {
 					"        <menu name=\"CPanelAdministratorsMenu\" action=\"" + ACTION + "\">" +
 					"          <menuitem name=\"AddAdministrator\" action=\"" + ACTION_ADD + "\" />" +
 					"          <menuitem name=\"RemoveAdministrator\" action=\"" + ACTION_REMOVE + "\" />" +
+					"          <separator />" +
+					"          <menuitem name=\"EditAdministrator\" action=\"" + ACTION_EDIT + "\" />" +
 					"        </menu>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -73,6 +76,7 @@ namespace Mobilect {
 					"        <placeholder name=\"CPanelToolItemsAdditions\">" +
 					"          <toolitem name=\"AddAdministrator\" action=\"" + ACTION_ADD + "\" />" +
 					"          <toolitem name=\"RemoveAdministrator\" action=\"" + ACTION_REMOVE + "\" />" +
+					"          <toolitem name=\"EditAdministrator\" action=\"" + ACTION_EDIT + "\" />" +
 					"        </placeholder>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -176,6 +180,16 @@ namespace Mobilect {
 								e_dialog.destroy ();
 							}
 						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_EDIT,
+						stock_id = Stock.EDIT,
+						label = "_Edit Administrator",
+						accelerator = "<Control>E",
+						tooltip = "Edit information about the selected administrator",
+						callback = (a) => {
+							edit ();
+						}
 					}
 				};
 
@@ -183,7 +197,43 @@ namespace Mobilect {
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().get_selected (null, null);
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
+					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
 				});
+			}
+
+			public void edit () {
+				TreeIter iter;
+				Administrator administrator;
+
+				if (tree_view.get_selection ().get_selected (null, out iter)) {
+					this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
+
+					var dialog = new AdministratorEditDialog (_("Administrator \"%s\" Properties").printf (administrator.username),
+					                                          this.cpanel.window,
+					                                          administrator);
+					dialog.response.connect ((d, r) => {
+						if (r == ResponseType.ACCEPT) {
+							try {
+								dialog.administrator.update ();
+							} catch (Error e) {
+								stderr.printf ("Error: %s\n", e.message);
+							}
+
+							reload ();
+						}
+
+						d.destroy ();
+					});
+					dialog.show_all ();
+				} else {
+					var e_dialog = new MessageDialog (this.cpanel.window,
+					                                  DialogFlags.MODAL,
+					                                  MessageType.ERROR,
+					                                  ButtonsType.OK,
+					                                  _("No administrator selected."));
+					e_dialog.run ();
+					e_dialog.destroy ();
+				}
 			}
 
 			public void reload () {

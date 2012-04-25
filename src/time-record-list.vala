@@ -164,7 +164,7 @@ namespace Mobilect {
 						value.set_string (time_record.get_start_string (true));
 						break;
 					case Columns.END_STRING:
-						value.set_string (time_record.get_end_string (true));
+						value.set_string (time_record.get_end_string (true)?? _("Open"));
 						break;
 				}
 			}

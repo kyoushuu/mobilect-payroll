@@ -42,6 +42,7 @@ mobilect_payroll_SOURCES = \
 	cpanel-employees.vala \
 	cpanel-preferences.vala \
 	cpanel-time-records.vala \
+	password-widget.vala \
 	administrator-edit-widget.vala \
 	administrator-edit-dialog.vala \
 	employee-edit-widget.vala \

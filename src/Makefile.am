@@ -27,6 +27,7 @@ mobilect_payroll_SOURCES = \
 	application.vala \
 	database.vala \
 	administrator-list.vala \
+	administrator.vala \
 	employee-list.vala \
 	employee.vala \
 	time-record-list.vala \

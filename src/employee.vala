@@ -159,6 +159,56 @@ namespace Mobilect {
 				return dt_new.add_minutes (((int) period * 30) - min);
 			}
 
+			public double get_hours (int start_hour, int hours, Date start_date, Date end_date) requires (start_hour >= 0 && start_hour <= 23) requires (start_hour + hours <= 24) {
+				double hours_span = 0.0;
+				DateTime record_start, record_end;
+
+				var range_start = new DateTime.local (start_date.get_year (),
+				                                      start_date.get_month (),
+				                                      start_date.get_day (),
+				                                      start_hour, 0, 0);
+				var range_end = new DateTime.local (end_date.get_year (),
+				                                    end_date.get_month (),
+				                                    end_date.get_day (),
+				                                    start_hour, 0, 0);
+				range_end = range_end.add_hours (hours);
+
+				foreach (var time_record in time_records) {
+					if (time_record.end == null) {
+						continue;
+					}
+
+					record_start = time_record.start;
+					record_end = time_record.end;
+
+					/* Check if time record date is in range */
+					if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||
+					    (record_start.compare (range_end) != 1 && record_end.compare (range_start) == 1)) {
+						/* Get times of record and period */
+						var period_start = new DateTime.local (record_start.get_year (), record_start.get_month (), record_start.get_day_of_month (),
+						                                       start_hour, 0, 0);
+						var period_end = period_start.add_hours (hours);
+
+						/* Check if time record date is in period */
+						if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||
+						    (record_start.compare (period_end) != 1 && record_end.compare (period_start) == 1)) {
+							/* Get span of paid period */
+							var span_start = record_start.compare (period_start) == 1? record_start : period_start;
+							var span_end = record_end.compare (period_end) == -1? record_end : period_end;
+
+							/* Round to 30-minute boundaries */
+							span_start = date_time_marginalize (span_start, false);
+							span_end = date_time_marginalize (span_end, true);
+
+							/* Get hours in between, per 30 mins each */
+							hours_span += (int) (span_end.difference (span_start)/(TimeSpan.HOUR / 2)) / 2.0;
+						}
+					}
+				}
+
+				return hours_span;
+			}
+
 			public void update () throws DatabaseError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));

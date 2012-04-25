@@ -29,6 +29,7 @@ namespace Mobilect {
 			public int id { get; set; }
 			public string lastname { get; set; }
 			public string firstname { get; set; }
+			public TimeRecordList time_records { get; private set; }
 
 			internal weak Database database { get; private set; }
 			internal weak EmployeeList list { get; set; }
@@ -42,6 +43,10 @@ namespace Mobilect {
 				var value_id = Value (typeof (int));
 
 				value_id.set_int (this.id);
+
+				time_records = new TimeRecordList ();
+				time_records.database = database;
+
 
 				if (id != 0) {
 					try {
@@ -58,6 +63,21 @@ namespace Mobilect {
 
 						var cell_data_firstname = data_model.get_value_at (1, 0);
 						this.firstname = database.dh_string.get_str_from_value (cell_data_firstname);
+
+
+						/* Get time records */
+						stmt = database.cnc.parse_sql_string ("SELECT id, start, end" +
+						                                      "  FROM time_records" +
+						                                      "  WHERE employee_id=##employee_id::int",
+						                                      out stmt_params);
+						stmt_params.get_holder ("employee_id").set_value (value_id);
+						data_model = database.cnc.statement_execute_select (stmt, stmt_params);
+
+						for (int i = 0; i < data_model.get_n_rows (); i++) {
+							var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
+							time_record.employee = this;
+							time_records.add (time_record);
+						}
 					} catch (Error e) {
 						stderr.printf ("Error: %s\n", e.message);
 					}

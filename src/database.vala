@@ -167,26 +167,6 @@ namespace Mobilect {
 				}
 			}
 
-			public string get_admin_password_checksum (string username) throws ApplicationError {
-				Set stmt_params;
-
-				try {
-					var stmt = cnc.parse_sql_string ("SELECT password" +
-					                                 "  FROM administrators" +
-					                                 "  WHERE username=##username::string",
-					                                 out stmt_params);
-					stmt_params.get_holder ("username").set_value_str (dh_string, username);
-					var data_model = cnc.statement_execute_select (stmt, stmt_params);
-
-					var cell_data = data_model.get_value_at (0, 0);
-					return cell_data.get_string ();
-				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
-					throw new ApplicationError.USERNAME_NOT_FOUND (_("Username \"%s\" not found.").printf (username));
-				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
-				}
-			}
-
 			public EmployeeList get_employees () {
 				var list = new EmployeeList ();
 				list.database = this;

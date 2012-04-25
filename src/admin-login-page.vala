@@ -71,7 +71,13 @@ namespace Mobilect {
 
 				button_ok.clicked.connect ((t) => {
 					try {
-						if ((this.window.application as Application).database.get_admin_password_checksum (this.username_entry.text) ==
+						var administrator = (this.window.application as Application).database.get_administrator_with_username (this.username_entry.text);
+
+						if (administrator == null) {
+							throw new ApplicationError.USERNAME_NOT_FOUND (_("Username not found"));
+						}
+
+						if (administrator.get_password_checksum () ==
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1)) {
 								this.window.notebook.page = this.window.PAGE_ADMIN;
 								this.username_entry.text = "";

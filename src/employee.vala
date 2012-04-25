@@ -144,6 +144,21 @@ namespace Mobilect {
 				}
 			}
 
+			private DateTime date_time_marginalize (DateTime dt, bool toceil) {
+				int min = dt.get_minute ();
+				double period = min / 30.0;
+
+				if (toceil) {
+					period = Math.ceil (period);
+				} else {
+					period = Math.floor (period);
+				}
+
+				var dt_new = dt.add_seconds (-dt.get_seconds ());
+
+				return dt_new.add_minutes (((int) period * 30) - min);
+			}
+
 			public void update () throws DatabaseError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));

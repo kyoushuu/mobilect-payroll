@@ -188,8 +188,8 @@ namespace Mobilect {
 					                                 "  VALUES (##employee_id::int, ##start::string, ##end::string::null)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("employee_id").set_value (value_id);
-					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.format ("%F %T"));
-					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
+					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.to_utc ().format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.to_utc ().format ("%F %T") : null);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (DatabaseError e) {
 					throw e;

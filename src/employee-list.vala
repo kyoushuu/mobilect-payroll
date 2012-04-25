@@ -61,13 +61,7 @@ namespace Mobilect {
 			}
 
 			public bool contains_name (string name) {
-				foreach (var employee in this) {
-					if (employee.get_name () == name) {
-						return true;
-					}
-				}
-
-				return false;
+				return get_with_name (name) != null;
 			}
 
 			public Employee? get_with_id (int id) {

@@ -91,31 +91,22 @@ namespace Mobilect {
 				}
 			}
 
-			public EmployeeList get_employees () throws DatabaseError {
+			public EmployeeList get_employees () {
 				var list = new EmployeeList ();
 				list.database = this;
 
 				try {
-					var stmt = cnc.parse_sql_string ("SELECT id, lastname, firstname" +
+					var stmt = cnc.parse_sql_string ("SELECT id" +
 					                                 "  FROM employees",
 					                                 null);
 					var data_model = cnc.statement_execute_select (stmt, null);
 
 					for (int i = 0; i < data_model.get_n_rows (); i++) {
-						var cell_data_id = data_model.get_value_at (0, i);
-						var employee = new Employee (cell_data_id.get_int ());
-						employee.database = this;
-
-						var cell_data_lastname = data_model.get_value_at (1, i);
-						employee.lastname = dh_string.get_str_from_value (cell_data_lastname);
-
-						var cell_data_firstname = data_model.get_value_at (2, i);
-						employee.firstname = dh_string.get_str_from_value (cell_data_firstname);
-
-						list.add (employee);
+						list.add (get_employee (data_model.get_value_at (0, i).get_int ()));
 					}
 				} catch (Error e) {
-					throw new DatabaseError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					list = new EmployeeList ();
+					list.database = this;
 				}
 
 				return list;
@@ -128,23 +119,18 @@ namespace Mobilect {
 				value_id.set_int (id);
 
 				try {
-					var stmt = cnc.parse_sql_string ("SELECT lastname, firstname" +
+					var stmt = cnc.parse_sql_string ("SELECT id" +
 					                                 "  FROM employees" +
 					                                 "  WHERE id=##id::int",
 					                                 out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
 					var data_model = cnc.statement_execute_select (stmt, stmt_params);
 
-					var employee = new Employee (id);
-					employee.database = this;
-
-					var cell_data_lastname = data_model.get_value_at (0, 0);
-					employee.lastname = dh_string.get_str_from_value (cell_data_lastname);
-
-					var cell_data_firstname = data_model.get_value_at (1, 0);
-					employee.firstname = dh_string.get_str_from_value (cell_data_firstname);
-
-					return employee;
+					if (data_model.get_n_rows () > 0) {
+						return new Employee (id, this);
+					} else {
+						return null;
+					}
 				} catch (Error e) {
 					return null;
 				}

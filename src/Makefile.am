@@ -16,8 +16,8 @@ AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h
 
 AM_CFLAGS = \
-	 -Wall \
-	 -g
+	-w \
+	-g
 
 
 bin_PROGRAMS = mobilect-payroll

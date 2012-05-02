@@ -48,10 +48,23 @@ namespace Mobilect {
 				});
 				this.add (tree_view);
 
-				var column = new TreeViewColumn.with_attributes ("Employee Name",
-				                                                 new CellRendererText (),
-				                                                 "text", EmployeeList.Columns.NAME,
-				                                                 null);
+				TreeViewColumn column;
+
+				column = new TreeViewColumn.with_attributes ("Employee Name",
+				                                             new CellRendererText (),
+				                                             "text", EmployeeList.Columns.NAME,
+				                                             null);
+				tree_view.append_column (column);
+
+				column = new TreeViewColumn ();
+				var renderer = new CellRendererText ();
+				column.title = "Hours";
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, EmployeeList.Columns.HOURS, out value);
+					(r as CellRendererText).text = "%.1lf".printf (value.get_double ());
+				});
 				tree_view.append_column (column);
 
 				reload ();

@@ -33,6 +33,7 @@ namespace Mobilect {
 			public const string ACTION_ADD = "cpanel-employees-add";
 			public const string ACTION_REMOVE = "cpanel-employees-remove";
 			public const string ACTION_EDIT = "cpanel-employees-edit";
+			public const string ACTION_PASSWORD = "cpanel-employees-password";
 
 			public CPanelEmployees (CPanel cpanel) {
 				base (cpanel, ACTION);
@@ -66,6 +67,7 @@ namespace Mobilect {
 					"          <menuitem name=\"RemoveEmployee\" action=\"" + ACTION_REMOVE + "\" />" +
 					"          <separator />" +
 					"          <menuitem name=\"EditEmployee\" action=\"" + ACTION_EDIT + "\" />" +
+					"          <menuitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
 					"        </menu>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -77,6 +79,7 @@ namespace Mobilect {
 					"          <toolitem name=\"AddEmployee\" action=\"" + ACTION_ADD + "\" />" +
 					"          <toolitem name=\"RemoveEmployee\" action=\"" + ACTION_REMOVE + "\" />" +
 					"          <toolitem name=\"EditEmployee\" action=\"" + ACTION_EDIT + "\" />" +
+					"          <toolitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
 					"        </placeholder>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -190,6 +193,53 @@ namespace Mobilect {
 						tooltip = "Edit information about the selected employee",
 						callback = (a) => {
 							edit ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_PASSWORD,
+						stock_id = Stock.PROPERTIES,
+						label = "_Change Employee Password",
+						tooltip = "Change password of selected employee",
+						callback = (a) => {
+							TreeIter iter;
+							Employee employee;
+
+							if (tree_view.get_selection ().get_selected (null, out iter)) {
+								this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
+								var dialog = new PasswordDialog (_("Change Employee Password"),
+									                              this.cpanel.window);
+
+								dialog.response.connect((d, r) => {
+									if (r == ResponseType.ACCEPT) {
+										var password = dialog.widget.get_password ();
+
+										if (password != null) {
+											try {
+												employee.change_password (password);
+											} catch (ApplicationError e) {
+												var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+																			      MessageType.ERROR, ButtonsType.CLOSE,
+																			      _("Error: %s"), e.message);
+												e_dialog.run ();
+												e_dialog.destroy ();
+											}
+										} else {
+											return;
+										}
+									}
+
+									d.destroy ();
+								});
+								dialog.show_all ();
+							} else {
+								var e_dialog = new MessageDialog (this.cpanel.window,
+								                                  DialogFlags.MODAL,
+								                                  MessageType.ERROR,
+								                                  ButtonsType.OK,
+								                                  _("No employee selected."));
+								e_dialog.run ();
+								e_dialog.destroy ();
+							}
 						}
 					}
 				};

@@ -144,19 +144,13 @@ namespace Mobilect {
 				}
 			}
 
-			private DateTime date_time_marginalize (DateTime dt, bool toceil) {
+			private DateTime date_time_marginalize (DateTime dt) {
 				int min = dt.get_minute ();
-				double period = min / 30.0;
+				double period = Math.round (min / 30.0);
 
-				if (toceil) {
-					period = Math.ceil (period);
-				} else {
-					period = Math.floor (period);
-				}
-
-				var dt_new = dt.add_seconds (-dt.get_seconds ());
-
-				return dt_new.add_minutes (((int) period * 30) - min);
+				return dt
+					.add_seconds (-dt.get_seconds ())
+					.add_minutes (((int) period * 30) - min);
 			}
 
 			public double get_hours (int start_hour, int hours, Date start_date, Date end_date) requires (start_hour >= 0 && start_hour <= 23) requires (start_hour + hours <= 24) {
@@ -197,8 +191,8 @@ namespace Mobilect {
 							var span_end = record_end.compare (period_end) == -1? record_end : period_end;
 
 							/* Round to 30-minute boundaries */
-							span_start = date_time_marginalize (span_start, false);
-							span_end = date_time_marginalize (span_end, true);
+							span_start = date_time_marginalize (span_start);
+							span_end = date_time_marginalize (span_end);
 
 							/* Get hours in between, per 30 mins each */
 							hours_span += (int) (span_end.difference (span_start)/(TimeSpan.HOUR / 2)) / 2.0;

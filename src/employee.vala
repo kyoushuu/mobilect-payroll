@@ -153,19 +153,31 @@ namespace Mobilect {
 					.add_minutes (((int) period * 30) - min);
 			}
 
-			public double get_hours (int start_hour, int hours, Date start_date, Date end_date) requires (start_hour >= 0 && start_hour <= 23) requires (start_hour + hours <= 24) {
+			public double get_hours (Filter filter) {
 				double hours_span = 0.0;
 				DateTime record_start, record_end;
 
-				var range_start = new DateTime.local (start_date.get_year (),
-				                                      start_date.get_month (),
-				                                      start_date.get_day (),
-				                                      start_hour, 0, 0);
-				var range_end = new DateTime.local (end_date.get_year (),
-				                                    end_date.get_month (),
-				                                    end_date.get_day (),
-				                                    start_hour, 0, 0);
-				range_end = range_end.add_hours (hours);
+				Time time_start = filter.time_start;
+				Time time_end = filter.time_end;
+				Date date_start = filter.date_start;
+				Date date_end = filter.date_end;
+
+				int minutes =
+					((time_end.hour * 60) + time_end.minute) -
+					((time_start.hour * 60) + time_start.minute);
+				if (minutes < 0) {
+					minutes += 24 * 60;
+				}
+
+				var range_start = new DateTime.local (date_start.get_year (),
+				                                      date_start.get_month (),
+				                                      date_start.get_day (),
+				                                      time_start.hour, time_start.minute, 0);
+				var range_end = new DateTime.local (date_end.get_year (),
+				                                    date_end.get_month (),
+				                                    date_end.get_day (),
+				                                    time_start.hour, time_start.minute, 0);
+				range_end = range_end.add_minutes (minutes);
 
 				foreach (var time_record in time_records) {
 					if (time_record.end == null) {
@@ -179,9 +191,11 @@ namespace Mobilect {
 					if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||
 					    (record_start.compare (range_end) != 1 && record_end.compare (range_start) == 1)) {
 						/* Get times of record and period */
-						var period_start = new DateTime.local (record_start.get_year (), record_start.get_month (), record_start.get_day_of_month (),
-						                                       start_hour, 0, 0);
-						var period_end = period_start.add_hours (hours);
+						var period_start = new DateTime.local (record_start.get_year (),
+						                                       record_start.get_month (),
+						                                       record_start.get_day_of_month (),
+						                                       time_start.hour, time_start.minute, 0);
+						var period_end = period_start.add_minutes (minutes);
 
 						/* Check if time record date is in period */
 						if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||

@@ -203,6 +203,28 @@ namespace Mobilect {
 				return hours_span;
 			}
 
+			public void change_password (string password) throws ApplicationError {
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (this.id);
+
+				try {
+					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
+					                                          "  SET password=##password::string" +
+					                                          "  WHERE id=##id::int",
+					                                          out stmt_params);
+					stmt_params.get_holder ("id").set_value (value_id);
+					stmt_params.get_holder ("password").set_value_str (database.dh_string,
+					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
+					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (ApplicationError e) {
+					throw e;
+				} catch (Error e) {
+					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+				}
+			}
+
 			public void update () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));

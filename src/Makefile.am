@@ -52,6 +52,7 @@ mobilect_payroll_SOURCES = \
 	time-record-edit-dialog.vala \
 	date-time-entry.vala \
 	time.vala \
+	filter.vala \
 	config.vapi
 
 mobilect_payroll_VALAFLAGS = \

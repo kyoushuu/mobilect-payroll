@@ -31,6 +31,8 @@ namespace Mobilect {
 			public int stamp { get; private set; }
 
 			internal weak Database database { get; set; }
+			internal Filter filter { get; set; }
+
 
 			public enum Columns {
 				OBJECT,
@@ -38,11 +40,19 @@ namespace Mobilect {
 				LASTNAME,
 				FIRSTNAME,
 				NAME,
+				HOURS,
 				NUM
 			}
 
+
 			public EmployeeList () {
 				stamp = (int) Random.next_int ();
+
+				filter = new Filter ();
+				filter.time_start.set (8, 0);
+				filter.time_end.set (17, 0);
+				filter.date_start.set_dmy (16, DateMonth.APRIL, 2012);
+				filter.date_end.set_dmy (16, DateMonth.MAY, 2012);
 			}
 
 			public new void add (Employee employee) {
@@ -97,6 +107,8 @@ namespace Mobilect {
 						return typeof (string);
 					case Columns.NAME:
 						return typeof (string);
+					case Columns.HOURS:
+						return typeof (double);
 					default:
 						return Type.INVALID;
 				}
@@ -145,6 +157,9 @@ namespace Mobilect {
 						break;
 					case Columns.NAME:
 						value.set_string (record.get_name ());
+						break;
+					case Columns.HOURS:
+						value.set_double (filter != null? record.get_hours (filter) : 0);
 						break;
 				}
 			}

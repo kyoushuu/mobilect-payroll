@@ -49,6 +49,7 @@ namespace Mobilect {
 				this.add (tree_view);
 
 				TreeViewColumn column;
+				CellRendererText renderer;
 
 				column = new TreeViewColumn.with_attributes ("Employee Name",
 				                                             new CellRendererText (),
@@ -57,8 +58,19 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				column = new TreeViewColumn ();
-				var renderer = new CellRendererText ();
-				column.title = "Hours";
+				renderer = new CellRendererText ();
+				column.title = _("Rate");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, EmployeeList.Columns.RATE, out value);
+					(r as CellRendererText).text = value.get_int ().to_string ();
+				});
+				tree_view.append_column (column);
+
+				column = new TreeViewColumn ();
+				renderer = new CellRendererText ();
+				column.title = _("Hours");
 				column.pack_start (renderer, false);
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;

@@ -41,6 +41,7 @@ namespace Mobilect {
 				FIRSTNAME,
 				MIDDLENAME,
 				NAME,
+				RATE,
 				HOURS,
 				NUM
 			}
@@ -104,6 +105,8 @@ namespace Mobilect {
 						return typeof (string);
 					case Columns.NAME:
 						return typeof (string);
+					case Columns.RATE:
+						return typeof (int);
 					case Columns.HOURS:
 						return typeof (double);
 					default:
@@ -157,6 +160,9 @@ namespace Mobilect {
 						break;
 					case Columns.NAME:
 						value.set_string (record.get_name ());
+						break;
+					case Columns.RATE:
+						value.set_int (record.rate);
 						break;
 					case Columns.HOURS:
 						value.set_double (filter != null? record.get_hours (filter) : 0);

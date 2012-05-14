@@ -70,6 +70,17 @@ namespace Mobilect {
 
 				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
+				column.title = _("Rate per Hour");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, EmployeeList.Columns.HOURRATE, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				tree_view.append_column (column);
+
+				column = new TreeViewColumn ();
+				renderer = new CellRendererText ();
 				column.title = _("Hours");
 				column.pack_start (renderer, false);
 				column.set_cell_data_func (renderer, (c, r, m, i) => {

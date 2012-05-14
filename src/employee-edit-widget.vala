@@ -31,6 +31,7 @@ namespace Mobilect {
 			public Entry lastname_entry { get; private set; }
 			public Entry firstname_entry { get; private set; }
 			public Entry middlename_entry { get; private set; }
+			public SpinButton rate_spin { get; private set; }
 
 			private Employee _employee;
 			public Employee employee {
@@ -44,6 +45,7 @@ namespace Mobilect {
 						lastname_entry.text = value.lastname?? "";
 						firstname_entry.text = value.firstname?? "";
 						middlename_entry.text = value.middlename?? "";
+						rate_spin.value = value.rate;
 					}
 				}
 			}
@@ -95,6 +97,21 @@ namespace Mobilect {
 				                     PositionType.RIGHT,
 				                     2, 1);
 
+				var rate_label = new Label (_("_Rate:"));
+				rate_label.use_underline = true;
+				rate_label.xalign = 0.0f;
+				grid.add (rate_label);
+
+				rate_spin = new SpinButton (new Adjustment (3500,
+				                                            0, 1000000,
+				                                            10, 100,
+				                                            0),
+				                            100, 0);
+				grid.attach_next_to (rate_spin,
+				                     rate_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
+
 				this.employee = employee;
 			}
 
@@ -103,6 +120,7 @@ namespace Mobilect {
 					this._employee.lastname = this.lastname_entry.text;
 					this._employee.firstname = this.firstname_entry.text;
 					this._employee.middlename = this.middlename_entry.text;
+					this._employee.rate = this.rate_spin.get_value_as_int ();
 				}
 			}
 

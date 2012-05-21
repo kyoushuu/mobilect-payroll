@@ -41,6 +41,29 @@ namespace Mobilect {
 			public Filter () {
 			}
 
+			public Filter duplicate () {
+				var filter = new Filter ();
+
+				filter.date_start = date_start;
+				filter.date_end = date_end;
+
+				filter.time_start = time_start.duplicate ();
+				filter.time_end = time_end.duplicate ();
+
+				return filter;
+			}
+
+			public bool is_equal (Filter filter) {
+				return filter.date_start.compare (this.date_start) == 0 &&
+					filter.date_end.compare (this.date_end) == 0 &&
+					filter.time_start.is_equal (this.time_start) &&
+					filter.time_end.is_equal (this.time_end) &&
+					filter.use_holiday_type == this.use_holiday_type &&
+					filter.holiday_type == this.holiday_type &&
+					filter.sunday_work == this.sunday_work &&
+					filter.period == this.period;
+			}
+
 		}
 
 	}

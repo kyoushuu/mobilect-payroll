@@ -32,6 +32,11 @@ namespace Mobilect {
 			public Time time_start = new Time (0, 0);
 			public Time time_end = new Time (0, 0);
 
+			public bool use_holiday_type = false;
+			public MonthInfo.HolidayType holiday_type;
+			public bool sunday_work = false;
+			public double period = 4.0;
+
 
 			public Filter () {
 			}

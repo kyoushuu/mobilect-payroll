@@ -245,12 +245,12 @@ namespace Mobilect {
 							var span_start = record_start.compare (period_start) == 1? record_start : period_start;
 							var span_end = record_end.compare (period_end) == -1? record_end : period_end;
 
-							/* Round to 30-minute boundaries */
-							span_start = date_time_marginalize (span_start);
-							span_end = date_time_marginalize (span_end);
-
-							/* Get hours in between, per 30 mins each */
-							hours_span += (int) (span_end.difference (span_start)/(TimeSpan.HOUR / 2)) / 2.0;
+							double hours = span_end.difference (span_start) / TimeSpan.HOUR;
+							hours_span += Math.floor (hours / filter.period) * filter.period;
+							if (Math.floor ((hours + (filter.period / 4)) / filter.period) >
+							    Math.floor (hours / filter.period)) {
+								hours_span += filter.period;
+							}
 						}
 					}
 				}

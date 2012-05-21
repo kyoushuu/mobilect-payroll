@@ -96,6 +96,10 @@ namespace Mobilect {
 				return lastname + ", " + firstname + " " + middlename;
 			}
 
+			public double get_rate_per_hour () {
+				return rate / (26.0 * 8.0);
+			}
+
 			public int get_open_time_records_num () throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));

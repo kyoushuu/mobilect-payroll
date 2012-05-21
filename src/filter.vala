@@ -41,6 +41,34 @@ namespace Mobilect {
 			public Filter () {
 			}
 
+			public DateTime get_start_as_date_time () {
+				return new DateTime.local (date_start.get_year (),
+				                           date_start.get_month (),
+				                           date_start.get_day (),
+				                           time_start.hour, time_start.minute, 0);
+			}
+
+			public DateTime get_end_as_date_time () {
+				return new DateTime.local (date_end.get_year (),
+				                           date_end.get_month (),
+				                           date_end.get_day (),
+				                           time_end.hour, time_end.minute, 0);
+			}
+
+			public void set_start_from_date_time (DateTime dt) {
+				date_start.set_dmy ((DateDay) dt.get_day_of_month (),
+				                    (DateMonth) dt.get_month (),
+				                    (DateYear) dt.get_year ());
+				time_start.set (dt.get_hour (), dt.get_minute ());
+			}
+
+			public void set_end_from_date_time (DateTime dt) {
+				date_end.set_dmy ((DateDay) dt.get_day_of_month (),
+				                  (DateMonth) dt.get_month (),
+				                  (DateYear) dt.get_year ());
+				time_end.set (dt.get_hour (), dt.get_minute ());
+			}
+
 			public Filter duplicate () {
 				var filter = new Filter ();
 

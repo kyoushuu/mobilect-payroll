@@ -53,6 +53,7 @@ mobilect_payroll_SOURCES = \
 	date-time-entry.vala \
 	time.vala \
 	filter.vala \
+	pay-period.vala \
 	time-period.vala \
 	config.vapi
 

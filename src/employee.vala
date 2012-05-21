@@ -36,6 +36,9 @@ namespace Mobilect {
 			internal weak Database database { get; private set; }
 			internal weak EmployeeList list { get; set; }
 
+			private Filter cached_filter;
+			private double cached_hours;
+
 			public Employee (int id, Database database) {
 				this.id = id;
 				this.database = database;
@@ -166,6 +169,11 @@ namespace Mobilect {
 			}
 
 			public double get_hours (Filter filter) {
+				if (this.cached_filter != null &&
+				    filter.is_equal (this.cached_filter)) {
+					return this.cached_hours;
+				}
+
 				double hours_span = 0.0;
 				DateTime record_start, record_end;
 
@@ -247,6 +255,9 @@ namespace Mobilect {
 						}
 					}
 				}
+
+				this.cached_filter = filter.duplicate ();
+				this.cached_hours = hours_span;
 
 				return hours_span;
 			}

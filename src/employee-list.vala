@@ -31,7 +31,7 @@ namespace Mobilect {
 			public int stamp { get; private set; }
 
 			internal weak Database database { get; set; }
-			internal Filter filter { get; set; }
+			public Filter filter { get; set; }
 
 
 			public enum Columns {

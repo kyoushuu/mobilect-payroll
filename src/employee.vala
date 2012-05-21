@@ -166,6 +166,8 @@ namespace Mobilect {
 				Date date_start = filter.date_start;
 				Date date_end = filter.date_end;
 
+				MonthInfo month_info = null;
+
 				int minutes =
 					((time_end.hour * 60) + time_end.minute) -
 					((time_start.hour * 60) + time_start.minute);
@@ -190,6 +192,26 @@ namespace Mobilect {
 
 					record_start = time_record.start;
 					record_end = time_record.end;
+
+					if (month_info == null ||
+					    month_info.month != record_start.get_month () ||
+					    month_info.year != record_start.get_year ()) {
+						month_info = new MonthInfo (database,
+						                            record_start.get_year (),
+						                            record_start.get_month ());
+					}
+
+					if (filter.use_holiday_type) {
+						if (month_info.get_day_type (record_start.get_day_of_month ()) !=
+						    filter.holiday_type) {
+							continue;
+						}
+					}
+
+					if (filter.sunday_work !=
+					    (month_info.get_weekday (record_start.get_day_of_month ()) == DateWeekday.SUNDAY)) {
+						continue;
+					}
 
 					/* Check if time record date is in range */
 					if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||

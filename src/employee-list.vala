@@ -39,6 +39,7 @@ namespace Mobilect {
 				ID,
 				LASTNAME,
 				FIRSTNAME,
+				MIDDLENAME,
 				NAME,
 				HOURS,
 				NUM
@@ -105,6 +106,8 @@ namespace Mobilect {
 						return typeof (string);
 					case Columns.FIRSTNAME:
 						return typeof (string);
+					case Columns.MIDDLENAME:
+						return typeof (string);
 					case Columns.NAME:
 						return typeof (string);
 					case Columns.HOURS:
@@ -154,6 +157,9 @@ namespace Mobilect {
 						break;
 					case Columns.FIRSTNAME:
 						value.set_string (record.firstname);
+						break;
+					case Columns.MIDDLENAME:
+						value.set_string (record.middlename);
 						break;
 					case Columns.NAME:
 						value.set_string (record.get_name ());

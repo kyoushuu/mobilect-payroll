@@ -29,6 +29,7 @@ namespace Mobilect {
 			public int id { get; set; }
 			public string lastname { get; set; }
 			public string firstname { get; set; }
+			public string middlename { get; set; }
 			public TimeRecordList time_records { get; private set; }
 
 			internal weak Database database { get; private set; }
@@ -51,7 +52,7 @@ namespace Mobilect {
 				if (id != 0) {
 					try {
 						/* Get employee data from database */
-						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname" +
+						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename" +
 						                                          "  FROM employees" +
 						                                          "  WHERE id=##id::int",
 						                                          out stmt_params);
@@ -63,6 +64,9 @@ namespace Mobilect {
 
 						var cell_data_firstname = data_model.get_value_at (1, 0);
 						this.firstname = database.dh_string.get_str_from_value (cell_data_firstname);
+
+						var cell_data_middlename = data_model.get_value_at (2, 0);
+						this.middlename = database.dh_string.get_str_from_value (cell_data_middlename);
 
 
 						/* Get time records */
@@ -85,7 +89,7 @@ namespace Mobilect {
 			}
 
 			public string get_name () {
-				return lastname + ", " + firstname;
+				return lastname + ", " + firstname + " " + middlename;
 			}
 
 			public int get_open_time_records_num () throws ApplicationError {
@@ -250,12 +254,14 @@ namespace Mobilect {
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
 					                                          "  SET lastname=##lastname::string," +
-					                                          "    firstname=##firstname::string" +
+					                                          "    firstname=##firstname::string," +
+					                                          "    middlename=##middlename::string" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
 					stmt_params.get_holder ("lastname").set_value_str (database.dh_string, this.lastname);
 					stmt_params.get_holder ("firstname").set_value_str (database.dh_string, this.firstname);
+					stmt_params.get_holder ("middlename").set_value_str (database.dh_string, this.middlename);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (ApplicationError e) {
 					throw e;

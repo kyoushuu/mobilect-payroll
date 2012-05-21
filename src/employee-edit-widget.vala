@@ -30,6 +30,7 @@ namespace Mobilect {
 
 			public Entry lastname_entry { get; private set; }
 			public Entry firstname_entry { get; private set; }
+			public Entry middlename_entry { get; private set; }
 
 			private Employee _employee;
 			public Employee employee {
@@ -42,6 +43,7 @@ namespace Mobilect {
 					if (value != null) {
 						lastname_entry.text = value.lastname?? "";
 						firstname_entry.text = value.firstname?? "";
+						middlename_entry.text = value.middlename?? "";
 					}
 				}
 			}
@@ -80,6 +82,19 @@ namespace Mobilect {
 				                     PositionType.RIGHT,
 				                     2, 1);
 
+				var middlename_label = new Label (_("_Middle Name:"));
+				middlename_label.use_underline = true;
+				middlename_label.xalign = 0.0f;
+				grid.add (middlename_label);
+
+				middlename_entry = new Entry ();
+				middlename_entry.hexpand = true;
+				middlename_entry.activates_default = true;
+				grid.attach_next_to (middlename_entry,
+				                     middlename_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
+
 				this.employee = employee;
 			}
 
@@ -87,6 +102,7 @@ namespace Mobilect {
 				if (this._employee != null) {
 					this._employee.lastname = this.lastname_entry.text;
 					this._employee.firstname = this.firstname_entry.text;
+					this._employee.middlename = this.middlename_entry.text;
 				}
 			}
 

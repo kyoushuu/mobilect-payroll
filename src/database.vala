@@ -44,6 +44,7 @@ namespace Mobilect {
 					             "  id integer primary key autoincrement," +
 					             "  lastname string not null," +
 					             "  firstname string not null," +
+					             "  middlename string not null," +
 					             "  password string not null" +
 					             ")");
 
@@ -220,16 +221,17 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string password) throws ApplicationError {
+			public void add_employee (string lastname, string firstname, string middlename, string password) throws ApplicationError {
 				Set stmt_params;
 
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, password)" +
-					                                 "  VALUES (##lastname::string, ##firstname::string, ##password::string)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, password)" +
+					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##password::string)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("lastname").set_value_str (null, lastname);
 					stmt_params.get_holder ("firstname").set_value_str (null, firstname);
+					stmt_params.get_holder ("middlename").set_value_str (null, firstname);
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {

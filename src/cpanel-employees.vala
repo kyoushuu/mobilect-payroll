@@ -137,6 +137,7 @@ namespace Mobilect {
 									try {
 										this.list.database.add_employee (employee.lastname,
 										                                 employee.firstname,
+										                                 employee.middlename,
 										                                 password_entry.text);
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,

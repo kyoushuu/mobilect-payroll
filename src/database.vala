@@ -60,6 +60,14 @@ namespace Mobilect {
 					             "  password string not null" +
 					             ")");
 
+					execute_sql ("CREATE TABLE IF NOT EXISTS holidays (" +
+					             "  id integer primary key autoincrement," +
+					             "  year integer," +
+					             "  month integer," +
+					             "  day integer," +
+					             "  type integer" +
+					             ")");
+
 					Set stmt_params;
 					var stmt = cnc.parse_sql_string ("INSERT OR IGNORE INTO administrators (id, username, password)" +
 					                                 "  VALUES (1, ##username::string, ##password::string)",

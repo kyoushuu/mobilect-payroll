@@ -103,14 +103,14 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION,
 						stock_id = null,
-						label = "_Employees"
+						label = _("_Employees")
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						label = "_Add Employee",
-						accelerator = "<Control>A",
-						tooltip = "Add an employee to database",
+						label = _("_Add"),
+						accelerator = _("<Control>A"),
+						tooltip = _("Add an employee to database"),
 						callback = (a) => {
 							var employee = new Employee (0, list.database);
 
@@ -157,9 +157,9 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
-						label = "_Remove Employee",
-						accelerator = "<Control>R",
-						tooltip = "Remove the selected employee from database",
+						label = _("_Remove"),
+						accelerator = _("<Control>R"),
+						tooltip = _("Remove the selected employee from database"),
 						callback = (a) => {
 							TreeIter iter;
 							Employee employee;
@@ -201,9 +201,9 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_EDIT,
 						stock_id = Stock.EDIT,
-						label = "_Edit Employee",
-						accelerator = "<Control>E",
-						tooltip = "Edit information about the selected employee",
+						label = _("_Edit"),
+						accelerator = _("<Control>E"),
+						tooltip = _("Edit information about the selected employee"),
 						callback = (a) => {
 							edit ();
 						}
@@ -211,8 +211,8 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_PASSWORD,
 						stock_id = Stock.PROPERTIES,
-						label = "_Change Employee Password",
-						tooltip = "Change password of selected employee",
+						label = _("_Change Password"),
+						tooltip = _("Change password of selected employee"),
 						callback = (a) => {
 							TreeIter iter;
 							Employee employee;

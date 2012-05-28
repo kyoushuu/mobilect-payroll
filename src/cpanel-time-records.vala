@@ -101,14 +101,14 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION,
 						stock_id = null,
-						label = "_Time Records"
+						label = _("_Time Records")
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						label = "_Add Time Record",
-						accelerator = "<Control>A",
-						tooltip = "Add an time record to database",
+						label = _("_Add"),
+						accelerator = _("<Control>A"),
+						tooltip = _("Add an time record to database"),
 						callback = (a) => {
 							var time_record = new TimeRecord (0, list.database, null);
 
@@ -152,9 +152,9 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
-						label = "_Remove Time Record",
-						accelerator = "<Control>R",
-						tooltip = "Remove the selected time record from database",
+						label = _("_Remove"),
+						accelerator = _("<Control>R"),
+						tooltip = _("Remove the selected time record from database"),
 						callback = (a) => {
 							TreeIter iter;
 							TimeRecord time_record;
@@ -196,9 +196,9 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_EDIT,
 						stock_id = Stock.EDIT,
-						label = "_Edit Time Record",
-						accelerator = "<Control>E",
-						tooltip = "Edit information about the selected time record",
+						label = _("_Edit"),
+						accelerator = _("<Control>E"),
+						tooltip = _("Edit information about the selected time record"),
 						callback = (a) => {
 							edit ();
 						}

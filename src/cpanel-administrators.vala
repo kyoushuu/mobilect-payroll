@@ -90,14 +90,14 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION,
 						stock_id = null,
-						label = "_Administrators"
+						label = _("_Administrators")
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						label = "_Add Administrator",
-						accelerator = "<Control>A",
-						tooltip = "Add an administrator to database",
+						label = _("_Add"),
+						accelerator = _("<Control>A"),
+						tooltip = _("Add an administrator to database"),
 						callback = (a) => {
 							var administrator = new Administrator (0, list.database);
 
@@ -143,9 +143,9 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
-						label = "_Remove Administrator",
-						accelerator = "<Control>R",
-						tooltip = "Remove the selected administrator from database",
+						label = _("_Remove"),
+						accelerator = _("<Control>R"),
+						tooltip = _("Remove the selected administrator from database"),
 						callback = (a) => {
 							TreeIter iter;
 							Administrator administrator;
@@ -187,9 +187,9 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_EDIT,
 						stock_id = Stock.EDIT,
-						label = "_Edit Administrator",
-						accelerator = "<Control>E",
-						tooltip = "Edit information about the selected administrator",
+						label = _("_Edit"),
+						accelerator = _("<Control>E"),
+						tooltip = _("Edit information about the selected administrator"),
 						callback = (a) => {
 							edit ();
 						}
@@ -197,8 +197,8 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_PASSWORD,
 						stock_id = Stock.PROPERTIES,
-						label = "_Change Administrator Password",
-						tooltip = "Change password of selected administrator",
+						label = _("_Change Password"),
+						tooltip = _("Change password of selected administrator"),
 						callback = (a) => {
 							TreeIter iter;
 							Administrator administrator;

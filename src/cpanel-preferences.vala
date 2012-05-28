@@ -28,8 +28,42 @@ namespace Mobilect {
 
 			public const string ACTION = "cpanel-preferences";
 
+			public Grid grid { get; private set; }
+
+			public DateTimeEntry start_entry { get; private set; }
+			public DateTimeEntry end_entry { get; private set; }
+
 			public CPanelPreferences (CPanel cpanel) {
 				base (cpanel, ACTION);
+				grid = new Grid ();
+				grid.orientation = Orientation.VERTICAL;
+				grid.row_spacing = 3;
+				grid.column_spacing = 12;
+				this.add_with_viewport (grid);
+
+				var start_label = new Label (_("_Start:"));
+				start_label.use_underline = true;
+				start_label.xalign = 0.0f;
+				grid.add (start_label);
+
+				start_entry = new DateTimeEntry ();
+				start_entry.set_date_time (this.cpanel.filter.get_start_as_date_time ());
+				grid.attach_next_to (start_entry,
+				                     start_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
+
+				var end_label = new Label (_("_End:"));
+				end_label.use_underline = true;
+				end_label.xalign = 0.0f;
+				grid.add (end_label);
+
+				end_entry = new DateTimeEntry ();
+				end_entry.set_date_time (this.cpanel.filter.get_end_as_date_time ());
+				grid.attach_next_to (end_entry,
+				                     end_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
 			}
 
 		}

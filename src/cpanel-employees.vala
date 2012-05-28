@@ -339,6 +339,7 @@ namespace Mobilect {
 
 			public void reload () {
 				this.list = this.cpanel.window.app.database.get_employees ();
+				this.list.filter = this.cpanel.filter;
 				this.tree_view.model = this.list ;
 			}
 

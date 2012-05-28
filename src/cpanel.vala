@@ -109,6 +109,7 @@ namespace Mobilect {
 				this.add_page (new CPanelAdministrators (this), _("Administrators"));
 				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
 				this.add_page (new CPanelPreferences (this), _("Preferences"));
+				this.add_page (new CPanelHolidays (this), _("_Holidays"));
 			}
 
 			public void add_page (CPanelTab tab, string title) {

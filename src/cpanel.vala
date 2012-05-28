@@ -30,6 +30,9 @@ namespace Mobilect {
 			public weak CPanelTab current_page { get; internal set; }
 			public Gtk.ActionGroup action_group { get; internal set; }
 
+			public Filter filter { get; set; }
+
+
 			public CPanel (Window window) {
 				this.window = window;
 				this.tab_pos = PositionType.LEFT;
@@ -104,6 +107,31 @@ namespace Mobilect {
 				action_group = new Gtk.ActionGroup ("cpanel");
 				action_group.add_actions (actions, this);
 				window.ui_manager.insert_action_group (action_group, -1);
+
+				var date = new DateTime.now_local ();
+				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
+
+				DateDay last_day;
+				if (period == 0) {
+					last_day = 15;
+				} else {
+					last_day = 31;
+					while (!Date.valid_dmy (last_day,
+					                        (DateMonth) date.get_month (),
+					                        (DateYear) date.get_year ())) {
+						last_day--;
+					}
+				}
+
+				this.filter = new Filter ();
+				this.filter.time_start.set (8, 0);
+				this.filter.time_end.set (17, 0);
+				this.filter.date_start.set_dmy ((15 * period) + 1,
+				                                date.get_month (),
+				                                (DateYear) date.get_year ());
+				this.filter.date_end.set_dmy (last_day,
+				                              date.get_month (),
+				                              (DateYear) date.get_year ());
 
 				this.add_page (new CPanelEmployees (this), _("Employees"));
 				this.add_page (new CPanelAdministrators (this), _("Administrators"));

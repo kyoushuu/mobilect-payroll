@@ -90,6 +90,18 @@ namespace Mobilect {
 				});
 				tree_view.append_column (column);
 
+				column = new TreeViewColumn ();
+				renderer = new CellRendererText ();
+				column.title = _("Earnings");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value_hours, value_hourrate;
+					m.get_value (i, EmployeeList.Columns.HOURS, out value_hours);
+					m.get_value (i, EmployeeList.Columns.HOURRATE, out value_hourrate);
+					(r as CellRendererText).text = "%.2lf".printf (value_hours.get_double () * value_hourrate.get_double ());
+				});
+				tree_view.append_column (column);
+
 				reload ();
 
 

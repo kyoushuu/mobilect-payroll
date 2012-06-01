@@ -33,6 +33,10 @@ namespace Mobilect {
 
 			public PayGroup pay_groups { get; set; }
 			public EmployeeList employees { get; set; }
+			public ListStore deductions { get; set; }
+
+			public Date start { get; private set; }
+			public Date end { get; private set; }
 
 			public FontDescription title_font = FontDescription.from_string ("Sans Bold 14");
 			public FontDescription company_name_font = FontDescription.from_string ("Sans Bold 12");
@@ -59,9 +63,30 @@ namespace Mobilect {
 			private double footer_height;
 
 			private double padding = 1.0;
+			private int days = 0;
+			private Filter filter;
 
 
-			public Report () {
+			public Report (Date start, Date end) {
+				this.start = start;
+				this.end = end;
+
+				if (start.compare (end) > 0) {
+					this.end = start;
+				}
+
+				for (var d = start; d.compare (end) <= 0; d.add_days (1)) {
+					if (d.get_weekday () != DateWeekday.SUNDAY) {
+						days++;
+					}
+				}
+
+				filter = new Filter ();
+				filter.date_start = start;
+				filter.date_end = end;
+				filter.time_start.set (8, 0);
+				filter.time_end.set (17, 0);
+
 				begin_print.connect (begin_print_handler);
 				draw_page.connect (draw_page_handler);
 			}
@@ -267,41 +292,104 @@ namespace Mobilect {
 				}
 
 
-				/* Names and TIN No. */
-				cr.move_to (table_x + padding, table_y + padding);
-				layout.set_width (units_from_double (column_width * 2));
-				layout.set_height (units_from_double (text_font_height));
 				for (int i = 0; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++) {
 					var employee = (employees as ArrayList<Employee>).get (i + id);
+					double days_wo_pay = days - (employee.get_hours (filter)/8);
+					/* Half-month salary - (salary per day times days without pay) */
+					double salary = (employee.rate/2) - (employee.rate * days_wo_pay/26);
+
+					/* Iter */
+					var value = Value (typeof (double));
+					var iter = TreeIter ();
+					if (deductions != null) {
+						var p = new TreePath.from_indices (i + id);
+						deductions.get_iter (out iter, p);
+					}
+
+					layout.set_height (units_from_double (text_font_height));
+
+					layout.set_width (units_from_double (column_width * 2));
 
 					layout.set_font_description (text_font);
 					layout.set_alignment (Pango.Alignment.LEFT);
 
+					/* Name */
+					cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * 2 * i));
 					layout.set_markup (employee.get_name ().up (), -1);
 					cairo_show_layout (cr, layout);
-					cr.rel_move_to (0, (text_font_height + (padding * 2)));
 
-					layout.set_font_description (number_font);
-					layout.set_alignment (Pango.Alignment.CENTER);
-
-					layout.set_markup ("XXX-XXX-XXX", -1);
-					cairo_show_layout (cr, layout);
-					cr.rel_move_to (0, (text_font_height + (padding * 2)));
-				}
-
-				/* Rates */
-				cr.move_to (table_x + (column_width * 2), table_y + padding);
-				layout.set_width (units_from_double (column_width));
-				layout.set_height (units_from_double (text_font_height));
-				for (int i = 0; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++) {
-					var employee = (employees as ArrayList<Employee>).get (i + id);
+					layout.set_width (units_from_double (column_width));
 
 					layout.set_font_description (number_font);
 					layout.set_alignment (Pango.Alignment.RIGHT);
 
+					/* Rates */
+					cr.rel_move_to (column_width * 2 - padding, 0);
 					layout.set_markup ("%.2lf".printf (employee.rate), -1);
 					cairo_show_layout (cr, layout);
-					cr.rel_move_to (0, (text_font_height + (padding * 2)) * 2);
+
+					/* Days w/o Pay */
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.1lf".printf (days_wo_pay), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Salary to Date */
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (salary), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Tax */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.TAX, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Loan */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.LOAN, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					/* PAG-IBIG */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.PAG_IBIG, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					/* SSS Loan */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.SSS_LOAN, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Vale */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.VALE, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Moesala Loan */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.MOESALA_LOAN, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Moesala Savings */
+					if (deductions != null) deductions.get (iter, CPanelReport.Columns.MOESALA_SAVINGS, out value);
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					cairo_show_layout (cr, layout);
+
+					layout.set_width (units_from_double (column_width * 2));
+
+					layout.set_font_description (number_font);
+					layout.set_alignment (Pango.Alignment.CENTER);
+
+					/* TIN No. */
+					cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * ((2 * i) + 1)));
+					layout.set_markup ("XXX-XXX-XXX", -1);
+					cairo_show_layout (cr, layout);
+					cr.rel_move_to (0, (text_font_height + (padding * 2)));
 				}
 
 				/* start in line #1 (#0 is header of table) */

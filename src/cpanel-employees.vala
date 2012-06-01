@@ -56,7 +56,7 @@ namespace Mobilect {
 				TreeViewColumn column;
 				CellRendererText renderer;
 
-				column = new TreeViewColumn.with_attributes ("Employee Name",
+				column = new TreeViewColumn.with_attributes (_("Employee Name"),
 				                                             new CellRendererText (),
 				                                             "text", EmployeeList.Columns.NAME,
 				                                             null);

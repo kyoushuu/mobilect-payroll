@@ -19,6 +19,7 @@
 
 using Gtk;
 using Pango;
+using Gee;
 
 
 namespace Mobilect {
@@ -33,11 +34,14 @@ namespace Mobilect {
 			public const string ACTION_PRINT = "cpanel-report-print";
 			public const string ACTION_PRINT_PREVIEW = "cpanel-report-print-preview";
 
+			public EmployeeList list;
+
 			public Grid grid { get; private set; }
 
 			public ComboBoxText type_combo { get; private set; }
 			public DateEntry start_entry { get; private set; }
 			public DateEntry end_entry { get; private set; }
+			public TreeView deduc_view { get; private set; }
 
 			private FontDescription title_font = FontDescription.from_string ("Sans Bold 14");
 			private FontDescription company_name_font = FontDescription.from_string ("Sans Bold 12");
@@ -50,8 +54,26 @@ namespace Mobilect {
 			private PrintSettings settings;
 
 
+			public enum Columns {
+				ID,
+				NAME,
+				TAX,
+				LOAN,
+				PAG_IBIG,
+				SSS_LOAN,
+				VALE,
+				MOESALA_LOAN,
+				MOESALA_SAVINGS,
+				NUM
+			}
+
+
 			public CPanelReport (CPanel cpanel) {
 				base (cpanel, ACTION);
+
+				this.changed_to.connect (() => {
+					reload ();
+				});
 
 				page_setup = new PageSetup ();
 				page_setup.set_orientation (PageOrientation.LANDSCAPE);
@@ -93,6 +115,176 @@ namespace Mobilect {
 				                     start_entry,
 				                     PositionType.BOTTOM,
 				                     2, 1);
+
+				var deduc_scroll = new ScrolledWindow (null, null);
+				deduc_scroll.expand = true;
+				grid.add_with_properties (deduc_scroll, width: 3);
+
+				deduc_view = new TreeView ();
+				deduc_scroll.add (deduc_view);
+
+				CellRendererSpin renderer;
+				TreeViewColumn column;
+
+				column = new TreeViewColumn.with_attributes (_("Employee Name"),
+				                                             new CellRendererText (),
+				                                             "text", Columns.NAME,
+				                                             null);
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.TAX, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("Tax");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.TAX, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.LOAN, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("Loan");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.LOAN, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.PAG_IBIG, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("PAG-IBIG");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.PAG_IBIG, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.SSS_LOAN, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("SSS Loan");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.SSS_LOAN, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.SSS_LOAN, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("Vale");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.SSS_LOAN, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.MOESALA_LOAN, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("Moesala Loan");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.MOESALA_LOAN, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
+
+				renderer = new CellRendererSpin ();
+				renderer.adjustment = new Adjustment (0, 0, 999999,
+				                                      1, 10, 0);
+				renderer.editable = true;
+				renderer.climb_rate = 1;
+				renderer.digits = 2;
+				renderer.edited.connect ((r, p, n) => {
+					TreeIter iter;
+					var deduc_store = deduc_view.model as ListStore;
+					deduc_store.get_iter_from_string (out iter, p);
+					deduc_store.set (iter, Columns.MOESALA_SAVINGS, double.parse (n));
+				});
+				column = new TreeViewColumn ();
+				column.title = _("Moesala Savings");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, Columns.MOESALA_SAVINGS, out value);
+					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+				});
+				deduc_view.append_column (column);
 
 				ui_def =
 					"<ui>" +
@@ -308,7 +500,7 @@ namespace Mobilect {
 			}
 
 			private Report create_report () {
-				var pr = new Report ();
+				var pr = new Report (start_entry.date, end_entry.date);
 				pr.title = "SEMI-MONTHLY PAYROLL";
 				pr.employees = this.cpanel.window.app.database.get_employees ();
 				pr.default_page_setup = page_setup;
@@ -318,6 +510,27 @@ namespace Mobilect {
 				}
 
 				return pr;
+			}
+
+			public void reload () {
+				var deduc_store = new ListStore (Columns.NUM,
+				                                 typeof (int),
+				                                 typeof (string),
+				                                 typeof (double),
+				                                 typeof (double),
+				                                 typeof (double),
+				                                 typeof (double),
+				                                 typeof (double),
+				                                 typeof (double),
+				                                 typeof (double));
+				this.list = this.cpanel.window.app.database.get_employees ();
+				for (int i = 0; i < list.size; i++) {
+					var employee = (list as ArrayList<Employee>).get (i);
+					deduc_store.insert_with_values (null, -1,
+					                                Columns.NAME, employee.get_name (),
+					                                Columns.ID, employee.id);
+				}
+				deduc_view.model = deduc_store;
 			}
 
 		}

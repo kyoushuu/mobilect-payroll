@@ -48,7 +48,7 @@ namespace Mobilect {
 				});
 				this.add (tree_view);
 
-				var column = new TreeViewColumn.with_attributes ("Administrator Username",
+				var column = new TreeViewColumn.with_attributes (_("Username"),
 				                                                 new CellRendererText (),
 				                                                 "text", AdministratorList.Columns.NAME,
 				                                                 null);

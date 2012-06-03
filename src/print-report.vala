@@ -299,7 +299,8 @@ namespace Mobilect {
 					double salary = (employee.rate/2) - (employee.rate * days_wo_pay/26);
 
 					/* Iter */
-					var value = Value (typeof (double));
+					double value = 0;
+					double deduction = 0;
 					var iter = TreeIter ();
 					if (deductions != null) {
 						var p = new TreePath.from_indices (i + id);
@@ -340,44 +341,61 @@ namespace Mobilect {
 
 					/* Tax */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.TAX, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
 					cairo_show_layout (cr, layout);
 
 					/* Loan */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.LOAN, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
 					cairo_show_layout (cr, layout);
 
 					/* PAG-IBIG */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.PAG_IBIG, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
 					cairo_show_layout (cr, layout);
 
 					/* SSS Loan */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.SSS_LOAN, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
 					cairo_show_layout (cr, layout);
 
 					/* Vale */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.VALE, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
 					cairo_show_layout (cr, layout);
 
 					/* Moesala Loan */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.MOESALA_LOAN, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
 					cairo_show_layout (cr, layout);
 
 					/* Moesala Savings */
 					if (deductions != null) deductions.get (iter, CPanelReport.Columns.MOESALA_SAVINGS, out value);
+					deduction += value;
 					cr.rel_move_to (column_width, 0);
-					layout.set_markup ("%.2lf".printf (value.get_double ()), -1);
+					layout.set_markup ("%.2lf".printf (value), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Total Deductions */
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (deduction), -1);
+					cairo_show_layout (cr, layout);
+
+					/* Net Amount */
+					cr.rel_move_to (column_width, 0);
+					layout.set_markup ("%.2lf".printf (salary - deduction), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_width (units_from_double (column_width * 2));

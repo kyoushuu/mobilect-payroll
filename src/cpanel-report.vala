@@ -130,6 +130,7 @@ namespace Mobilect {
 				                                             new CellRendererText (),
 				                                             "text", Columns.NAME,
 				                                             null);
+				column.expand = true;
 				deduc_view.append_column (column);
 
 				renderer = new CellRendererSpin ();
@@ -146,7 +147,8 @@ namespace Mobilect {
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("Tax");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
@@ -169,7 +171,8 @@ namespace Mobilect {
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("Loan");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
@@ -192,7 +195,8 @@ namespace Mobilect {
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("PAG-IBIG");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
@@ -215,7 +219,8 @@ namespace Mobilect {
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("SSS Loan");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
@@ -234,15 +239,16 @@ namespace Mobilect {
 														  TreeIter iter;
 														  var deduc_store = deduc_view.model as ListStore;
 														  deduc_store.get_iter_from_string (out iter, p);
-														  deduc_store.set (iter, Columns.SSS_LOAN, double.parse (n));
+														  deduc_store.set (iter, Columns.VALE, double.parse (n));
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("Vale");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
-											   m.get_value (i, Columns.SSS_LOAN, out value);
+											   m.get_value (i, Columns.VALE, out value);
 											   (r as CellRendererText).text = "%.2lf".printf (value.get_double ());
 										   });
 				deduc_view.append_column (column);
@@ -261,7 +267,8 @@ namespace Mobilect {
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("Moesala Loan");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
@@ -284,7 +291,8 @@ namespace Mobilect {
 													  });
 				column = new TreeViewColumn ();
 				column.title = _("Moesala Savings");
-				column.pack_start (renderer, false);
+				column.expand = true;
+				column.pack_start (renderer, true);
 				column.set_cell_data_func (renderer,
 				                           (c, r, m, i) => {
 											   Value value;
@@ -511,6 +519,7 @@ namespace Mobilect {
 				pr.title = "SEMI-MONTHLY PAYROLL";
 				pr.employees = this.cpanel.window.app.database.get_employees ();
 				pr.default_page_setup = page_setup;
+				pr.deductions = deduc_view.model as ListStore;
 
 				if (settings != null) {
 					pr.print_settings = settings;

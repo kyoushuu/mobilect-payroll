@@ -30,61 +30,8 @@ namespace Mobilect {
 
 			public Grid grid { get; private set; }
 
-			public DateTimeEntry start_entry { get; private set; }
-			public DateTimeEntry end_entry { get; private set; }
-			public SpinButton hour_rate_spin { get; private set; }
-
-
 			public CPanelPreferences (CPanel cpanel) {
 				base (cpanel, ACTION);
-
-				grid = new Grid ();
-				grid.orientation = Orientation.VERTICAL;
-				grid.row_spacing = 3;
-				grid.column_spacing = 12;
-				this.add_with_viewport (grid);
-
-				var start_label = new Label (_("_Start:"));
-				start_label.use_underline = true;
-				start_label.xalign = 0.0f;
-				grid.add (start_label);
-
-				start_entry = new DateTimeEntry ();
-				start_entry.set_date_time (this.cpanel.filter.get_start_as_date_time ());
-				grid.attach_next_to (start_entry,
-				                     start_label,
-				                     PositionType.RIGHT,
-				                     2, 1);
-
-				var end_label = new Label (_("_End:"));
-				end_label.use_underline = true;
-				end_label.xalign = 0.0f;
-				grid.add (end_label);
-
-				end_entry = new DateTimeEntry ();
-				end_entry.set_date_time (this.cpanel.filter.get_end_as_date_time ());
-				grid.attach_next_to (end_entry,
-				                     end_label,
-				                     PositionType.RIGHT,
-				                     2, 1);
-
-				var hour_rate_label = new Label (_("_Rate per Hour:"));
-				hour_rate_label.use_underline = true;
-				hour_rate_label.xalign = 0.0f;
-				grid.add (hour_rate_label);
-
-				hour_rate_spin = new SpinButton (new Adjustment (this.cpanel.hour_rate,
-				                                                 0, 1000000,
-				                                                 1, 10,
-				                                                 0),
-				                                 1, 2);
-				hour_rate_spin.value_changed.connect ((s) => {
-					this.cpanel.hour_rate = s.value;
-				});
-				grid.attach_next_to (hour_rate_spin,
-				                     hour_rate_label,
-				                     PositionType.RIGHT,
-				                     2, 1);
 			}
 
 		}

@@ -52,7 +52,7 @@ namespace Mobilect {
 				grid.column_spacing = 12;
 				this.add (grid);
 
-				var username_label = new Label (_("_Last Name:"));
+				var username_label = new Label (_("_Username:"));
 				username_label.use_underline = true;
 				username_label.xalign = 0.0f;
 				grid.add (username_label);

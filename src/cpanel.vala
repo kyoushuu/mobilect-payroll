@@ -30,9 +30,6 @@ namespace Mobilect {
 			public weak CPanelTab current_page { get; internal set; }
 			public Gtk.ActionGroup action_group { get; internal set; }
 
-			public Filter filter { get; set; }
-			public double hour_rate { get; set; }
-
 
 			public CPanel (Window window) {
 				this.window = window;
@@ -85,20 +82,20 @@ namespace Mobilect {
 				try {
 					window.ui_manager.add_ui_from_string (ui_def, -1);
 				} catch (Error e) {
-					stderr.printf ("Error: %s\n", e.message);
+					stderr.printf (_("Error: %s\n"), e.message);
 				}
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
-						name="cpanel",
-						stock_id=null,
-						label="_Administrator"
+						name = "cpanel",
+						stock_id = null,
+						label = _("_Administrator")
 					},
 					Gtk.ActionEntry () {
 						name = "cpanel-logout",
 						stock_id = Stock.STOP,
-						label = "_Log out",
-						tooltip = "Log out",
+						label = _("_Log out"),
+						tooltip = _("Log out"),
 						callback = (a) => {
 							this.window.notebook.page = this.window.PAGE_LOGIN_EMPLOYEE;
 						}
@@ -124,24 +121,12 @@ namespace Mobilect {
 					}
 				}
 
-				this.filter = new Filter ();
-				this.filter.time_start.set (8, 0);
-				this.filter.time_end.set (17, 0);
-				this.filter.date_start.set_dmy ((15 * period) + 1,
-				                                date.get_month (),
-				                                (DateYear) date.get_year ());
-				this.filter.date_end.set_dmy (last_day,
-				                              date.get_month (),
-				                              (DateYear) date.get_year ());
-
-				this.hour_rate = 40;
-
-				this.add_page (new CPanelPreferences (this), _("_Preferences"));
 				this.add_page (new CPanelEmployees (this), _("_Employees"));
 				this.add_page (new CPanelAdministrators (this), _("_Administrators"));
 				this.add_page (new CPanelTimeRecords (this), _("_Time Records"));
 				this.add_page (new CPanelHolidays (this), _("_Holidays"));
 				this.add_page (new CPanelReport (this), _("_Report"));
+				this.add_page (new CPanelPreferences (this), _("_Preferences"));
 			}
 
 			public void add_page (CPanelTab tab, string title) {
@@ -152,7 +137,7 @@ namespace Mobilect {
 					try {
 						window.ui_manager.add_ui_from_string (tab.ui_def, -1);
 					} catch (Error e) {
-						stderr.printf ("Error: %s\n", e.message);
+						stderr.printf (_("Error: %s\n"), e.message);
 					}
 				}
 			}

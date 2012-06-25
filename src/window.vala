@@ -55,8 +55,8 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = "file-quit",
 						stock_id = Stock.QUIT,
-						accelerator = "<Control>Q",
-						tooltip = "Quit",
+						accelerator = _("<Control>Q"),
+						tooltip = _("Quit"),
 						callback = (a) => {
 							destroy ();
 						}
@@ -68,8 +68,8 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = "help-about",
 						stock_id = Stock.ABOUT,
-						accelerator = "F1",
-						tooltip = "About",
+						accelerator = _("F1"),
+						tooltip = _("About"),
 						callback = (a) => {
 							string[] authors = {"Arnel A. Borja <kyoushuu@yahoo.com>", null};
 							string license = _("This program is free software; you can redistribute it and/or modify " +
@@ -135,7 +135,7 @@ namespace Mobilect {
 					this.add_accel_group (ui_manager.get_accel_group ());
 					box.add (ui_manager.get_widget ("/menubar"));
 				} catch (Error e) {
-					stderr.printf ("Error: %s\n", e.message);
+					stderr.printf (_("Error: %s\n"), e.message);
 				}
 
 				var toolbar = ui_manager.get_widget ("/toolbar");

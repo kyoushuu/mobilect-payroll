@@ -30,8 +30,9 @@ namespace Mobilect {
 			public string lastname { get; set; }
 			public string firstname { get; set; }
 			public string middlename { get; set; }
+			public string tin { get; set; }
 			public int rate { get; set; }
-			public TimeRecordList time_records { get; private set; }
+			/*public TimeRecordList time_records { get; private set; }*/
 
 			internal weak Database database { get; private set; }
 			internal weak EmployeeList list { get; set; }
@@ -49,14 +50,10 @@ namespace Mobilect {
 
 				value_id.set_int (this.id);
 
-				time_records = new TimeRecordList ();
-				time_records.database = database;
-
-
 				if (id != 0) {
 					try {
 						/* Get employee data from database */
-						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename, rate" +
+						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename, tin, rate" +
 						                                          "  FROM employees" +
 						                                          "  WHERE id=##id::int",
 						                                          out stmt_params);
@@ -72,25 +69,13 @@ namespace Mobilect {
 						var cell_data_middlename = data_model.get_value_at (2, 0);
 						this.middlename = database.dh_string.get_str_from_value (cell_data_middlename);
 
-						var cell_data_rate = data_model.get_value_at (3, 0);
+						var cell_data_tin = data_model.get_value_at (3, 0);
+						this.tin = database.dh_string.get_str_from_value (cell_data_tin);
+
+						var cell_data_rate = data_model.get_value_at (4, 0);
 						this.rate = cell_data_rate.get_int ();
-
-
-						/* Get time records */
-						stmt = database.cnc.parse_sql_string ("SELECT id, start, end" +
-						                                      "  FROM time_records" +
-						                                      "  WHERE employee_id=##employee_id::int",
-						                                      out stmt_params);
-						stmt_params.get_holder ("employee_id").set_value (value_id);
-						data_model = database.cnc.statement_execute_select (stmt, stmt_params);
-
-						for (int i = 0; i < data_model.get_n_rows (); i++) {
-							var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
-							time_record.employee = this;
-							time_records.add (time_record);
-						}
 					} catch (Error e) {
-						stderr.printf ("Error: %s\n", e.message);
+						stderr.printf (_("Error: %s\n"), e.message);
 					}
 				}
 			}
@@ -200,59 +185,78 @@ namespace Mobilect {
 				                                    time_start.hour, time_start.minute, 0);
 				range_end = range_end.add_minutes (minutes);
 
-				foreach (var time_record in time_records) {
-					if (time_record.end == null) {
-						continue;
-					}
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+				value_id.set_int (this.id);
 
-					record_start = time_record.start;
-					record_end = time_record.end;
+				try {
+					/* Get time records */
+					var stmt = database.cnc.parse_sql_string ("SELECT id, start, end" +
+					                                          "  FROM time_records" +
+					                                          "  WHERE employee_id=##employee_id::int",
+					                                          out stmt_params);
+					stmt_params.get_holder ("employee_id").set_value (value_id);
+					var data_model = database.cnc.statement_execute_select (stmt, stmt_params);
 
-					if (month_info == null ||
-					    month_info.month != record_start.get_month () ||
-					    month_info.year != record_start.get_year ()) {
-						month_info = new MonthInfo (database,
-						                            record_start.get_year (),
-						                            record_start.get_month ());
-					}
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
+						time_record.employee = this;
 
-					if (filter.use_holiday_type) {
-						if (month_info.get_day_type (record_start.get_day_of_month ()) !=
-						    filter.holiday_type) {
+						if (time_record.end == null) {
 							continue;
 						}
-					}
 
-					if (filter.sunday_work !=
-					    (month_info.get_weekday (record_start.get_day_of_month ()) == DateWeekday.SUNDAY)) {
-						continue;
-					}
+						record_start = time_record.start;
+						record_end = time_record.end;
 
-					/* Check if time record date is in range */
-					if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||
-					    (record_start.compare (range_end) != 1 && record_end.compare (range_start) == 1)) {
-						/* Get times of record and period */
-						var period_start = new DateTime.local (record_start.get_year (),
-						                                       record_start.get_month (),
-						                                       record_start.get_day_of_month (),
-						                                       time_start.hour, time_start.minute, 0);
-						var period_end = period_start.add_minutes (minutes);
+						if (month_info == null ||
+						    month_info.month != record_start.get_month () ||
+						    month_info.year != record_start.get_year ()) {
+							month_info = new MonthInfo (database,
+							                            record_start.get_year (),
+							                            record_start.get_month ());
+						}
 
-						/* Check if time record date is in period */
-						if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||
-						    (record_start.compare (period_end) != 1 && record_end.compare (period_start) == 1)) {
-							/* Get span of paid period */
-							var span_start = record_start.compare (period_start) == 1? record_start : period_start;
-							var span_end = record_end.compare (period_end) == -1? record_end : period_end;
+						if (filter.use_holiday_type) {
+							if (month_info.get_day_type (record_start.get_day_of_month ()) !=
+							    filter.holiday_type) {
+								continue;
+							}
+						}
 
-							double hours = span_end.difference (span_start) / TimeSpan.HOUR;
-							hours_span += Math.floor (hours / filter.period) * filter.period;
-							if (Math.floor ((hours + (filter.period / 4)) / filter.period) >
-							    Math.floor (hours / filter.period)) {
-								hours_span += filter.period;
+						if (filter.sunday_work !=
+						    (month_info.get_weekday (record_start.get_day_of_month ()) == DateWeekday.SUNDAY)) {
+							continue;
+						}
+
+						/* Check if time record date is in range */
+						if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||
+						    (record_start.compare (range_end) != 1 && record_end.compare (range_start) == 1)) {
+							/* Get times of record and period */
+							var period_start = new DateTime.local (record_start.get_year (),
+							                                       record_start.get_month (),
+							                                       record_start.get_day_of_month (),
+							                                       time_start.hour, time_start.minute, 0);
+							var period_end = period_start.add_minutes (minutes);
+
+							/* Check if time record date is in period */
+							if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||
+							    (record_start.compare (period_end) != 1 && record_end.compare (period_start) == 1)) {
+								/* Get span of paid period */
+								var span_start = record_start.compare (period_start) == 1? record_start : period_start;
+								var span_end = record_end.compare (period_end) == -1? record_end : period_end;
+
+								double hours = span_end.difference (span_start)/TimeSpan.HOUR;
+								hours_span += Math.floor (hours/filter.period)*filter.period;
+								if (Math.floor ((hours + (filter.period/4)) / filter.period) >
+								    Math.floor (hours / filter.period)) {
+									hours_span += filter.period;
+								}
 							}
 						}
 					}
+				} catch (Error e) {
+					stderr.printf (_("Error: %s\n"), e.message);
 				}
 
 				this.cached_filter = filter.duplicate ();
@@ -296,6 +300,7 @@ namespace Mobilect {
 					                                          "  SET lastname=##lastname::string," +
 					                                          "    firstname=##firstname::string," +
 					                                          "    middlename=##middlename::string," +
+					                                          "    tib=##tin::string," +
 					                                          "    rate=##rate::int" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);
@@ -303,6 +308,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("lastname").set_value_str (database.dh_string, this.lastname);
 					stmt_params.get_holder ("firstname").set_value_str (database.dh_string, this.firstname);
 					stmt_params.get_holder ("middlename").set_value_str (database.dh_string, this.middlename);
+					stmt_params.get_holder ("tin").set_value_str (database.dh_string, this.tin);
 					stmt_params.get_holder ("rate").set_value (value_rate);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (ApplicationError e) {

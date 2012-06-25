@@ -62,7 +62,9 @@ mobilect_payroll_SOURCES = \
 	pay-group.vala \
 	pay-period.vala \
 	time-period.vala \
-	print-report.vala \
+	report.vala \
+	regular-report.vala \
+	overtime-report.vala \
 	date-entry.vala \
 	config.vapi
 

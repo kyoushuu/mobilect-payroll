@@ -62,6 +62,12 @@ namespace Mobilect {
 				                                             null);
 				tree_view.append_column (column);
 
+				column = new TreeViewColumn.with_attributes (_("TIN Number"),
+				                                             new CellRendererText (),
+				                                             "text", EmployeeList.Columns.TIN,
+				                                             null);
+				tree_view.append_column (column);
+
 				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
 				column.title = _("Rate");
@@ -83,31 +89,6 @@ namespace Mobilect {
 					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
 				});
 				tree_view.append_column (column);
-
-				column = new TreeViewColumn ();
-				renderer = new CellRendererText ();
-				column.title = _("Hours");
-				column.pack_start (renderer, false);
-				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value;
-					m.get_value (i, EmployeeList.Columns.HOURS, out value);
-					(r as CellRendererText).text = "%.1lf".printf (value.get_double ());
-				});
-				tree_view.append_column (column);
-
-				column = new TreeViewColumn ();
-				renderer = new CellRendererText ();
-				column.title = _("Earnings");
-				column.pack_start (renderer, false);
-				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value_hours, value_hourrate;
-					m.get_value (i, EmployeeList.Columns.HOURS, out value_hours);
-					m.get_value (i, EmployeeList.Columns.HOURRATE, out value_hourrate);
-					(r as CellRendererText).text = "%.2lf".printf (value_hours.get_double () * value_hourrate.get_double ());
-				});
-				tree_view.append_column (column);
-
-				reload ();
 
 
 				ui_def =
@@ -184,6 +165,7 @@ namespace Mobilect {
 										this.list.database.add_employee (employee.lastname,
 										                                 employee.firstname,
 										                                 employee.middlename,
+										                                 employee.tin,
 										                                 password_entry.text,
 										                                 employee.rate);
 									} catch (ApplicationError e) {
@@ -324,6 +306,8 @@ namespace Mobilect {
 				};
 
 				this.action_group.add_actions (actions, this);
+				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
+				this.action_group.get_action (ACTION_EDIT).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().get_selected (null, null);
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
@@ -346,7 +330,7 @@ namespace Mobilect {
 							try {
 								dialog.employee.update ();
 							} catch (Error e) {
-								stderr.printf ("Error: %s\n", e.message);
+								stderr.printf (_("Error: %s\n"), e.message);
 							}
 
 							reload ();
@@ -368,7 +352,6 @@ namespace Mobilect {
 
 			public void reload () {
 				this.list = this.cpanel.window.app.database.get_employees ();
-				this.list.filter = this.cpanel.filter;
 				this.tree_view.model = this.list ;
 			}
 

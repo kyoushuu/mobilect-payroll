@@ -45,6 +45,7 @@ namespace Mobilect {
 					             "  lastname string not null," +
 					             "  firstname string not null," +
 					             "  middlename string not null," +
+					             "  tin string not null," +
 					             "  password string not null," +
 					             "  rate integer" +
 					             ")");
@@ -52,6 +53,9 @@ namespace Mobilect {
 					execute_sql ("CREATE TABLE IF NOT EXISTS time_records (" +
 					             "  id integer primary key autoincrement," +
 					             "  employee_id integer," +
+					             "  year integer," +
+					             "  month integer," +
+					             "  day integer," +
 					             "  start timestamp not null," +
 					             "  end timestamp" +
 					             ")");
@@ -222,19 +226,20 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string middlename, string password, int rate) throws ApplicationError {
+			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate) throws ApplicationError {
 				Set stmt_params;
 				var value_rate = Value (typeof (int));
 				value_rate.set_int (rate);
 
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, password, rate)" +
-					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##password::string, ##rate:int)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate)" +
+					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##tin::string, ##password::string, ##rate::int)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("lastname").set_value_str (null, lastname);
 					stmt_params.get_holder ("firstname").set_value_str (null, firstname);
-					stmt_params.get_holder ("middlename").set_value_str (null, firstname);
+					stmt_params.get_holder ("middlename").set_value_str (null, middlename);
+					stmt_params.get_holder ("tin").set_value_str (null, tin);
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					stmt_params.get_holder ("rate").set_value (value_rate);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
@@ -267,17 +272,96 @@ namespace Mobilect {
 				return list;
 			}
 
+			public TimeRecordList get_time_records_within_date (Date start, Date end) {
+				var list = new TimeRecordList ();
+				list.database = this;
+
+				if (start.compare (end) > 0) {
+					end = start;
+				}
+
+				var stmt_str = "SELECT id, employee_id, start, end FROM time_records WHERE ";
+				if (start.get_year () == end.get_year ()) {
+					if (start.get_month () == end.get_month ()) {
+						if (start.get_day () == end.get_day ()) {
+							stmt_str += "year=##start_year::int AND month=##start_month::int AND day=##start_day::int";
+						} else {
+							stmt_str += "year=##start_year::int AND month=##start_month::int AND (day>=##start_day::int AND day<=##end_day::int)";
+						}
+					} else {
+						stmt_str += "year=##start_year::int AND ((month=##start_month::int AND day>=##start_day::int) OR (month>##start_month::int AND month<##end_month::int) OR (month=##end_month::int AND day<=##end_day::int))";
+					}
+				} else {
+					stmt_str += "(year=##start_year::int AND ((month=##start_month::int AND day>=##start_day::int) OR month>##start_month::int)) OR (year=##end_year::int AND ((month=##end_month::int AND day<=##end_day::int) OR month<##end_month::int)) OR (year>##start_year::int AND year<##end_year::int)";
+				}
+
+				try {
+					Set stmt_params;
+					var stmt = cnc.parse_sql_string (stmt_str, out stmt_params);
+
+					var value = Value (typeof (int));
+					Holder holder;
+
+					value.set_int (start.get_year ());
+					holder = stmt_params.get_holder ("start_year");
+					if (holder != null) holder.set_value (value);
+
+					value.set_int (start.get_month ());
+					holder = stmt_params.get_holder ("start_month");
+					if (holder != null) holder.set_value (value);
+
+					value.set_int (start.get_day ());
+					holder = stmt_params.get_holder ("start_day");
+					if (holder != null) holder.set_value (value);
+
+					value.set_int (end.get_year ());
+					holder = stmt_params.get_holder ("end_year");
+					if (holder != null) holder.set_value (value);
+
+					value.set_int (end.get_month ());
+					holder = stmt_params.get_holder ("end_month");
+					if (holder != null) holder.set_value (value);
+
+					value.set_int (end.get_day ());
+					holder = stmt_params.get_holder ("end_day");
+					if (holder != null) holder.set_value (value);
+
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						Value cell_data = data_model.get_value_at (0, i);
+						var time_record = new TimeRecord (cell_data.get_int (), this, null);
+
+						list.add (time_record);
+					}
+				} catch (Error e) {
+					list = new TimeRecordList ();
+					list.database = this;
+				}
+
+				return list;
+			}
+
 			public void add_time_record (int employee_id, DateTime start, DateTime? end) throws ApplicationError {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
+				var value_year = Value (typeof (int));
+				var value_month = Value (typeof (int));
+				var value_day = Value (typeof (int));
 
 				value_id.set_int (employee_id);
+				value_year.set_int (start.get_year ());
+				value_month.set_int (start.get_month ());
+				value_day.set_int (start.get_day_of_month ());
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, start, end)" +
-					                                 "  VALUES (##employee_id::int, ##start::string, ##end::string::null)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end)" +
+					                                 "  VALUES (##employee_id::int, ##year::int, ##month::int, ##day::int, ##start::string, ##end::string::null)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("employee_id").set_value (value_id);
+					stmt_params.get_holder ("year").set_value (value_year);
+					stmt_params.get_holder ("month").set_value (value_month);
+					stmt_params.get_holder ("day").set_value (value_day);
 					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.to_utc ().format ("%F %T"));
 					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.to_utc ().format ("%F %T") : null);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);

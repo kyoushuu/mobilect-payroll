@@ -54,6 +54,10 @@ namespace Mobilect {
 			private PrintSettings settings;
 
 
+			/* Philippines Legal / FanFold German Legal / US Foolscap */
+			public const string PAPER_NAME_FANFOLD_GERMAN_LEGAL = "na_foolscap";
+
+
 			public enum Columns {
 				ID,
 				NAME,
@@ -77,7 +81,7 @@ namespace Mobilect {
 
 				page_setup = new PageSetup ();
 				page_setup.set_orientation (PageOrientation.LANDSCAPE);
-				page_setup.set_paper_size (new PaperSize (PAPER_NAME_LEGAL));
+				page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
@@ -294,6 +298,31 @@ namespace Mobilect {
 				});
 				deduc_view.append_column (column);
 
+
+				/* Set period */
+				var date = new DateTime.now_local ().add_days (-10);
+				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
+
+				DateDay last_day;
+				if (period == 0) {
+					last_day = 15;
+				} else {
+					last_day = 31;
+					while (!Date.valid_dmy (last_day,
+					                        (DateMonth) date.get_month (),
+					                        (DateYear) date.get_year ())) {
+						last_day--;
+					}
+				}
+
+				start_entry.set_dmy ((15 * period) + 1,
+				                     date.get_month (),
+				                     date.get_year ());
+				end_entry.set_dmy (last_day,
+				                   date.get_month (),
+				                   date.get_year ());
+
+
 				ui_def =
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
@@ -447,7 +476,7 @@ namespace Mobilect {
 							if (settings == null) {
 								settings = new PrintSettings ();
 								settings.set_orientation (PageOrientation.LANDSCAPE);
-								settings.set_paper_size (new PaperSize (PAPER_NAME_LEGAL));
+								settings.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 							}
 
 							var new_page_setup = print_run_page_setup_dialog (this.cpanel.window, page_setup, settings);
@@ -507,9 +536,9 @@ namespace Mobilect {
 				this.action_group.add_actions (actions, this);
 			}
 
-			private Report create_report () {
-				var pr = new Report (start_entry.date, end_entry.date);
-				pr.title = "SEMI-MONTHLY PAYROLL";
+			private RegularReport create_report () {
+				var pr = new RegularReport (start_entry.get_date (), end_entry.get_date ());
+				pr.title = _("SEMI-MONTHLY PAYROLL");
 				pr.employees = this.cpanel.window.app.database.get_employees ();
 				pr.default_page_setup = page_setup;
 				pr.deductions = deduc_view.model as ListStore;

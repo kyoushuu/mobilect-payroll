@@ -26,7 +26,11 @@ namespace Mobilect {
 
 		public class CPanelTimeRecords : CPanelTab {
 
+			public DateEntry start_entry { get; private set; }
+			public DateEntry end_entry { get; private set; }
 			public TreeView tree_view { get; private set; }
+			public Spinner search_spinner { get; private set; }
+			public Button search_button { get; private set; }
 			public TimeRecordList list;
 
 			public const string ACTION = "cpanel-time-records";
@@ -37,37 +41,76 @@ namespace Mobilect {
 			public CPanelTimeRecords (CPanel cpanel) {
 				base (cpanel, ACTION);
 
-				this.changed_to.connect (() => {
-					reload ();
-				});
+
+				var vbox = new Box (Orientation.VERTICAL, 3);
+				this.add_with_viewport (vbox);
+
+				var hbox = new Box (Orientation.HORIZONTAL, 3);
+				vbox.add (hbox);
+
+				var sw = new ScrolledWindow (null, null);
+				vbox.pack_start (sw, true, true, 0);
 
 				tree_view = new TreeView ();
 				tree_view.row_activated.connect ((t, p, c) => {
 					edit ();
 				});
-				this.add (tree_view);
+				sw.add (tree_view);
 
 				TreeViewColumn column;
 
-				column = new TreeViewColumn.with_attributes ("Employee",
+				column = new TreeViewColumn.with_attributes (_("Employee"),
 				                                             new CellRendererText (),
 				                                             "text", TimeRecordList.Columns.EMPLOYEE_STRING,
 				                                             null);
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn.with_attributes ("Start Date",
+				column = new TreeViewColumn.with_attributes (_("Start Date"),
 				                                             new CellRendererText (),
 				                                             "text", TimeRecordList.Columns.START_STRING,
 				                                             null);
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn.with_attributes ("End Date",
+				column = new TreeViewColumn.with_attributes (_("End Date"),
 				                                             new CellRendererText (),
 				                                             "text", TimeRecordList.Columns.END_STRING,
 				                                             null);
 				tree_view.append_column (column);
 
-				reload ();
+
+				var date_label = new Label (_("_Date:"));
+				date_label.use_underline = true;
+				hbox.add (date_label);
+
+				start_entry = new DateEntry ();
+				hbox.add (start_entry);
+
+				var to_label = new Label (_("_to"));
+				to_label.use_underline = true;
+				hbox.add (to_label);
+
+				end_entry = new DateEntry ();
+				hbox.add (end_entry);
+
+				search_button = new Button.with_mnemonic (_("_Search"));
+				search_button.clicked.connect ((b) => {
+					search_spinner.show ();
+					search_spinner.start ();
+
+					this.list = null;
+					this.tree_view.model = null;
+
+					this.list = this.cpanel.window.app.database.get_time_records_within_date (start_entry.get_date (), end_entry.get_date ());
+					this.tree_view.model = this.list;
+
+					search_spinner.stop ();
+					search_spinner.hide ();
+				});
+				hbox.add (search_button);
+
+				search_spinner = new Spinner ();
+				search_spinner.no_show_all = true;
+				hbox.add (search_spinner);
 
 
 				ui_def =
@@ -110,7 +153,8 @@ namespace Mobilect {
 						accelerator = _("<Control>A"),
 						tooltip = _("Add an time record to database"),
 						callback = (a) => {
-							var time_record = new TimeRecord (0, list.database, null);
+							var database = this.cpanel.window.app.database;
+							var time_record = new TimeRecord (0, database, null);
 
 							var dialog = new TimeRecordEditDialog (_("Add Time Record"),
 							                                       this.cpanel.window,
@@ -130,9 +174,9 @@ namespace Mobilect {
 									}
 
 									try {
-										this.list.database.add_time_record (time_record.employee_id,
-										                                    time_record.start,
-										                                    time_record.end);
+										database.add_time_record (time_record.employee_id,
+										                          time_record.start,
+										                          time_record.end);
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
@@ -141,7 +185,9 @@ namespace Mobilect {
 										e_dialog.destroy ();
 									}
 
-									reload ();
+									this.list = null;
+									this.tree_view.model = null;
+
 								}
 
 								d.destroy ();
@@ -178,7 +224,9 @@ namespace Mobilect {
 										e_dialog.destroy ();
 									}
 
-									reload ();
+									this.list = null;
+									this.tree_view.model = null;
+
 								}
 
 								m_dialog.destroy ();
@@ -206,6 +254,8 @@ namespace Mobilect {
 				};
 
 				this.action_group.add_actions (actions, this);
+				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
+				this.action_group.get_action (ACTION_EDIT).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().get_selected (null, null);
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
@@ -228,10 +278,12 @@ namespace Mobilect {
 							try {
 								dialog.time_record.update ();
 							} catch (Error e) {
-								stderr.printf ("Error: %s\n", e.message);
+								stderr.printf (_("Error: %s\n"), e.message);
 							}
 
-							reload ();
+							this.list = null;
+							this.tree_view.model = null;
+
 						}
 
 						d.destroy ();
@@ -246,11 +298,6 @@ namespace Mobilect {
 					e_dialog.run ();
 					e_dialog.destroy ();
 				}
-			}
-
-			public void reload () {
-				this.list = this.cpanel.window.app.database.get_time_records ();
-				this.tree_view.model = this.list;
 			}
 
 		}

@@ -36,7 +36,7 @@ namespace Mobilect {
 			                 MonthInfo.HolidayType holiday_type,
 			                 double rate,
 			                 PayPeriod[] periods,
-			                 double[] minus_period_rates) {
+			                 double[]? minus_period_rates) {
 				this.name = name;
 				this.is_sunday_work = is_sunday_work;
 				this.holiday_type = holiday_type;

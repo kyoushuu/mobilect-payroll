@@ -60,7 +60,7 @@ namespace Mobilect {
 						var cell_data_username = data_model.get_value_at (0, 0);
 						this.username = database.dh_string.get_str_from_value (cell_data_username);
 					} catch (Error e) {
-						stderr.printf ("Error: %s\n", e.message);
+						stderr.printf (_("Error: %s\n"), e.message);
 					}
 				}
 			}

@@ -54,8 +54,6 @@ namespace Mobilect {
 				                                                 null);
 				tree_view.append_column (column);
 
-				reload ();
-
 
 				ui_def =
 					"<ui>" +
@@ -244,6 +242,8 @@ namespace Mobilect {
 				};
 
 				this.action_group.add_actions (actions, this);
+				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
+				this.action_group.get_action (ACTION_EDIT).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().get_selected (null, null);
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
@@ -266,7 +266,7 @@ namespace Mobilect {
 							try {
 								dialog.administrator.update ();
 							} catch (Error e) {
-								stderr.printf ("Error: %s\n", e.message);
+								stderr.printf (_("Error: %s\n"), e.message);
 							}
 
 							reload ();

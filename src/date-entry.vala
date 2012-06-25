@@ -26,7 +26,7 @@ namespace Mobilect {
 
 		public class DateEntry : Entry {
 
-			public Date date;
+			private Date date;
 
 
 			public DateEntry () {
@@ -45,6 +45,25 @@ namespace Mobilect {
 				});
 			}
 
+			public Date get_date () {
+				return date;
+			}
+
+			public void set_date (Date date) {
+				if (!date.valid ()) {
+					this.date = date;
+				}
+				update_text ();
+			}
+
+			public void set_dmy (int day, int month, int year) {
+				var d = date;
+				date.set_dmy ((DateDay) day, (DateMonth) month, (DateYear) year);
+				if (!date.valid ()) {
+					date = d;
+				}
+				update_text ();
+			}
 
 			private void update_entry () {
 				var d = date;
@@ -56,7 +75,7 @@ namespace Mobilect {
 			}
 
 			private void update_text () {
-				char s[50];
+				char s[64];
 				date.strftime (s, "%x");
 				text = (string) s;
 			}

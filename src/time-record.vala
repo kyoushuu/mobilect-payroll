@@ -98,7 +98,7 @@ namespace Mobilect {
 							this.end = new DateTime.from_timeval_local (time_val);
 						}
 					} catch (Error e) {
-						stderr.printf ("Error: %s\n", e.message);
+						stderr.printf (_("Error: %s\n"), e.message);
 					}
 				}
 			}
@@ -135,19 +135,31 @@ namespace Mobilect {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 				var value_employee_id = Value (typeof (int));
+				var value_year = Value (typeof (int));
+				var value_month = Value (typeof (int));
+				var value_day = Value (typeof (int));
 
 				value_id.set_int (this.id);
 				value_employee_id.set_int (this.employee_id);
+				value_year.set_int (start.get_year ());
+				value_month.set_int (start.get_month ());
+				value_day.set_int (start.get_day_of_month ());
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE time_records" +
 					                                          "  SET employee_id=##employee_id::int," +
+					                                          "      year=##year::int," +
+					                                          "      month=##month::int," +
+					                                          "      day=##day::int," +
 					                                          "      start=##start::string," +
 					                                          "      end=##end::string::null" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
 					stmt_params.get_holder ("employee_id").set_value (value_employee_id);
+					stmt_params.get_holder ("year").set_value (value_year);
+					stmt_params.get_holder ("month").set_value (value_month);
+					stmt_params.get_holder ("day").set_value (value_day);
 					stmt_params.get_holder ("start").set_value_str (database.dh_string, this.get_start_string (false));
 					stmt_params.get_holder ("end").set_value_str (database.dh_string, this.get_end_string (false));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);

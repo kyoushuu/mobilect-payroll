@@ -41,6 +41,7 @@ namespace Mobilect {
 				FIRSTNAME,
 				MIDDLENAME,
 				NAME,
+				TIN,
 				RATE,
 				HOURRATE,
 				HOURS,
@@ -106,6 +107,8 @@ namespace Mobilect {
 						return typeof (string);
 					case Columns.NAME:
 						return typeof (string);
+					case Columns.TIN:
+						return typeof (string);
 					case Columns.RATE:
 						return typeof (int);
 					case Columns.HOURRATE:
@@ -163,6 +166,9 @@ namespace Mobilect {
 						break;
 					case Columns.NAME:
 						value.set_string (record.get_name ());
+						break;
+					case Columns.TIN:
+						value.set_string (record.tin);
 						break;
 					case Columns.RATE:
 						value.set_int (record.rate);

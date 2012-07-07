@@ -40,6 +40,7 @@ namespace Mobilect {
 			private double table_top;
 			private double header_height;
 			private double footer_height;
+			private double table_header_height;
 
 			private int days = 0;
 			private Filter filter;
@@ -57,8 +58,10 @@ namespace Mobilect {
 				filter = new Filter ();
 				filter.date_start = start;
 				filter.date_end = end;
-				filter.time_start.set (8, 0);
-				filter.time_end.set (17, 0);
+				filter.time_periods = new TimePeriod[] {
+					new TimePeriod (new Time (8,0), new Time (12,0)),
+					new TimePeriod (new Time (13,0), new Time (17,0))
+				};
 
 				export_filename = "payroll-regular-" +
 					format_date (start, "%Y%m%d") + "-" +
@@ -74,7 +77,8 @@ namespace Mobilect {
 
 				/* Get height of header and footer */
 				table_top = (title_font_height * 2) + company_name_font_height + (padding * 6);
-				header_height = table_top + ((header_font_height + (padding * 2)) * 2);
+				table_header_height = ((header_font_height + (padding * 2)) * 2);
+				header_height = table_top + table_header_height;
 				footer_height = (text_font_height + (padding * 2)) * 10;
 
 
@@ -92,7 +96,14 @@ namespace Mobilect {
 				}
 
 				/* Note: +10 for footer */
-				set_n_pages ((int) Math.ceil ((double) (num_lines + (lines_per_page - lines_first_page) + 10) / lines_per_page));
+				set_n_pages ((int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 10) / lines_per_page));
+
+				stdout.printf ("Pages: %d\n", (int) Math.ceil ((double) (num_lines + (lines_per_page - lines_first_page) + 10) / lines_per_page));
+				stdout.printf ("Lines in First Page: %d\n", lines_first_page);
+				stdout.printf ("Lines per Page: %d\n", lines_per_page);
+				stdout.printf ("Number of Lines: %d\n", num_lines);
+				stdout.printf ("Useable height in first page: %lf\n", height - header_height);
+				stdout.printf ("Line height: %lf\n", text_font_height + (padding * 2));
 			}
 
 			public void draw_page_handler (Gtk.PrintContext context, int page_nr) {
@@ -110,9 +121,12 @@ namespace Mobilect {
 				if (page_nr == 0) {
 					id = 0;
 					page_num_lines = lines_first_page;
-				} else if ((id + (page_num_lines/2)) > num_lines) {
+				} else if ((id + (page_num_lines/2)) > (num_lines/2)) {
 					page_num_lines = num_lines - (id*2);
 				}
+				double table_content_height = (page_num_lines * (text_font_height + (padding * 2)));
+
+				stdout.printf ("page_num_lines: %d\n", page_num_lines);
 
 				double table_x, table_y;
 
@@ -227,7 +241,7 @@ namespace Mobilect {
 
 
 					/* Draw table lines */
-					cr.rectangle (0, table_top, width, (page_num_lines * (text_font_height + (padding * 2))) + ((header_font_height + (padding * 2)) * 2));
+					cr.rectangle (0, table_top, width, table_content_height + table_header_height);
 					/* Vertical */
 					for (int i = 0; i < 13; i++) {
 						cr.move_to (column_width * (2+i), table_top + ((i >= 4 && i <= 7)? (header_font_height + (padding * 2)) : 0));
@@ -236,7 +250,7 @@ namespace Mobilect {
 					/* Horizontal */
 					cr.move_to (column_width * 5, table_top + (header_font_height + (padding * 2)));
 					cr.rel_line_to (column_width * 5, 0);
-					cr.move_to (0, table_top + (2 * (header_font_height + (padding * 2))));
+					cr.move_to (0, table_top + table_header_height);
 					cr.rel_line_to (width, 0);
 
 					cr.set_line_width (2);
@@ -246,7 +260,7 @@ namespace Mobilect {
 					table_y = 0;
 
 					/* Draw table lines */
-					cr.rectangle (0, 0, width, (page_num_lines * (text_font_height + (padding * 2))));
+					cr.rectangle (0, 0, width, table_content_height);
 
 					cr.set_line_width (2);
 					cr.stroke ();
@@ -262,7 +276,7 @@ namespace Mobilect {
 				/* Vertical */
 				for (int i = 0; i < 13; i++) {
 					cr.move_to (column_width * (2+i), table_y);
-					cr.rel_line_to (0, (page_num_lines * (text_font_height + (padding * 2))));
+					cr.rel_line_to (0, table_content_height);
 				}
 				cr.set_line_width (1);
 				cr.stroke ();

@@ -29,8 +29,7 @@ namespace Mobilect {
 			public Date date_start = Date ();
 			public Date date_end = Date ();
 
-			public Time time_start = new Time (0, 0);
-			public Time time_end = new Time (0, 0);
+			public TimePeriod[] time_periods { get; set; }
 
 			public bool use_holiday_type = false;
 			public MonthInfo.HolidayType holiday_type;
@@ -41,6 +40,7 @@ namespace Mobilect {
 			public Filter () {
 			}
 
+			/*
 			public DateTime get_start_as_date_time () {
 				return new DateTime.local (date_start.get_year (),
 				                           date_start.get_month (),
@@ -68,6 +68,7 @@ namespace Mobilect {
 				                  (DateYear) dt.get_year ());
 				time_end.set (dt.get_hour (), dt.get_minute ());
 			}
+			*/
 
 			public Filter duplicate () {
 				var filter = new Filter ();
@@ -75,17 +76,28 @@ namespace Mobilect {
 				filter.date_start = date_start;
 				filter.date_end = date_end;
 
-				filter.time_start = time_start.duplicate ();
-				filter.time_end = time_end.duplicate ();
+				filter.time_periods = new TimePeriod[this.time_periods.length];
+				for (int i = 0; i < this.time_periods.length; i++) {
+					filter.time_periods[i] = this.time_periods[i].duplicate ();
+				}
 
 				return filter;
 			}
 
 			public bool is_equal (Filter filter) {
-				return filter.date_start.compare (this.date_start) == 0 &&
+				if (filter.time_periods.length != this.time_periods.length) {
+					return false;
+				}
+
+				for (int i = 0; i < this.time_periods.length; i++) {
+					if (this.time_periods[i].is_equal (filter.time_periods[i]) == false) {
+						return false;
+					}
+				}
+
+				return
+					filter.date_start.compare (this.date_start) == 0 &&
 					filter.date_end.compare (this.date_end) == 0 &&
-					filter.time_start.is_equal (this.time_start) &&
-					filter.time_end.is_equal (this.time_end) &&
 					filter.use_holiday_type == this.use_holiday_type &&
 					filter.holiday_type == this.holiday_type &&
 					filter.sunday_work == this.sunday_work &&

@@ -32,6 +32,16 @@ namespace Mobilect {
 				this.end = end;
 			}
 
+			public TimePeriod duplicate () {
+				return new TimePeriod (this.start, this.end);
+			}
+
+			public bool is_equal (TimePeriod time_period) {
+				return
+					this.start == time_period.start &&
+					this.end == time_period.end;
+			}
+
 		}
 
 	}

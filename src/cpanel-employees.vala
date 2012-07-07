@@ -308,10 +308,12 @@ namespace Mobilect {
 				this.action_group.add_actions (actions, this);
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
 				this.action_group.get_action (ACTION_EDIT).sensitive = false;
+				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().get_selected (null, null);
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
+					this.action_group.get_action (ACTION_PASSWORD).sensitive = selected;
 				});
 			}
 

@@ -161,29 +161,10 @@ namespace Mobilect {
 				double hours_span = 0.0;
 				DateTime record_start, record_end;
 
-				Time time_start = filter.time_start;
-				Time time_end = filter.time_end;
 				Date date_start = filter.date_start;
 				Date date_end = filter.date_end;
 
 				MonthInfo month_info = null;
-
-				int minutes =
-					((time_end.hour * 60) + time_end.minute) -
-					((time_start.hour * 60) + time_start.minute);
-				if (minutes < 0) {
-					minutes += 24 * 60;
-				}
-
-				var range_start = new DateTime.local (date_start.get_year (),
-				                                      date_start.get_month (),
-				                                      date_start.get_day (),
-				                                      time_start.hour, time_start.minute, 0);
-				var range_end = new DateTime.local (date_end.get_year (),
-				                                    date_end.get_month (),
-				                                    date_end.get_day (),
-				                                    time_start.hour, time_start.minute, 0);
-				range_end = range_end.add_minutes (minutes);
 
 				Set stmt_params;
 				var value_id = Value (typeof (int));
@@ -199,58 +180,82 @@ namespace Mobilect {
 					var data_model = database.cnc.statement_execute_select (stmt, stmt_params);
 
 					for (int i = 0; i < data_model.get_n_rows (); i++) {
-						var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
-						time_record.employee = this;
+						for (int period = 0; period < filter.time_periods.length; period++)
+						{
+							Time time_start = filter.time_periods[period].start;
+							Time time_end = filter.time_periods[period].end;
 
-						if (time_record.end == null) {
-							continue;
-						}
+							int minutes =
+								((time_end.hour * 60) + time_end.minute) -
+								((time_start.hour * 60) + time_start.minute);
+							if (minutes < 0) {
+								minutes += 24 * 60;
+							}
 
-						record_start = time_record.start;
-						record_end = time_record.end;
+							var range_start = new DateTime.local (date_start.get_year (),
+							                                      date_start.get_month (),
+							                                      date_start.get_day (),
+							                                      time_start.hour, time_start.minute, 0);
+							var range_end = new DateTime.local (date_end.get_year (),
+							                                    date_end.get_month (),
+							                                    date_end.get_day (),
+							                                    time_start.hour, time_start.minute, 0);
+							range_end = range_end.add_minutes (minutes);
 
-						if (month_info == null ||
-						    month_info.month != record_start.get_month () ||
-						    month_info.year != record_start.get_year ()) {
-							month_info = new MonthInfo (database,
-							                            record_start.get_year (),
-							                            record_start.get_month ());
-						}
+							var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
+							time_record.employee = this;
 
-						if (filter.use_holiday_type) {
-							if (month_info.get_day_type (record_start.get_day_of_month ()) !=
-							    filter.holiday_type) {
+							if (time_record.end == null) {
 								continue;
 							}
-						}
 
-						if (filter.sunday_work !=
-						    (month_info.get_weekday (record_start.get_day_of_month ()) == DateWeekday.SUNDAY)) {
-							continue;
-						}
+							record_start = time_record.start;
+							record_end = time_record.end;
 
-						/* Check if time record date is in range */
-						if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||
-						    (record_start.compare (range_end) != 1 && record_end.compare (range_start) == 1)) {
-							/* Get times of record and period */
-							var period_start = new DateTime.local (record_start.get_year (),
-							                                       record_start.get_month (),
-							                                       record_start.get_day_of_month (),
-							                                       time_start.hour, time_start.minute, 0);
-							var period_end = period_start.add_minutes (minutes);
+							if (month_info == null ||
+							    month_info.month != record_start.get_month () ||
+							    month_info.year != record_start.get_year ()) {
+								month_info = new MonthInfo (database,
+								                            record_start.get_year (),
+								                            record_start.get_month ());
+							}
 
-							/* Check if time record date is in period */
-							if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||
-							    (record_start.compare (period_end) != 1 && record_end.compare (period_start) == 1)) {
-								/* Get span of paid period */
-								var span_start = record_start.compare (period_start) == 1? record_start : period_start;
-								var span_end = record_end.compare (period_end) == -1? record_end : period_end;
+							if (filter.use_holiday_type) {
+								if (month_info.get_day_type (record_start.get_day_of_month ()) !=
+								    filter.holiday_type) {
+									continue;
+								}
+							}
 
-								double hours = span_end.difference (span_start)/TimeSpan.HOUR;
-								hours_span += Math.floor (hours/filter.period)*filter.period;
-								if (Math.floor ((hours + (filter.period/4)) / filter.period) >
-								    Math.floor (hours / filter.period)) {
-									hours_span += filter.period;
+							if (filter.sunday_work !=
+							    (month_info.get_weekday (record_start.get_day_of_month ()) == DateWeekday.SUNDAY)) {
+								continue;
+							}
+
+							/* Check if time record date is in range */
+							if ((record_start.compare (range_end) == -1 && record_end.compare (range_start) != -1) ||
+							    (record_start.compare (range_end) != 1 && record_end.compare (range_start) == 1)) {
+								/* Get times of record and period */
+								var period_start = new DateTime.local (record_start.get_year (),
+								                                       record_start.get_month (),
+								                                       record_start.get_day_of_month (),
+								                                       time_start.hour, time_start.minute, 0);
+								var period_end = period_start.add_minutes (minutes);
+
+								/* Check if time record date is in period */
+								if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||
+								    (record_start.compare (period_end) != 1 && record_end.compare (period_start) == 1)) {
+									/* Get span of paid period */
+									var span_start = record_start.compare (period_start) == 1? record_start : period_start;
+									var span_end = record_end.compare (period_end) == -1? record_end : period_end;
+
+									double hours = span_end.difference (span_start)/TimeSpan.HOUR;
+									hours_span += Math.floor (hours/filter.period)*filter.period;
+									if (Math.floor ((hours + (filter.period/4)) / filter.period) >
+									    Math.floor (hours / filter.period)) {
+										hours_span += filter.period;
+									}
+
 								}
 							}
 						}

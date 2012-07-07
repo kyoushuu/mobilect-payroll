@@ -52,7 +52,7 @@ namespace Mobilect {
 					filter.use_holiday_type = true;
 					filter.holiday_type = holiday_type;
 					filter.sunday_work = is_sunday_work;
-					filter.period = 1.0;
+					filter.period = periods[i].is_overtime? 1.0 : 4.0;
 					this.filters[i] = filter;
 				}
 			}

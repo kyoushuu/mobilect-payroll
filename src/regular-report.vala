@@ -97,13 +97,6 @@ namespace Mobilect {
 
 				/* Note: +10 for footer */
 				set_n_pages ((int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 10) / lines_per_page));
-
-				stdout.printf ("Pages: %d\n", (int) Math.ceil ((double) (num_lines + (lines_per_page - lines_first_page) + 10) / lines_per_page));
-				stdout.printf ("Lines in First Page: %d\n", lines_first_page);
-				stdout.printf ("Lines per Page: %d\n", lines_per_page);
-				stdout.printf ("Number of Lines: %d\n", num_lines);
-				stdout.printf ("Useable height in first page: %lf\n", height - header_height);
-				stdout.printf ("Line height: %lf\n", text_font_height + (padding * 2));
 			}
 
 			public void draw_page_handler (Gtk.PrintContext context, int page_nr) {
@@ -125,8 +118,6 @@ namespace Mobilect {
 					page_num_lines = num_lines - (id*2);
 				}
 				double table_content_height = (page_num_lines * (text_font_height + (padding * 2)));
-
-				stdout.printf ("page_num_lines: %d\n", page_num_lines);
 
 				double table_x, table_y;
 

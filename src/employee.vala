@@ -144,14 +144,6 @@ namespace Mobilect {
 				}
 			}
 
-			private DateTime date_time_marginalize (DateTime dt) {
-				int min = dt.get_minute ();
-
-				return dt
-					.add_seconds (-dt.get_seconds ())
-					.add_minutes (((int) Math.round (min / 30.0) * 30) - min);
-			}
-
 			public double get_hours (Filter filter) {
 				if (this.cached_filter != null &&
 				    filter.is_equal (this.cached_filter)) {
@@ -185,13 +177,6 @@ namespace Mobilect {
 							Time time_start = filter.time_periods[period].start;
 							Time time_end = filter.time_periods[period].end;
 
-							int minutes =
-								((time_end.hour * 60) + time_end.minute) -
-								((time_start.hour * 60) + time_start.minute);
-							if (minutes < 0) {
-								minutes += 24 * 60;
-							}
-
 							var range_start = new DateTime.local (date_start.get_year (),
 							                                      date_start.get_month (),
 							                                      date_start.get_day (),
@@ -200,6 +185,12 @@ namespace Mobilect {
 							                                    date_end.get_month (),
 							                                    date_end.get_day (),
 							                                    time_start.hour, time_start.minute, 0);
+							int minutes =
+								((time_end.hour * 60) + time_end.minute) -
+								((time_start.hour * 60) + time_start.minute);
+							if (minutes < 0) {
+								minutes += 24 * 60;
+							}
 							range_end = range_end.add_minutes (minutes);
 
 							var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
@@ -212,6 +203,15 @@ namespace Mobilect {
 							record_start = time_record.start;
 							record_end = time_record.end;
 
+							/* Used to make sure to get 'real' day info when period passes 12 midnight */
+							var record_start_dummy = record_start;
+							bool next_day = (range_start.get_hour () > range_end.get_hour () && record_start.get_day_of_month () == record_end.get_day_of_month ());
+							if (next_day) {
+								/* Already next day! */
+								record_start_dummy = record_start_dummy.add_days (-1);
+							}
+
+
 							if (month_info == null ||
 							    month_info.month != record_start.get_month () ||
 							    month_info.year != record_start.get_year ()) {
@@ -221,14 +221,14 @@ namespace Mobilect {
 							}
 
 							if (filter.use_holiday_type) {
-								if (month_info.get_day_type (record_start.get_day_of_month ()) !=
+								if (month_info.get_day_type (record_start_dummy.get_day_of_month ()) !=
 								    filter.holiday_type) {
 									continue;
 								}
 							}
 
 							if (filter.sunday_work !=
-							    (month_info.get_weekday (record_start.get_day_of_month ()) == DateWeekday.SUNDAY)) {
+							    (month_info.get_weekday (record_start_dummy.get_day_of_month ()) == DateWeekday.SUNDAY)) {
 								continue;
 							}
 
@@ -241,6 +241,12 @@ namespace Mobilect {
 								                                       record_start.get_day_of_month (),
 								                                       time_start.hour, time_start.minute, 0);
 								var period_end = period_start.add_minutes (minutes);
+
+								if (next_day) {
+									/* Already next day! */
+									period_start = period_start.add_days (-1);
+									period_end = period_end.add_days (-1);
+								}
 
 								/* Check if time record date is in period */
 								if ((record_start.compare (period_end) == -1 && record_end.compare (period_start) != -1) ||
@@ -255,7 +261,6 @@ namespace Mobilect {
 									    Math.floor (hours / filter.period)) {
 										hours_span += filter.period;
 									}
-
 								}
 							}
 						}

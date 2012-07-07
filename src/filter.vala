@@ -81,6 +81,11 @@ namespace Mobilect {
 					filter.time_periods[i] = this.time_periods[i].duplicate ();
 				}
 
+				filter.use_holiday_type = use_holiday_type;
+				filter.holiday_type = holiday_type;
+				filter.sunday_work = sunday_work;
+				filter.period = period;
+
 				return filter;
 			}
 

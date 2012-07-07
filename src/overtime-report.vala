@@ -67,22 +67,24 @@ namespace Mobilect {
 				                                            false,
 				                                            1.0,
 				                                            new TimePeriod[] {
-																new TimePeriod (new Time (8,0), new Time (17,0))
+																new TimePeriod (new Time (8,0), new Time (12,0)),
+																new TimePeriod (new Time (13,0), new Time (17,0))
 															});
 				var period_8am_5pm_sunday = new PayPeriod (_("8am-5pm"),
 				                                           false,
 				                                           1.3,
 				                                           new TimePeriod[] {
-															   new TimePeriod (new Time (8,0), new Time (17,0))
+															   new TimePeriod (new Time (8,0), new Time (12,0)),
+															   new TimePeriod (new Time (13,0), new Time (17,0))
 														   });
 				var period_5pm_10pm = new PayPeriod (_("5pm-10pm"),
-				                                     false,
+				                                     true,
 				                                     1.25,
 				                                     new TimePeriod[] {
 														 new TimePeriod (new Time (17,0), new Time (22,0))
 													 });
 				var period_10pm_6am = new PayPeriod (_("10pm-6am"),
-				                                     false,
+				                                     true,
 				                                     1.5,
 				                                     new TimePeriod[] {
 														 new TimePeriod (new Time (22,0), new Time (6,0))
@@ -100,6 +102,15 @@ namespace Mobilect {
 				};
 
 				pay_groups = new PayGroup[] {
+					new PayGroup (_("Non-Holiday"),
+					              false,
+					              MonthInfo.HolidayType.NON_HOLIDAY,
+					              1.0,
+					              new PayPeriod[] {
+									  period_5pm_10pm,
+									  period_10pm_6am
+								  },
+					              null),
 					new PayGroup (_("Sunday, Non-Holiday"),
 					              true,
 					              MonthInfo.HolidayType.NON_HOLIDAY,
@@ -194,15 +205,6 @@ namespace Mobilect {
 				pages_h = (int) Math.ceil (table_width / width);
 				set_n_pages (pages_v * pages_h);
 
-				stdout.printf ("Pages: %d\n", (int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 10) / lines_per_page));
-				stdout.printf ("Lines in First Page: %d\n", lines_first_page);
-				stdout.printf ("Lines per Page: %d\n", lines_per_page);
-				stdout.printf ("Number of Lines: %d\n", num_lines);
-				stdout.printf ("Useable height in first page: %lf\n", height - header_height);
-				stdout.printf ("Line height: %lf\n", text_font_height + (padding * 2));
-				stdout.printf ("Width: %lf\n", width);
-				stdout.printf ("Height: %lf\n", height);
-
 
 				double table_x, table_y;
 
@@ -223,18 +225,13 @@ namespace Mobilect {
 
 					int id = (((surface-1) * lines_per_page) + lines_first_page)/2;
 					int page_num_lines = lines_per_page;
-					stdout.printf ("page_num_lines: %d\n", page_num_lines);
 					if (surface == 0) {
 						id = 0;
 						page_num_lines = lines_first_page;
-					stdout.printf ("page_num_lines A: %d\n", page_num_lines);
 					} else if ((id + (page_num_lines/2)) > (num_lines/2)) {
 						page_num_lines = num_lines - (id*2);
-					stdout.printf ("page_num_lines B: %d\n", page_num_lines);
 					}
 					double table_content_height = (page_num_lines * (text_font_height + (padding * 2)));
-
-					stdout.printf ("page_num_lines: %d\n", page_num_lines);
 
 					if (surface == 0) {
 						/* Print out headers */
@@ -294,7 +291,7 @@ namespace Mobilect {
 							/* Date */
 							cr.move_to (x, table_top + padding);
 							layout.set_width (units_from_double (((hour_column_width + number_column_width) * pay_group.periods.length) + number_column_width - (padding * 2)));
-							layout.set_markup (_("DATE"), -1);
+							layout.set_markup (pay_group.name, -1);
 							cairo_show_layout (cr, layout);
 
 							foreach (var pay_period in pay_group.periods) {
@@ -447,7 +444,7 @@ namespace Mobilect {
 					for (int i = 0; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++) {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
 						/* Half-month salary - (salary per day times days without pay) */
-						double salary = 0, subtotal;
+						double salary = 0, subtotal, hours, pay, rate;
 
 						layout.set_height (units_from_double (text_font_height));
 
@@ -473,33 +470,48 @@ namespace Mobilect {
 						cr.rel_move_to (number_column_width, 0);
 
 						/* Hourly Rate */
-						layout.set_markup ("%.2lf".printf (employee.rate/(26*8)), -1);
+						rate = employee.rate/(26*8);
+						layout.set_markup ("%.2lf".printf (rate), -1);
 						cairo_show_layout (cr, layout);
 						cr.rel_move_to (number_column_width, 0);
 
 						foreach (var pay_group in pay_groups) {
-							foreach (var pay_period in pay_group.periods) {
+							subtotal = 0;
+
+							for (var j = 0; j < pay_group.periods.length; j++) {
+								var pay_period = pay_group.periods[j];
+								hours = employee.get_hours (pay_group.create_filter (j, start, end));
+								pay = hours * rate * ((pay_group.rate * pay_period.rate) - (pay_group.minus_period_rates != null? pay_group.minus_period_rates[j] : 0));
+								subtotal += pay;
+
 								/* Hour */
 								layout.set_width (units_from_double (hour_column_width - (padding * 2)));
-								layout.set_markup ("0", -1);
+								layout.set_markup ("%.0lf".printf (hours), -1);
 								cairo_show_layout (cr, layout);
 								cr.rel_move_to (hour_column_width, 0);
 
 								/* Subtotal */
 								layout.set_width (units_from_double (number_column_width - (padding * 2)));
-								layout.set_markup ("0.00", -1);
+								layout.set_markup ("%.2lf".printf (pay), -1);
 								cairo_show_layout (cr, layout);
 								cr.rel_move_to (number_column_width, 0);
 							}
 
+							salary += subtotal;
+
 							/* Subtotal each group */
 							layout.set_width (units_from_double (number_column_width - (padding * 2)));
-							layout.set_markup ("0.00", -1);
+							layout.set_markup ("%.2lf".printf (subtotal), -1);
 							cairo_show_layout (cr, layout);
 							cr.rel_move_to (number_column_width, 0);
 						}
 
-						layout.set_width (units_from_double (name_column_width));
+						/* Total */
+						layout.set_width (units_from_double (number_column_width - (padding * 2)));
+						layout.set_markup ("%.2lf".printf (salary), -1);
+						cairo_show_layout (cr, layout);
+
+						layout.set_width (units_from_double (name_column_width - (padding * 2)));
 
 						layout.set_font_description (number_font);
 						layout.set_alignment (Pango.Alignment.CENTER);
@@ -520,9 +532,8 @@ namespace Mobilect {
 				layout.set_wrap (Pango.WrapMode.WORD_CHAR);
 				layout.set_ellipsize (EllipsizeMode.END);
 
-				int page_h = page_nr % pages_v;
-				int page_v = page_nr / pages_v;
-				stdout.printf ("Page %d is (%d, %d)\n", page_nr, page_h, page_v);
+				int page_h = page_nr / pages_v;
+				int page_v = page_nr % pages_v;
 
 				cr.rectangle (0, 0, width, height);
 				cr.clip ();

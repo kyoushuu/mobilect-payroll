@@ -536,12 +536,17 @@ namespace Mobilect {
 				this.action_group.add_actions (actions, this);
 			}
 
-			private RegularReport create_report () {
-				var pr = new RegularReport (start_entry.get_date (), end_entry.get_date ());
+			private Report create_report () {
+				Report pr;
+				if (type_combo.active == 0) {
+					pr = new RegularReport (start_entry.get_date (), end_entry.get_date ());
+					(pr as RegularReport).deductions = deduc_view.model as ListStore;
+				} else {
+					pr = new OvertimeReport (start_entry.get_date (), end_entry.get_date ());
+				}
 				pr.title = _("SEMI-MONTHLY PAYROLL");
 				pr.employees = this.cpanel.window.app.database.get_employees ();
 				pr.default_page_setup = page_setup;
-				pr.deductions = deduc_view.model as ListStore;
 
 				if (settings != null) {
 					pr.print_settings = settings;

@@ -23,12 +23,13 @@ namespace Mobilect {
 
 		public class PayGroup : Object {
 
-			public string name { get; set; }
-			public bool is_sunday_work { get; set; }
-			public MonthInfo.HolidayType holiday_type { get; set; }
-			public double rate { get; set; }
-			public PayPeriod[] periods { get; set; }
-			public double[] minus_period_rates { get; set; }
+			public string name { get; private set; }
+			public bool is_sunday_work { get; private set; }
+			public MonthInfo.HolidayType holiday_type { get; private set; }
+			public double rate { get; private set; }
+			public PayPeriod[] periods { get; private set; }
+			public double[] minus_period_rates { get; private set; }
+			public Filter[] filters { get; private set; }
 
 
 			public PayGroup (string name,
@@ -43,6 +44,24 @@ namespace Mobilect {
 				this.rate = rate;
 				this.periods = periods;
 				this.minus_period_rates = minus_period_rates;
+				this.filters = new Filter[periods.length];
+
+				for (int i = 0; i < periods.length; i++) {
+					var filter = new Filter ();
+					filter.time_periods = periods[i].time_periods;
+					filter.use_holiday_type = true;
+					filter.holiday_type = holiday_type;
+					filter.sunday_work = is_sunday_work;
+					filter.period = 1.0;
+					this.filters[i] = filter;
+				}
+			}
+
+			public Filter create_filter (int period, Date start, Date end) requires (period >= 0 && period < periods.length) {
+				var filter = this.filters[period].duplicate ();
+				filter.date_start = start;
+				filter.date_end = end;
+				return filter;
 			}
 
 		}

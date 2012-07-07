@@ -23,10 +23,10 @@ namespace Mobilect {
 
 		public class PayPeriod : Object {
 
-			public string name { get; set; }
-			public bool is_overtime { get; set; }
-			public double rate { get; set; }
-			public TimePeriod[] time_periods { get; set; }
+			public string name { get; private set; }
+			public bool is_overtime { get; private set; }
+			public double rate { get; private set; }
+			public TimePeriod[] time_periods { get; private set; }
 
 
 			public PayPeriod (string name,

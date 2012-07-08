@@ -310,7 +310,7 @@ namespace Mobilect {
 					                                          "  SET lastname=##lastname::string," +
 					                                          "    firstname=##firstname::string," +
 					                                          "    middlename=##middlename::string," +
-					                                          "    tib=##tin::string," +
+					                                          "    tin=##tin::string," +
 					                                          "    rate=##rate::int" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);

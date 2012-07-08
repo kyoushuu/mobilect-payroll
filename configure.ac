@@ -26,7 +26,7 @@ dnl ***************************************************************************
 dnl Internationalization
 dnl ***************************************************************************
 
-GETTEXT_PACKAGE=AC_PACKAGE_NAME
+GETTEXT_PACKAGE=AC_PACKAGE_TARNAME
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
 AM_GLIB_GNU_GETTEXT

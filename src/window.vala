@@ -96,7 +96,7 @@ namespace Mobilect {
 							                   "license", license,
 							                   "wrap-license", true,
 							                   "authors", authors,
-							                   "logo-icon-name", PACKAGE_NAME);
+							                   "logo-icon-name", PACKAGE);
 						}
 					}
 				};

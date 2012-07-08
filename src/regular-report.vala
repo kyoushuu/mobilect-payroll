@@ -389,7 +389,7 @@ namespace Mobilect {
 
 					/* TIN No. */
 					cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * ((2 * i) + 1)));
-					layout.set_markup ("XXX-XXX-XXX", -1);
+					layout.set_markup (employee.tin, -1);
 					cairo_show_layout (cr, layout);
 					cr.rel_move_to (0, (text_font_height + (padding * 2)));
 				}

@@ -43,6 +43,7 @@ namespace Mobilect {
 				});
 
 				tree_view = new TreeView ();
+				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.row_activated.connect ((t, p, c) => {
 					edit ();
 				});
@@ -94,7 +95,7 @@ namespace Mobilect {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
 						label = _("_Add"),
-						accelerator = _("<Control>A"),
+						accelerator = _("<Control>plus"),
 						tooltip = _("Add an administrator to database"),
 						callback = (a) => {
 							var administrator = new Administrator (0, list.database);
@@ -142,31 +143,36 @@ namespace Mobilect {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
 						label = _("_Remove"),
-						accelerator = _("<Control>R"),
-						tooltip = _("Remove the selected administrator from database"),
+						accelerator = _("<Control>minus"),
+						tooltip = _("Remove the selected administrators from database"),
 						callback = (a) => {
-							TreeIter iter;
-							Administrator administrator;
+							var selection = tree_view.get_selection ();
+							int selected_count = selection.count_selected_rows ();
 
-							if (tree_view.get_selection ().get_selected (null, out iter)) {
-								this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
+							if (selected_count > 0) {
 								var m_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.INFO,
 								                                  ButtonsType.YES_NO,
-								                                  _("Are you sure you want to remove the selected administrator? The changes will be permanent."));
+								                                  ngettext("Are you sure you want to remove the selected administrator?",
+								                                           "Are you sure you want to remove the %d selected administrators?",
+								                                           selected_count).printf (selected_count) + " " +
+								                                  _("The changes will be permanent."));
 
 								if (m_dialog.run () == ResponseType.YES) {
-									try {
-										administrator.remove ();
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-															              MessageType.ERROR, ButtonsType.CLOSE,
-															              _("Error: %s"), e.message);
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
-
+									selection.selected_foreach ((m, p, i) => {
+										Administrator administrator;
+										this.list.get (i, AdministratorList.Columns.OBJECT, out administrator);
+										try {
+											administrator.remove ();
+										} catch (ApplicationError e) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Error: %s"), e.message);
+											e_dialog.run ();
+											e_dialog.destroy ();
+										}
+									});
 									reload ();
 								}
 
@@ -187,7 +193,7 @@ namespace Mobilect {
 						stock_id = Stock.EDIT,
 						label = _("_Edit"),
 						accelerator = _("<Control>E"),
-						tooltip = _("Edit information about the selected administrator"),
+						tooltip = _("Edit information about the selected administrators"),
 						callback = (a) => {
 							edit ();
 						}
@@ -196,38 +202,42 @@ namespace Mobilect {
 						name = ACTION_PASSWORD,
 						stock_id = Stock.PROPERTIES,
 						label = _("_Change Password"),
-						tooltip = _("Change password of selected administrator"),
+						tooltip = _("Change password of selected administrators"),
 						callback = (a) => {
-							TreeIter iter;
-							Administrator administrator;
+							var selection = tree_view.get_selection ();
+							int selected_count = selection.count_selected_rows ();
 
-							if (tree_view.get_selection ().get_selected (null, out iter)) {
-								this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
-								var dialog = new PasswordDialog (_("Change Administrator Password"),
-									                              this.cpanel.window);
+							if (selected_count > 0) {
+								selection.selected_foreach ((m, p, i) => {
+									Administrator administrator;
+									this.list.get (i, AdministratorList.Columns.OBJECT, out administrator);
 
-								dialog.response.connect((d, r) => {
-									if (r == ResponseType.ACCEPT) {
-										var password = dialog.widget.get_password ();
+									var dialog = new PasswordDialog (_("Change Administrator Password"),
+									                                 this.cpanel.window);
 
-										if (password != null) {
-											try {
-												administrator.change_password (password);
-											} catch (ApplicationError e) {
-												var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-																			      MessageType.ERROR, ButtonsType.CLOSE,
-																			      _("Error: %s"), e.message);
-												e_dialog.run ();
-												e_dialog.destroy ();
+									dialog.response.connect((d, r) => {
+										if (r == ResponseType.ACCEPT) {
+											var password = dialog.widget.get_password ();
+
+											if (password != null) {
+												try {
+													administrator.change_password (password);
+												} catch (ApplicationError e) {
+													var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+													                                  MessageType.ERROR, ButtonsType.CLOSE,
+													                                  _("Error: %s"), e.message);
+													e_dialog.run ();
+													e_dialog.destroy ();
+												}
+											} else {
+												return;
 											}
-										} else {
-											return;
 										}
-									}
 
-									d.destroy ();
+										d.destroy ();
+									});
+									dialog.show_all ();
 								});
-								dialog.show_all ();
 							} else {
 								var e_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
@@ -246,7 +256,7 @@ namespace Mobilect {
 				this.action_group.get_action (ACTION_EDIT).sensitive = false;
 				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
-					var selected = tree_view.get_selection ().get_selected (null, null);
+					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
 					this.action_group.get_action (ACTION_PASSWORD).sensitive = selected;
@@ -254,11 +264,13 @@ namespace Mobilect {
 			}
 
 			public void edit () {
-				TreeIter iter;
-				Administrator administrator;
+				var selection = tree_view.get_selection ();
+				int selected_count = selection.count_selected_rows ();
 
-				if (tree_view.get_selection ().get_selected (null, out iter)) {
-					this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
+				if (selected_count > 0) {
+					selection.selected_foreach ((m, p, i) => {
+					Administrator administrator;
+					this.list.get (i, AdministratorList.Columns.OBJECT, out administrator);
 
 					var dialog = new AdministratorEditDialog (_("Administrator \"%s\" Properties").printf (administrator.username),
 					                                          this.cpanel.window,
@@ -277,6 +289,7 @@ namespace Mobilect {
 						d.destroy ();
 					});
 					dialog.show_all ();
+				});
 				} else {
 					var e_dialog = new MessageDialog (this.cpanel.window,
 					                                  DialogFlags.MODAL,

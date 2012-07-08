@@ -1,30 +1,43 @@
 # List of source files containing translatable strings.
-# Copyright (c) 2012  Mobilect Power Corp.
 
-# Should use C source file, because of multi-line license string
+
+src/administrator-edit-dialog.c
+src/administrator-edit-widget.c
+src/administrator-list.c
+src/administrator.c
+src/admin-login-page.c
+src/application.c
+src/cpanel-administrators.c
+src/cpanel-employees.c
+src/cpanel-holidays.c
+src/cpanel-preferences.c
+src/cpanel-report.c
+src/cpanel-tab.c
+src/cpanel-time-records.c
+src/cpanel.c
+src/database.c
+src/date-entry.c
+src/date-time-entry.c
+src/employee-edit-dialog.c
+src/employee-edit-widget.c
+src/employee-list.c
+src/employee-login-page.c
+src/employee.c
+src/filter.c
+src/login-page.c
+src/mobilect-payroll.c
+src/month-info.c
+src/overtime-report.c
+src/password-dialog.c
+src/password-widget.c
+src/pay-group.c
+src/pay-period.c
+src/regular-report.c
+src/report.c
+src/time-period.c
+src/time-record-edit-dialog.c
+src/time-record-edit-widget.c
+src/time-record-list.c
+src/time-record.c
+src/time.c
 src/window.c
-
-# Vala sources
-src/admin-login-page.vala
-src/application.vala
-src/cpanel-administrators.vala
-src/cpanel-employees.vala
-src/cpanel-preferences.vala
-src/cpanel-tab.vala
-src/cpanel-time-records.vala
-src/cpanel.vala
-src/database.vala
-src/date-time-entry.vala
-src/employee-edit-dialog.vala
-src/employee-edit-widget.vala
-src/employee-list.vala
-src/employee-login-page.vala
-src/employee.vala
-src/login-page.vala
-src/mobilect-payroll.vala
-src/mobilect_payroll_vala.stamp
-src/time-record-edit-dialog.vala
-src/time-record-edit-widget.vala
-src/time-record-list.vala
-src/time-record.vala
-# src/window.vala

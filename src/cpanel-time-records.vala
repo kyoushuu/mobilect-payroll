@@ -52,6 +52,7 @@ namespace Mobilect {
 				vbox.pack_start (sw, true, true, 0);
 
 				tree_view = new TreeView ();
+				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.row_activated.connect ((t, p, c) => {
 					edit ();
 				});
@@ -150,8 +151,8 @@ namespace Mobilect {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
 						label = _("_Add"),
-						accelerator = _("<Control>A"),
-						tooltip = _("Add an time record to database"),
+						accelerator = _("<Control>plus"),
+						tooltip = _("Add a time record to database"),
 						callback = (a) => {
 							var database = this.cpanel.window.app.database;
 							var time_record = new TimeRecord (0, database, null);
@@ -199,31 +200,36 @@ namespace Mobilect {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
 						label = _("_Remove"),
-						accelerator = _("<Control>R"),
-						tooltip = _("Remove the selected time record from database"),
+						accelerator = _("<Control>minus"),
+						tooltip = _("Remove the selected time records from database"),
 						callback = (a) => {
-							TreeIter iter;
-							TimeRecord time_record;
+							var selection = tree_view.get_selection ();
+							int selected_count = selection.count_selected_rows ();
 
-							if (tree_view.get_selection ().get_selected (null, out iter)) {
-								this.list.get (iter, TimeRecordList.Columns.OBJECT, out time_record);
+							if (selected_count > 0) {
 								var m_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.INFO,
 								                                  ButtonsType.YES_NO,
-								                                  _("Are you sure you want to remove the selected time record? The changes will be permanent."));
+								                                  ngettext("Are you sure you want to remove the selected time record?",
+								                                           "Are you sure you want to remove the %d selected time records?",
+								                                           selected_count).printf (selected_count) + " " +
+								                                  _("The changes will be permanent."));
 
 								if (m_dialog.run () == ResponseType.YES) {
-									try {
-										time_record.remove ();
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  _("Error: %s"), e.message);
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
-
+									selection.selected_foreach ((m, p, i) => {
+										TimeRecord time_record;
+										this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
+										try {
+											time_record.remove ();
+										} catch (ApplicationError e) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Error: %s"), e.message);
+											e_dialog.run ();
+											e_dialog.destroy ();
+										}
+									});
 									this.list = null;
 									this.tree_view.model = null;
 
@@ -246,7 +252,7 @@ namespace Mobilect {
 						stock_id = Stock.EDIT,
 						label = _("_Edit"),
 						accelerator = _("<Control>E"),
-						tooltip = _("Edit information about the selected time record"),
+						tooltip = _("Edit information about the selected time records"),
 						callback = (a) => {
 							edit ();
 						}
@@ -257,38 +263,41 @@ namespace Mobilect {
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
 				this.action_group.get_action (ACTION_EDIT).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
-					var selected = tree_view.get_selection ().get_selected (null, null);
+					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
 				});
 			}
 
 			public void edit () {
-				TreeIter iter;
-				TimeRecord time_record;
+				var selection = tree_view.get_selection ();
+				int selected_count = selection.count_selected_rows ();
 
-				if (tree_view.get_selection ().get_selected (null, out iter)) {
-					this.list.get (iter, TimeRecordList.Columns.OBJECT, out time_record);
+				if (selected_count > 0) {
+					selection.selected_foreach ((m, p, i) => {
+						TimeRecord time_record;
+						this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
 
-					var dialog = new TimeRecordEditDialog (_("Time Record Properties"),
-					                                       this.cpanel.window,
-					                                       time_record);
-					dialog.response.connect ((d, r) => {
-						if (r == ResponseType.ACCEPT) {
-							try {
-								dialog.time_record.update ();
-							} catch (Error e) {
-								stderr.printf (_("Error: %s\n"), e.message);
+						var dialog = new TimeRecordEditDialog (_("Time Record Properties"),
+						                                       this.cpanel.window,
+						                                       time_record);
+						dialog.response.connect ((d, r) => {
+							if (r == ResponseType.ACCEPT) {
+								try {
+									dialog.time_record.update ();
+								} catch (Error e) {
+									stderr.printf (_("Error: %s\n"), e.message);
+								}
+
+								this.list = null;
+								this.tree_view.model = null;
 							}
 
-							this.list = null;
-							this.tree_view.model = null;
+							d.destroy ();
+						});
 
-						}
-
-						d.destroy ();
+						dialog.show_all ();
 					});
-					dialog.show_all ();
 				} else {
 					var e_dialog = new MessageDialog (this.cpanel.window,
 					                                  DialogFlags.MODAL,

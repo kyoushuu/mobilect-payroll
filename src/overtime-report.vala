@@ -518,7 +518,7 @@ namespace Mobilect {
 
 						/* TIN No. */
 						cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * ((2 * i) + 1)));
-						layout.set_markup ("XXX-XXX-XXX", -1);
+						layout.set_markup (employee.tin, -1);
 						cairo_show_layout (cr, layout);
 						cr.rel_move_to (0, (text_font_height + (padding * 2)));
 					}
@@ -532,8 +532,8 @@ namespace Mobilect {
 				layout.set_wrap (Pango.WrapMode.WORD_CHAR);
 				layout.set_ellipsize (EllipsizeMode.END);
 
-				int page_h = page_nr / pages_v;
-				int page_v = page_nr % pages_v;
+				int page_h = page_nr % pages_h;
+				int page_v = page_nr / pages_h;
 
 				cr.rectangle (0, 0, width, height);
 				cr.clip ();

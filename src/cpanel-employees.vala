@@ -48,6 +48,7 @@ namespace Mobilect {
 				});
 
 				tree_view = new TreeView ();
+				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.row_activated.connect ((t, p, c) => {
 					edit ();
 				});
@@ -136,7 +137,7 @@ namespace Mobilect {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
 						label = _("_Add"),
-						accelerator = _("<Control>A"),
+						accelerator = _("<Control>plus"),
 						tooltip = _("Add an employee to database"),
 						callback = (a) => {
 							var employee = new Employee (0, list.database);
@@ -188,30 +189,37 @@ namespace Mobilect {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
 						label = _("_Remove"),
-						accelerator = _("<Control>R"),
-						tooltip = _("Remove the selected employee from database"),
+						accelerator = _("<Control>minus"),
+						tooltip = _("Remove the selected employees from database"),
 						callback = (a) => {
-							TreeIter iter;
-							Employee employee;
+							var selection = tree_view.get_selection ();
+							int selected_count = selection.count_selected_rows ();
 
-							if (tree_view.get_selection ().get_selected (null, out iter)) {
-								this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
+							if (selected_count > 0) {
 								var m_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.INFO,
 								                                  ButtonsType.YES_NO,
-								                                  _("Are you sure you want to remove the selected employee? The changes will be permanent."));
+								                                  ngettext("Are you sure you want to remove the selected employee?",
+								                                           "Are you sure you want to remove the %d selected employees?",
+								                                           selected_count).printf (selected_count) + " " +
+								                                  _("The changes will be permanent."));
 
 								if (m_dialog.run () == ResponseType.YES) {
-									try {
-										employee.remove ();
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-															              MessageType.ERROR, ButtonsType.CLOSE,
-															              _("Error: %s"), e.message);
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
+									selection.selected_foreach ((m, p, i) => {
+										Employee employee;
+										this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
+
+										try {
+											employee.remove ();
+										} catch (ApplicationError e) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Error: %s"), e.message);
+											e_dialog.run ();
+											e_dialog.destroy ();
+										}
+									});
 
 									reload ();
 								}
@@ -233,7 +241,7 @@ namespace Mobilect {
 						stock_id = Stock.EDIT,
 						label = _("_Edit"),
 						accelerator = _("<Control>E"),
-						tooltip = _("Edit information about the selected employee"),
+						tooltip = _("Edit information about the selected employees"),
 						callback = (a) => {
 							edit ();
 						}
@@ -242,38 +250,42 @@ namespace Mobilect {
 						name = ACTION_PASSWORD,
 						stock_id = Stock.PROPERTIES,
 						label = _("_Change Password"),
-						tooltip = _("Change password of selected employee"),
+						tooltip = _("Change password of selected employees"),
 						callback = (a) => {
-							TreeIter iter;
-							Employee employee;
+							var selection = tree_view.get_selection ();
+							int selected_count = selection.count_selected_rows ();
 
-							if (tree_view.get_selection ().get_selected (null, out iter)) {
-								this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
-								var dialog = new PasswordDialog (_("Change Employee Password"),
-									                              this.cpanel.window);
+							if (selected_count > 0) {
+								selection.selected_foreach ((m, p, i) => {
+									Employee employee;
+									this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
 
-								dialog.response.connect((d, r) => {
-									if (r == ResponseType.ACCEPT) {
-										var password = dialog.widget.get_password ();
+									var dialog = new PasswordDialog (_("Change Employee Password"),
+									                                 this.cpanel.window);
 
-										if (password != null) {
-											try {
-												employee.change_password (password);
-											} catch (ApplicationError e) {
-												var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-																			      MessageType.ERROR, ButtonsType.CLOSE,
-																			      _("Error: %s"), e.message);
-												e_dialog.run ();
-												e_dialog.destroy ();
+									dialog.response.connect((d, r) => {
+										if (r == ResponseType.ACCEPT) {
+											var password = dialog.widget.get_password ();
+
+											if (password != null) {
+												try {
+													employee.change_password (password);
+												} catch (ApplicationError e) {
+													var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+													                                  MessageType.ERROR, ButtonsType.CLOSE,
+													                                  _("Error: %s"), e.message);
+													e_dialog.run ();
+													e_dialog.destroy ();
+												}
+											} else {
+												return;
 											}
-										} else {
-											return;
 										}
-									}
 
-									d.destroy ();
+										d.destroy ();
+									});
+									dialog.show_all ();
 								});
-								dialog.show_all ();
 							} else {
 								var e_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
@@ -290,7 +302,7 @@ namespace Mobilect {
 						stock_id = Stock.PRINT,
 						label = _("_Print"),
 						accelerator = _("<Control>P"),
-						tooltip = _("Print information about each employees for the current period selected"),
+						tooltip = _("Print information about each selected employees"),
 						callback = (a) => {
 						}
 					},
@@ -299,7 +311,7 @@ namespace Mobilect {
 						stock_id = Stock.PRINT_PREVIEW,
 						label = _("Print Previe_w"),
 						accelerator = _("<Shift><Control>P"),
-						tooltip = _("Show print preview of information about each employees for the current period selected"),
+						tooltip = _("Show print preview of information about each selected employees"),
 						callback = (a) => {
 						}
 					}
@@ -310,7 +322,7 @@ namespace Mobilect {
 				this.action_group.get_action (ACTION_EDIT).sensitive = false;
 				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
-					var selected = tree_view.get_selection ().get_selected (null, null);
+					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
 					this.action_group.get_action (ACTION_PASSWORD).sensitive = selected;
@@ -318,29 +330,32 @@ namespace Mobilect {
 			}
 
 			public void edit () {
-				TreeIter iter;
-				Employee employee;
+				var selection = tree_view.get_selection ();
+				int selected_count = selection.count_selected_rows ();
 
-				if (tree_view.get_selection ().get_selected (null, out iter)) {
-					this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
+				if (selected_count > 0) {
+					selection.selected_foreach ((m, p, i) => {
+						Employee employee;
+						this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
 
-					var dialog = new EmployeeEditDialog (_("Employee \"%s\" Properties").printf (employee.get_name ()),
-					                                     this.cpanel.window,
-					                                     employee);
-					dialog.response.connect ((d, r) => {
-						if (r == ResponseType.ACCEPT) {
-							try {
-								dialog.employee.update ();
-							} catch (Error e) {
-								stderr.printf (_("Error: %s\n"), e.message);
+						var dialog = new EmployeeEditDialog (_("Employee \"%s\" Properties").printf (employee.get_name ()),
+						                                     this.cpanel.window,
+						                                     employee);
+						dialog.response.connect ((d, r) => {
+							if (r == ResponseType.ACCEPT) {
+								try {
+									dialog.employee.update ();
+								} catch (Error e) {
+									stderr.printf (_("Error: %s\n"), e.message);
+								}
+
+								reload ();
 							}
 
-							reload ();
-						}
-
-						d.destroy ();
+							d.destroy ();
+						});
+						dialog.show_all ();
 					});
-					dialog.show_all ();
 				} else {
 					var e_dialog = new MessageDialog (this.cpanel.window,
 					                                  DialogFlags.MODAL,

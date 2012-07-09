@@ -46,5 +46,8 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 vapi/Makefile
+data/Makefile
+data/mobilect-payroll.desktop.in
+data/icons/Makefile
 po/Makefile.in
 ])

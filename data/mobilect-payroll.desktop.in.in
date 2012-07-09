@@ -1,0 +1,9 @@
+[Desktop Entry]
+_Name=Mobilect Payroll
+_Comment=Payroll Application of Mobilect Power Corp.
+Exec=mobilect-payroll
+TryExec=mobilect-payroll
+Terminal=false
+Type=Application
+Icon=mobilect-payroll
+Categories=GNOME;Office;

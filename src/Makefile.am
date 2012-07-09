@@ -86,3 +86,16 @@ mobilect_payroll_LDADD = \
 	$(GDA_LIBS) \
 	$(XML_LIBS) \
 	$(GEE_LIBS)
+
+
+if NATIVE_WIN32
+mobilect_payroll_LDFLAGS = -mwindows
+mobilect_payroll_LDADD += mobilect-payroll-win32-res.o
+endif
+
+mobilect-payroll-win32-res.o: mobilect-payroll.rc
+	$(WINDRES) $< $@
+
+EXTRA_DIST = \
+	mobilect-payroll.rc.in
+

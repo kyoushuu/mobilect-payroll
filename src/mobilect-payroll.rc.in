@@ -1,0 +1,29 @@
+#include <winver.h>                      
+
+MOBILECT_PAYROLL_ICON	ICON		"../data/icons/mobilect-payroll.ico"
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION     @MOBILECT_PAYROLL_MAJOR_VERSION@,@MOBILECT_PAYROLL_MINOR_VERSION@,@MOBILECT_PAYROLL_MICRO_VERSION@,0
+  PRODUCTVERSION  @MOBILECT_PAYROLL_MAJOR_VERSION@,@MOBILECT_PAYROLL_MINOR_VERSION@,@MOBILECT_PAYROLL_MICRO_VERSION@,0
+  FILEOS          VOS__WINDOWS32
+  FILETYPE        VFT_APP
+  BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+      BLOCK "040904B0"
+      BEGIN
+        VALUE "CompanyName", "Mobilect Power Corp."
+        VALUE "FileDescription", "Mobilect Payroll @MOBILECT_PAYROLL_VERSION@"
+        VALUE "FileVersion", "@MOBILECT_PAYROLL_VERSION@.0"
+        VALUE "LegalCopyright", "Copyright © 2012 Mobilect Power Corp."
+        VALUE "OriginalFilename", "mobilect-payroll.exe"
+        VALUE "ProductName", "Mobilect Payroll"
+        VALUE "ProductVersion", "@MOBILECT_PAYROLL_VERSION@.0"
+      END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+      VALUE "Translation", 0x409, 1200
+    END
+  END
+

@@ -70,9 +70,6 @@ AM_SILENT_RULES([yes])
 AC_PROG_CC
 
 
-LT_INIT
-
-
 dnl Check for vala
 AM_PROG_VALAC([0.10.0])
 

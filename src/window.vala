@@ -66,10 +66,19 @@ namespace Mobilect {
 						label = _("_Help")
 					},
 					Gtk.ActionEntry () {
+						name = "help-contents",
+						label = _("_Contents"),
+						stock_id = Stock.HELP,
+						accelerator = _("F1"),
+						tooltip = _("Open manual"),
+						callback = (a) => {
+							app.show_help (null, null);
+						}
+					},
+					Gtk.ActionEntry () {
 						name = "help-about",
 						stock_id = Stock.ABOUT,
-						accelerator = _("F1"),
-						tooltip = _("About"),
+						tooltip = _("About this application"),
 						callback = (a) => {
 							string[] authors = {"Arnel A. Borja <kyoushuu@yahoo.com>", null};
 							string license = _("This program is free software; you can redistribute it and/or modify " +
@@ -114,6 +123,8 @@ namespace Mobilect {
 					"    </menu>" +
 					"    <placeholder name=\"MenuAdditions\" />" +
 					"    <menu name=\"HelpMenu\" action=\"help\">" +
+					"      <menuitem name=\"Contents\" action=\"help-contents\"/>" +
+					"      <separator/>" +
 					"      <placeholder name=\"HelpMenuAdditions\" />" +
 					"      <separator/>" +
 					"      <menuitem name=\"About\" action=\"help-about\"/>" +

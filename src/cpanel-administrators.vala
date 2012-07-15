@@ -127,7 +127,8 @@ namespace Mobilect {
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 															              MessageType.ERROR, ButtonsType.CLOSE,
-															              _("Error: %s"), e.message);
+															              _("Failed to add administrator."));
+										e_dialog.secondary_text = e.message;
 										e_dialog.run ();
 										e_dialog.destroy ();
 									}
@@ -156,6 +157,7 @@ namespace Mobilect {
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
 								                                  _("No administrator selected."));
+								e_dialog.secondary_text = _("Select atleast one administrator first.");
 								e_dialog.run ();
 								e_dialog.destroy ();
 
@@ -167,7 +169,10 @@ namespace Mobilect {
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
-								                                  _("There should be atleast one administrator."));
+								                                  ngettext("Can't remove selected administrator.",
+								                                           "Can't remove selected administrators.",
+								                                           selected_count));
+								e_dialog.secondary_text = _("There should be atleast one administrator.");
 								e_dialog.run ();
 								e_dialog.destroy ();
 
@@ -180,8 +185,8 @@ namespace Mobilect {
 							                                  ButtonsType.YES_NO,
 							                                  ngettext("Are you sure you want to remove the selected administrator?",
 							                                           "Are you sure you want to remove the %d selected administrators?",
-							                                           selected_count).printf (selected_count) + " " +
-							                                  _("The changes will be permanent."));
+							                                           selected_count).printf (selected_count));
+							m_dialog.secondary_text = _("The changes will be permanent.");
 
 							if (m_dialog.run () == ResponseType.YES) {
 								selection.selected_foreach ((m, p, i) => {
@@ -192,7 +197,10 @@ namespace Mobilect {
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  _("Error: %s"), e.message);
+										                                  ngettext("Failed to remove selected administrator.",
+										                                           "Failed to remove selected administrators.",
+										                                           selected_count));
+										e_dialog.secondary_text = e.message;
 										e_dialog.run ();
 										e_dialog.destroy ();
 									}
@@ -228,6 +236,7 @@ namespace Mobilect {
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
 								                                  _("No administrator selected."));
+								e_dialog.secondary_text = _("Select atleast one administrator first.");
 								e_dialog.run ();
 								e_dialog.destroy ();
 
@@ -245,18 +254,26 @@ namespace Mobilect {
 									if (r == ResponseType.ACCEPT) {
 										var password = dialog.widget.get_password ();
 
-										if (password != null) {
-											try {
-												administrator.change_password (password);
-											} catch (ApplicationError e) {
-												var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-												                                  MessageType.ERROR, ButtonsType.CLOSE,
-												                                  _("Error: %s"), e.message);
-												e_dialog.run ();
-												e_dialog.destroy ();
-											}
-										} else {
+										if (password == null) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Failed to change password."));
+											e_dialog.secondary_text = _("Passwords didn't match.");
+											e_dialog.run ();
+											e_dialog.destroy ();
+
 											return;
+										}
+
+										try {
+											administrator.change_password (password);
+										} catch (ApplicationError e) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Failed to change password."));
+											e_dialog.secondary_text = e.message;
+											e_dialog.run ();
+											e_dialog.destroy ();
 										}
 									}
 
@@ -290,6 +307,7 @@ namespace Mobilect {
 					                                  MessageType.ERROR,
 					                                  ButtonsType.OK,
 					                                  _("No administrator selected."));
+					e_dialog.secondary_text = _("Select atleast one administrator first.");
 					e_dialog.run ();
 					e_dialog.destroy ();
 

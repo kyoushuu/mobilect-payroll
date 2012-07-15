@@ -502,7 +502,8 @@ namespace Mobilect {
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
-								                                  e.message);
+								                                  _("Failed to print report."));
+								e_dialog.secondary_text = e.message;
 								e_dialog.run ();
 								e_dialog.destroy ();
 							}
@@ -526,7 +527,8 @@ namespace Mobilect {
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
-								                                  e.message);
+								                                  _("Failed to preview report."));
+								e_dialog.secondary_text = e.message;
 								e_dialog.run ();
 								e_dialog.destroy ();
 							}
@@ -566,7 +568,8 @@ namespace Mobilect {
 									                                  DialogFlags.MODAL,
 									                                  MessageType.ERROR,
 									                                  ButtonsType.OK,
-									                                  e.message);
+									                                  _("Failed to export report."));
+									e_dialog.secondary_text = e.message;
 									e_dialog.run ();
 									e_dialog.destroy ();
 								}

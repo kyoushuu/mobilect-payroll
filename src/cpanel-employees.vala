@@ -37,8 +37,6 @@ namespace Mobilect {
 			public const string ACTION_REMOVE = "cpanel-employees-remove";
 			public const string ACTION_EDIT = "cpanel-employees-edit";
 			public const string ACTION_PASSWORD = "cpanel-employees-password";
-			public const string ACTION_PRINT = "cpanel-employees-print";
-			public const string ACTION_PRINT_PREVIEW = "cpanel-employees-print-preview";
 
 			public CPanelEmployees (CPanel cpanel) {
 				base (cpanel, ACTION);
@@ -104,9 +102,6 @@ namespace Mobilect {
 					"          <separator />" +
 					"          <menuitem name=\"EditEmployee\" action=\"" + ACTION_EDIT + "\" />" +
 					"          <menuitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
-					"          <separator />" +
-					"          <menuitem name=\"PrintEmployee\" action=\"" + ACTION_PRINT + "\" />" +
-					"          <menuitem name=\"PrintPreviewEmployee\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
 					"        </menu>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -119,9 +114,6 @@ namespace Mobilect {
 					"          <toolitem name=\"RemoveEmployee\" action=\"" + ACTION_REMOVE + "\" />" +
 					"          <toolitem name=\"EditEmployee\" action=\"" + ACTION_EDIT + "\" />" +
 					"          <toolitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
-					"          <separator />" +
-					"          <toolitem name=\"PrintEmployee\" action=\"" + ACTION_PRINT + "\" />" +
-					"          <toolitem name=\"PrintPreviewEmployee\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
 					"        </placeholder>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -173,7 +165,8 @@ namespace Mobilect {
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 															              MessageType.ERROR, ButtonsType.CLOSE,
-															              _("Error: %s"), e.message);
+															              _("Failed to add employee."));
+										e_dialog.secondary_text = e.message;
 										e_dialog.run ();
 										e_dialog.destroy ();
 									}
@@ -202,6 +195,7 @@ namespace Mobilect {
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
 								                                  _("No employee selected."));
+								e_dialog.secondary_text = _("Select atleast one employee first.");
 								e_dialog.run ();
 								e_dialog.destroy ();
 
@@ -214,8 +208,8 @@ namespace Mobilect {
 							                                  ButtonsType.YES_NO,
 							                                  ngettext("Are you sure you want to remove the selected employee?",
 							                                           "Are you sure you want to remove the %d selected employees?",
-							                                           selected_count).printf (selected_count) + " " +
-							                                  _("The changes will be permanent."));
+							                                           selected_count).printf (selected_count));
+							m_dialog.secondary_text = _("The changes will be permanent.");
 
 							if (m_dialog.run () == ResponseType.YES) {
 								selection.selected_foreach ((m, p, i) => {
@@ -227,7 +221,10 @@ namespace Mobilect {
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  _("Error: %s"), e.message);
+										                                  ngettext("Failed to remove selected employee.",
+										                                           "Failed to remove selected employees.",
+										                                           selected_count));
+										e_dialog.secondary_text = e.message;
 										e_dialog.run ();
 										e_dialog.destroy ();
 									}
@@ -264,6 +261,7 @@ namespace Mobilect {
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
 								                                  _("No employee selected."));
+								e_dialog.secondary_text = _("Select atleast one employee first.");
 								e_dialog.run ();
 								e_dialog.destroy ();
 
@@ -281,43 +279,33 @@ namespace Mobilect {
 									if (r == ResponseType.ACCEPT) {
 										var password = dialog.widget.get_password ();
 
-										if (password != null) {
-											try {
-												employee.change_password (password);
-											} catch (ApplicationError e) {
-												var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-												                                  MessageType.ERROR, ButtonsType.CLOSE,
-												                                  _("Error: %s"), e.message);
-												e_dialog.run ();
-												e_dialog.destroy ();
-											}
-										} else {
+										if (password == null) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Failed to change password."));
+											e_dialog.secondary_text = _("Passwords didn't match.");
+											e_dialog.run ();
+											e_dialog.destroy ();
+
 											return;
+										}
+
+										try {
+											employee.change_password (password);
+										} catch (ApplicationError e) {
+											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+											                                  MessageType.ERROR, ButtonsType.CLOSE,
+											                                  _("Failed to change password."));
+											e_dialog.secondary_text = e.message;
+											e_dialog.run ();
+											e_dialog.destroy ();
 										}
 									}
 
 									d.destroy ();
 								});
 								dialog.show_all ();
-						  });
-						}
-					},
-					Gtk.ActionEntry () {
-						name = ACTION_PRINT,
-						stock_id = Stock.PRINT,
-						label = _("_Print"),
-						accelerator = _("<Control>P"),
-						tooltip = _("Print information about each selected employees"),
-						callback = (a) => {
-						}
-					},
-					Gtk.ActionEntry () {
-						name = ACTION_PRINT_PREVIEW,
-						stock_id = Stock.PRINT_PREVIEW,
-						label = _("Print Previe_w"),
-						accelerator = _("<Shift><Control>P"),
-						tooltip = _("Show print preview of information about each selected employees"),
-						callback = (a) => {
+							});
 						}
 					}
 				};
@@ -344,6 +332,7 @@ namespace Mobilect {
 					                                  MessageType.ERROR,
 					                                  ButtonsType.OK,
 					                                  _("No employee selected."));
+					e_dialog.secondary_text = _("Select atleast one employee first.");
 					e_dialog.run ();
 					e_dialog.destroy ();
 

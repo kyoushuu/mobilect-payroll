@@ -35,17 +35,6 @@ namespace Mobilect {
 				this.add_buttons (Stock.OK, ResponseType.ACCEPT,
 				                  Stock.CANCEL, ResponseType.REJECT);
 				this.set_default_response (ResponseType.ACCEPT);
-				this.response.connect ((t, r) => {
-					if (r == ResponseType.ACCEPT && widget.get_password () == null) {
-						var e_dialog = new MessageDialog (parent,
-						                                  DialogFlags.MODAL,
-						                                  MessageType.ERROR,
-						                                  ButtonsType.OK,
-						                                  _("Passwords didn't match."));
-						e_dialog.run ();
-						e_dialog.destroy ();
-					}
-				});
 
 				widget = new PasswordWidget ();
 				this.get_content_area ().add (widget);

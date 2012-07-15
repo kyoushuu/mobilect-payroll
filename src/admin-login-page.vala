@@ -74,7 +74,7 @@ namespace Mobilect {
 						var administrator = (this.window.application as Application).database.get_administrator_with_username (this.username_entry.text);
 
 						if (administrator == null) {
-							throw new ApplicationError.USERNAME_NOT_FOUND (_("Username not found"));
+							throw new ApplicationError.USERNAME_NOT_FOUND (_("Username not found."));
 						}
 
 						if (administrator.get_password_checksum () ==
@@ -86,11 +86,12 @@ namespace Mobilect {
 								throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
 							}
 					} catch (Error e) {
-						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+						var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 						                                  MessageType.ERROR, ButtonsType.CLOSE,
-						                                  _("Error: %s"), e.message);
-						m_dialog.run ();
-						m_dialog.destroy ();
+						                                  _("Failed to login."));
+						e_dialog.secondary_text = e.message;
+						e_dialog.run ();
+						e_dialog.destroy ();
 					}
 				});
 

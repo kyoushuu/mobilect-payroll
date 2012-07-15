@@ -76,7 +76,7 @@ namespace Mobilect {
 
 			private void update_text () {
 				char s[64];
-				date.strftime (s, "%x");
+				date.strftime (s, "%A, %d %B, %Y");
 				text = (string) s;
 			}
 		}

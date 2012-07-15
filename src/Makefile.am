@@ -9,6 +9,7 @@ AM_CPPFLAGS = \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
 	$(GTK_CFLAGS) \
+	$(GDK_CFLAGS) \
 	$(PANGO_CFLAGS) \
 	$(CAIRO_CFLAGS) \
 	$(PANGOCAIRO_CFLAGS) \
@@ -70,6 +71,7 @@ mobilect_payroll_SOURCES = \
 
 mobilect_payroll_VALAFLAGS = \
 	--pkg gtk+-3.0 \
+	--pkg gdk-3.0 \
 	--pkg pango \
 	--pkg cairo \
 	--pkg pangocairo \
@@ -80,6 +82,7 @@ mobilect_payroll_VALAFLAGS = \
 
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \
+	$(GDK_LIBS) \
 	$(PANGO_LIBS) \
 	$(CAIRO_LIBS) \
 	$(PANGOCAIRO_LIBS) \

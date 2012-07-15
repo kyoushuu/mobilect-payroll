@@ -114,11 +114,12 @@ namespace Mobilect {
 
 						this.password_entry.text = "";
 					} catch (Error e) {
-						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+						var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 						                                  MessageType.ERROR, ButtonsType.CLOSE,
-						                                  _("Error: %s"), e.message);
-						m_dialog.run ();
-						m_dialog.destroy ();
+						                                  _("Failed to login."));
+						e_dialog.secondary_text = e.message;
+						e_dialog.run ();
+						e_dialog.destroy ();
 					}
 				});
 
@@ -147,11 +148,12 @@ namespace Mobilect {
 
 						this.password_entry.text = "";
 					} catch (Error e) {
-						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+						var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 						                                  MessageType.ERROR, ButtonsType.CLOSE,
-						                                  _("Error: %s"), e.message);
-						m_dialog.run ();
-						m_dialog.destroy ();
+						                                  _("Failed to log out."));
+						e_dialog.secondary_text = e.message;
+						e_dialog.run ();
+						e_dialog.destroy ();
 					}
 				});
 

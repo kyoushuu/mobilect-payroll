@@ -18,6 +18,8 @@
 
 
 using Gtk;
+using Gdk;
+using Config;
 
 
 namespace Mobilect {
@@ -41,21 +43,18 @@ namespace Mobilect {
 
 			public Application () {
 				Object (application_id: "com.mobilectpower.payroll");
-
-				try {
-					database = new Database ();
-				} catch (Error e) {
-					stderr.printf (_("Error: %s\n"), e.message);
-				}
 			}
 
 			public override void activate () {
-				if (database == null) {
-					var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+				try {
+					database = new Database ();
+				} catch (Error e) {
+					var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 					                                  MessageType.ERROR, ButtonsType.CLOSE,
 					                                  _("Failed to load database."));
-					m_dialog.run ();
-					m_dialog.destroy ();
+					e_dialog.secondary_text = e.message;
+					e_dialog.run ();
+					e_dialog.destroy ();
 
 					return;
 				}
@@ -65,6 +64,26 @@ namespace Mobilect {
 				}
 
 				window.present ();
+			}
+
+			private string help_link_id (string name, string? link_id) {
+				// TODO: if (AppInfo.get_default_for_uri_scheme ("help") != null) {
+				return link_id != null? "help:%s/%s".printf(name, link_id) : "help:%s".printf (name);
+			}
+
+			public void show_help (string? name, string? link_id) {
+				try {
+					show_uri ((window as Widget).get_screen (),
+					          help_link_id (name?? PACKAGE, link_id),
+					          CURRENT_TIME);
+				} catch (Error e) {
+					var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+					                                  MessageType.ERROR, ButtonsType.CLOSE,
+					                                  _("There was an error displaying the help."));
+					e_dialog.secondary_text = e.message;
+					e_dialog.run ();
+					e_dialog.destroy ();
+				}
 			}
 
 		}

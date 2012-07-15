@@ -169,6 +169,7 @@ namespace Mobilect {
 										                                  MessageType.ERROR,
 										                                  ButtonsType.OK,
 										                                  _("No employee selected."));
+										e_dialog.secondary_text = _("Select atleast one time record first.");
 										e_dialog.run ();
 										e_dialog.destroy ();
 
@@ -182,7 +183,8 @@ namespace Mobilect {
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  _("Error: %s"), e.message);
+										                                  _("Failed to add time record."));
+										e_dialog.secondary_text = e.message;
 										e_dialog.run ();
 										e_dialog.destroy ();
 									}
@@ -213,6 +215,7 @@ namespace Mobilect {
 								                                  MessageType.ERROR,
 								                                  ButtonsType.OK,
 								                                  _("No time record selected."));
+								e_dialog.secondary_text = _("Select atleast one time record first.");
 								e_dialog.run ();
 								e_dialog.destroy ();
 
@@ -225,8 +228,8 @@ namespace Mobilect {
 							                                  ButtonsType.YES_NO,
 							                                  ngettext("Are you sure you want to remove the selected time record?",
 							                                           "Are you sure you want to remove the %d selected time records?",
-							                                           selected_count).printf (selected_count) + " " +
-							                                  _("The changes will be permanent."));
+							                                           selected_count).printf (selected_count));
+							m_dialog.secondary_text = _("The changes will be permanent.");
 
 							if (m_dialog.run () == ResponseType.YES) {
 								selection.selected_foreach ((m, p, i) => {
@@ -237,7 +240,10 @@ namespace Mobilect {
 									} catch (ApplicationError e) {
 										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
 										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  _("Error: %s"), e.message);
+										                                  ngettext("Failed to remove selected time record.",
+										                                           "Failed to remove selected time records.",
+										                                  selected_count));
+										e_dialog.secondary_text = e.message;
 										e_dialog.run ();
 										e_dialog.destroy ();
 									}
@@ -281,6 +287,7 @@ namespace Mobilect {
 					                                  MessageType.ERROR,
 					                                  ButtonsType.OK,
 					                                  _("No time record selected."));
+					e_dialog.secondary_text = _("Select atleast one time record first.");
 					e_dialog.run ();
 					e_dialog.destroy ();
 

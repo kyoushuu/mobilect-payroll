@@ -45,17 +45,24 @@ namespace Mobilect {
 				try {
 					database = new Database ();
 				} catch (Error e) {
-					var m_dialog = new MessageDialog (null, DialogFlags.MODAL,
-					                                  MessageType.ERROR, ButtonsType.CLOSE,
-					                                  _("Error: %s"), e.message);
-					m_dialog.run ();
-					m_dialog.destroy ();
+					stderr.printf (_("Error: %s\n"), e.message);
 				}
 			}
 
 			public override void activate () {
-				if (window == null)
+				if (database == null) {
+					var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+					                                  MessageType.ERROR, ButtonsType.CLOSE,
+					                                  _("Failed to load database."));
+					m_dialog.run ();
+					m_dialog.destroy ();
+
+					return;
+				}
+
+				if (window == null) {
 					window = new Window (this);
+				}
 
 				window.present ();
 			}

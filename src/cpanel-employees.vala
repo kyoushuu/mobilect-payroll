@@ -49,6 +49,7 @@ namespace Mobilect {
 
 				tree_view = new TreeView ();
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
+				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
 					edit ();
 				});
@@ -195,37 +196,7 @@ namespace Mobilect {
 							var selection = tree_view.get_selection ();
 							int selected_count = selection.count_selected_rows ();
 
-							if (selected_count > 0) {
-								var m_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.INFO,
-								                                  ButtonsType.YES_NO,
-								                                  ngettext("Are you sure you want to remove the selected employee?",
-								                                           "Are you sure you want to remove the %d selected employees?",
-								                                           selected_count).printf (selected_count) + " " +
-								                                  _("The changes will be permanent."));
-
-								if (m_dialog.run () == ResponseType.YES) {
-									selection.selected_foreach ((m, p, i) => {
-										Employee employee;
-										this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
-
-										try {
-											employee.remove ();
-										} catch (ApplicationError e) {
-											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-											                                  MessageType.ERROR, ButtonsType.CLOSE,
-											                                  _("Error: %s"), e.message);
-											e_dialog.run ();
-											e_dialog.destroy ();
-										}
-									});
-
-									reload ();
-								}
-
-								m_dialog.destroy ();
-							} else {
+							if (selected_count <= 0) {
 								var e_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
@@ -233,7 +204,39 @@ namespace Mobilect {
 								                                  _("No employee selected."));
 								e_dialog.run ();
 								e_dialog.destroy ();
+
+								return;
 							}
+
+							var m_dialog = new MessageDialog (this.cpanel.window,
+							                                  DialogFlags.MODAL,
+							                                  MessageType.INFO,
+							                                  ButtonsType.YES_NO,
+							                                  ngettext("Are you sure you want to remove the selected employee?",
+							                                           "Are you sure you want to remove the %d selected employees?",
+							                                           selected_count).printf (selected_count) + " " +
+							                                  _("The changes will be permanent."));
+
+							if (m_dialog.run () == ResponseType.YES) {
+								selection.selected_foreach ((m, p, i) => {
+									Employee employee;
+									this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
+
+									try {
+										employee.remove ();
+									} catch (ApplicationError e) {
+										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+										                                  MessageType.ERROR, ButtonsType.CLOSE,
+										                                  _("Error: %s"), e.message);
+										e_dialog.run ();
+										e_dialog.destroy ();
+									}
+								});
+
+								reload ();
+							}
+
+							m_dialog.destroy ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -255,38 +258,7 @@ namespace Mobilect {
 							var selection = tree_view.get_selection ();
 							int selected_count = selection.count_selected_rows ();
 
-							if (selected_count > 0) {
-								selection.selected_foreach ((m, p, i) => {
-									Employee employee;
-									this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
-
-									var dialog = new PasswordDialog (_("Change Employee Password"),
-									                                 this.cpanel.window);
-
-									dialog.response.connect((d, r) => {
-										if (r == ResponseType.ACCEPT) {
-											var password = dialog.widget.get_password ();
-
-											if (password != null) {
-												try {
-													employee.change_password (password);
-												} catch (ApplicationError e) {
-													var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-													                                  MessageType.ERROR, ButtonsType.CLOSE,
-													                                  _("Error: %s"), e.message);
-													e_dialog.run ();
-													e_dialog.destroy ();
-												}
-											} else {
-												return;
-											}
-										}
-
-										d.destroy ();
-									});
-									dialog.show_all ();
-								});
-							} else {
+							if (selected_count <= 0) {
 								var e_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
@@ -294,7 +266,40 @@ namespace Mobilect {
 								                                  _("No employee selected."));
 								e_dialog.run ();
 								e_dialog.destroy ();
+
+								return;
 							}
+
+							selection.selected_foreach ((m, p, i) => {
+								Employee employee;
+								this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
+
+								var dialog = new PasswordDialog (_("Change Employee Password"),
+								                                 this.cpanel.window);
+
+								dialog.response.connect((d, r) => {
+									if (r == ResponseType.ACCEPT) {
+										var password = dialog.widget.get_password ();
+
+										if (password != null) {
+											try {
+												employee.change_password (password);
+											} catch (ApplicationError e) {
+												var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+												                                  MessageType.ERROR, ButtonsType.CLOSE,
+												                                  _("Error: %s"), e.message);
+												e_dialog.run ();
+												e_dialog.destroy ();
+											}
+										} else {
+											return;
+										}
+									}
+
+									d.destroy ();
+								});
+								dialog.show_all ();
+						  });
 						}
 					},
 					Gtk.ActionEntry () {
@@ -333,30 +338,7 @@ namespace Mobilect {
 				var selection = tree_view.get_selection ();
 				int selected_count = selection.count_selected_rows ();
 
-				if (selected_count > 0) {
-					selection.selected_foreach ((m, p, i) => {
-						Employee employee;
-						this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
-
-						var dialog = new EmployeeEditDialog (_("Employee \"%s\" Properties").printf (employee.get_name ()),
-						                                     this.cpanel.window,
-						                                     employee);
-						dialog.response.connect ((d, r) => {
-							if (r == ResponseType.ACCEPT) {
-								try {
-									dialog.employee.update ();
-								} catch (Error e) {
-									stderr.printf (_("Error: %s\n"), e.message);
-								}
-
-								reload ();
-							}
-
-							d.destroy ();
-						});
-						dialog.show_all ();
-					});
-				} else {
+				if (selected_count <= 0) {
 					var e_dialog = new MessageDialog (this.cpanel.window,
 					                                  DialogFlags.MODAL,
 					                                  MessageType.ERROR,
@@ -364,7 +346,32 @@ namespace Mobilect {
 					                                  _("No employee selected."));
 					e_dialog.run ();
 					e_dialog.destroy ();
+
+					return;
 				}
+
+				selection.selected_foreach ((m, p, i) => {
+					Employee employee;
+					this.list.get (i, EmployeeList.Columns.OBJECT, out employee);
+
+					var dialog = new EmployeeEditDialog (_("Employee \"%s\" Properties").printf (employee.get_name ()),
+					                                     this.cpanel.window,
+					                                     employee);
+					dialog.response.connect ((d, r) => {
+						if (r == ResponseType.ACCEPT) {
+							try {
+								dialog.employee.update ();
+							} catch (Error e) {
+								stderr.printf (_("Error: %s\n"), e.message);
+							}
+
+							reload ();
+						}
+
+						d.destroy ();
+					});
+					dialog.show_all ();
+				});
 			}
 
 			public void reload () {

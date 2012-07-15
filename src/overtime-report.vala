@@ -147,10 +147,6 @@ namespace Mobilect {
 					              null)
 				};
 
-				export_filename = "payroll-overtime-" +
-					format_date (start, "%Y%m%d") + "-" +
-					format_date (end, "%Y%m%d");
-
 				begin_print.connect (begin_print_handler);
 				draw_page.connect (draw_page_handler);
 			}
@@ -295,6 +291,14 @@ namespace Mobilect {
 							cairo_show_layout (cr, layout);
 
 							foreach (var pay_period in pay_group.periods) {
+								/* Percentage */
+								if (pay_period.rate > 1.0) {
+									cr.move_to (x, table_top + (table_header_line_height * 2) + padding);
+									layout.set_width (units_from_double (hour_column_width + number_column_width - (padding * 2)));
+									layout.set_markup ("%3.0lf%%".printf (pay_period.rate * 100), -1);
+									cairo_show_layout (cr, layout);
+								}
+
 								/* Hour */
 								cr.move_to (x, table_top + table_header_line_height + padding);
 								layout.set_width (units_from_double (hour_column_width - (padding * 2)));
@@ -315,6 +319,15 @@ namespace Mobilect {
 							layout.set_width (units_from_double (number_column_width - (padding * 2)));
 							layout.set_markup (_("Sub. Total"), -1);
 							cairo_show_layout (cr, layout);
+
+							/* Percentage */
+							if (pay_group.rate > 1.0) {
+								cr.move_to (x, table_top + (table_header_line_height * 2) + padding);
+								layout.set_width (units_from_double (number_column_width - (padding * 2)));
+								layout.set_markup ("%3.0lf%%".printf (pay_group.rate * 100), -1);
+								cairo_show_layout (cr, layout);
+							}
+
 							x += number_column_width;
 						}
 
@@ -444,7 +457,7 @@ namespace Mobilect {
 					for (int i = 0; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++) {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
 						/* Half-month salary - (salary per day times days without pay) */
-						double salary = 0, subtotal, hours, pay, rate;
+						double salary = 0, subtotal, hours, pay, rate, deduction;
 
 						layout.set_height (units_from_double (text_font_height));
 
@@ -477,12 +490,17 @@ namespace Mobilect {
 
 						foreach (var pay_group in pay_groups) {
 							subtotal = 0;
+							deduction = 0;
 
 							for (var j = 0; j < pay_group.periods.length; j++) {
 								var pay_period = pay_group.periods[j];
 								hours = employee.get_hours (pay_group.create_filter (j, start, end));
-								pay = hours * rate * ((pay_group.rate * pay_period.rate) - (pay_group.minus_period_rates != null? pay_group.minus_period_rates[j] : 0));
+								pay = hours * rate * pay_period.rate;
+
 								subtotal += pay;
+								if (pay_group.minus_period_rates != null) {
+									deduction += hours * rate * pay_group.minus_period_rates[j];
+								}
 
 								/* Hour */
 								layout.set_width (units_from_double (hour_column_width - (padding * 2)));
@@ -497,6 +515,8 @@ namespace Mobilect {
 								cr.rel_move_to (number_column_width, 0);
 							}
 
+							subtotal *= pay_group.rate;
+							subtotal -= deduction;
 							salary += subtotal;
 
 							/* Subtotal each group */

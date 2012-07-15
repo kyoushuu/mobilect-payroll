@@ -33,6 +33,7 @@ namespace Mobilect {
 			public const string ACTION_PAGE_SETUP = "cpanel-report-page-setup";
 			public const string ACTION_PRINT = "cpanel-report-print";
 			public const string ACTION_PRINT_PREVIEW = "cpanel-report-print-preview";
+			public const string ACTION_EXPORT = "cpanel-report-export";
 
 			public EmployeeList list;
 
@@ -334,6 +335,7 @@ namespace Mobilect {
 					"          <separator />" +
 					"          <menuitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
 					"          <menuitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
+					"          <menuitem name=\"ExportReport\" action=\"" + ACTION_EXPORT + "\" />" +
 					"        </menu>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -347,6 +349,7 @@ namespace Mobilect {
 					"          <separator />" +
 					"          <toolitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
 					"          <toolitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
+					"          <toolitem name=\"ExportReport\" action=\"" + ACTION_EXPORT + "\" />" +
 					"        </placeholder>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -529,6 +532,49 @@ namespace Mobilect {
 							}
 
 							settings = pr.print_settings;
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_EXPORT,
+						stock_id = Stock.SAVE,
+						label = _("_Export"),
+						accelerator = _("<Control>E"),
+						tooltip = _("Export payroll and payslips to a PDF file"),
+						callback = (a) => {
+							var pr = create_report ();
+							var dialog = new FileChooserDialog (_("Export"),
+							                                    this.cpanel.window,
+							                                    FileChooserAction.SAVE,
+							                                    Stock.CANCEL, ResponseType.REJECT,
+							                                    Stock.SAVE, ResponseType.ACCEPT);
+							dialog.do_overwrite_confirmation = true;
+							if (type_combo.active == 0) {
+								dialog.set_current_name (_("payroll-regular_%s-%s.pdf").printf (pr.format_date (start_entry.get_date (), "%Y%m%d"),
+								                                                                pr.format_date (end_entry.get_date (), "%Y%m%d")));
+							} else {
+								dialog.set_current_name (_("payroll-overtime_%s-%s.pdf").printf (pr.format_date (start_entry.get_date (), "%Y%m%d"),
+								                                                                 pr.format_date (end_entry.get_date (), "%Y%m%d")));
+							}
+
+							if (dialog.run () == ResponseType.ACCEPT) {
+								pr.export_filename = dialog.get_filename ();
+
+								try {
+									pr.export (this.cpanel.window);
+								} catch (Error e) {
+									var e_dialog = new MessageDialog (this.cpanel.window,
+									                                  DialogFlags.MODAL,
+									                                  MessageType.ERROR,
+									                                  ButtonsType.OK,
+									                                  e.message);
+									e_dialog.run ();
+									e_dialog.destroy ();
+								}
+
+								settings = pr.print_settings;
+							}
+
+							dialog.destroy ();
 						}
 					}
 				};

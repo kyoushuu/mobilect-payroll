@@ -33,6 +33,8 @@ AC_INIT([Mobilect Payroll], [mobilect_payroll_version],
 		[info@mobilectpower.com],
 		[mobilect-payroll],
 		[http://www.mobilectpower.com/])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_SRCDIR([ChangeLog])
 
 MOBILECT_PAYROLL_MAJOR_VERSION=mobilect_payroll_major_version
 MOBILECT_PAYROLL_MINOR_VERSION=mobilect_payroll_minor_version
@@ -61,11 +63,14 @@ dnl lib AC_SUBST(LT_VERSION_INFO)
 dnl lib AC_SUBST(LT_CURRENT_MINUS_AGE)
 
 
-AC_CONFIG_HEADERS([config.h])
-
 AM_INIT_AUTOMAKE([-Wall -Werror gnu no-dist-gzip dist-xz])
 
 AM_SILENT_RULES([yes])
+
+
+LT_INIT([disable-static win32-dll])
+LT_OUTPUT
+
 
 AC_PROG_CC
 

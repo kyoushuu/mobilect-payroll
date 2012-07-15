@@ -119,11 +119,6 @@ namespace Mobilect {
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-
-					stmt = database.cnc.parse_sql_string ("DELETE FROM time_records WHERE administrator_id=##administrator_id::int",
-					                                      out stmt_params);
-					stmt_params.get_holder ("administrator_id").set_value (value_id);
-					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}

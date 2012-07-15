@@ -18,6 +18,7 @@
 
 
 using Gda;
+using Config;
 
 
 namespace Mobilect {
@@ -26,20 +27,24 @@ namespace Mobilect {
 
 		public class Database : Object {
 
-			private const string db_name = "mobilect-payroll";
-
 			public Connection cnc { get; private set; }
 			public DataHandler dh_string { get; private set; }
 
 			public Database () throws ApplicationError {
 				try {
+					/* Create config directory with permission 0754 */
+					var db_dir = "%s/%s".printf (Environment.get_user_config_dir (), PACKAGE);
+					DirUtils.create_with_parents (db_dir, 0754);
+
+					/* Connect to database */
 					cnc = Connection.open_from_string ("SQLite",
-					                                   "DB_DIR=.;DB_NAME=" + db_name,
+					                                   "DB_DIR=%s;DB_NAME=%s".printf(db_dir, PACKAGE),
 					                                   null,
 					                                   ConnectionOptions.NONE);
 
 					dh_string = cnc.get_provider ().get_data_handler_g_type (cnc, typeof (string));
 
+					/* Create employees table if doesn't exists */
 					execute_sql ("CREATE TABLE IF NOT EXISTS employees (" +
 					             "  id integer primary key autoincrement," +
 					             "  lastname string not null," +
@@ -50,6 +55,7 @@ namespace Mobilect {
 					             "  rate integer" +
 					             ")");
 
+					/* Create time_records table if doesn't exists */
 					execute_sql ("CREATE TABLE IF NOT EXISTS time_records (" +
 					             "  id integer primary key autoincrement," +
 					             "  employee_id integer," +
@@ -60,12 +66,14 @@ namespace Mobilect {
 					             "  end timestamp" +
 					             ")");
 
+					/* Create administrators table if doesn't exists */
 					execute_sql ("CREATE TABLE IF NOT EXISTS administrators (" +
 					             "  id integer primary key autoincrement," +
 					             "  username string not null," +
 					             "  password string not null" +
 					             ")");
 
+					/* Create holidays table if doesn't exists */
 					execute_sql ("CREATE TABLE IF NOT EXISTS holidays (" +
 					             "  id integer primary key autoincrement," +
 					             "  year integer," +
@@ -74,17 +82,24 @@ namespace Mobilect {
 					             "  type integer" +
 					             ")");
 
+					/* Create a default administrator if nothing exists */
 					Set stmt_params;
-					var stmt = cnc.parse_sql_string ("INSERT OR IGNORE INTO administrators (id, username, password)" +
-					                                 "  VALUES (1, ##username::string, ##password::string)",
-					                                 out stmt_params);
-					stmt_params.get_holder ("username")
-						.set_value_str (null, "admin");
-					stmt_params.get_holder ("password")
-						.set_value_str (null,
-						                Checksum.compute_for_string (ChecksumType.SHA256,
-						                                             "admin", -1));
-					cnc.statement_execute_non_select (stmt, stmt_params, null);
+					var stmt = cnc.parse_sql_string ("SELECT id" +
+					                                 "  FROM administrators",
+					                                 null);
+					var data_model = cnc.statement_execute_select (stmt, null);
+					if (data_model.get_n_rows () < 1) {
+						stmt = cnc.parse_sql_string ("INSERT INTO administrators (id, username, password)" +
+						                             "  VALUES (1, ##username::string, ##password::string)",
+						                             out stmt_params);
+						stmt_params.get_holder ("username")
+							.set_value_str (null, "admin");
+						stmt_params.get_holder ("password")
+							.set_value_str (null,
+							                Checksum.compute_for_string (ChecksumType.SHA256,
+							                                             "admin", -1));
+						cnc.statement_execute_non_select (stmt, stmt_params, null);
+					}
 				} catch (Error e) {
 					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
 				}

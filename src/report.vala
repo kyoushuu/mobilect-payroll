@@ -71,6 +71,16 @@ namespace Mobilect {
 				run (PrintOperationAction.PREVIEW, window);
 			}
 
+			public void export (Window window) throws Error {
+				run (PrintOperationAction.EXPORT, window);
+			}
+
+			public string format_date (Date date, string format) {
+				char s[64];
+				date.strftime (s, format);
+				return (string) s;
+			}
+
 
 			internal string period_to_string (Date start, Date end) {
 				if (start.get_year () == end.get_year ()) {
@@ -86,12 +96,6 @@ namespace Mobilect {
 				} else {
 					return format_date (start, "%B %d, %Y") + " to " + format_date (end, "%B %d, %Y");
 				}
-			}
-
-			internal string format_date (Date date, string format) {
-				char s[64];
-				date.strftime (s, format);
-				return (string) s;
 			}
 
 			internal void update_font_height (Gtk.PrintContext context) {				/* Get font height */

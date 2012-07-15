@@ -63,10 +63,6 @@ namespace Mobilect {
 					new TimePeriod (new Time (13,0), new Time (17,0))
 				};
 
-				export_filename = "payroll-regular-" +
-					format_date (start, "%Y%m%d") + "-" +
-					format_date (end, "%Y%m%d");
-
 				begin_print.connect (begin_print_handler);
 				draw_page.connect (draw_page_handler);
 			}

@@ -53,6 +53,7 @@ namespace Mobilect {
 
 				tree_view = new TreeView ();
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
+				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
 					edit ();
 				});
@@ -206,37 +207,7 @@ namespace Mobilect {
 							var selection = tree_view.get_selection ();
 							int selected_count = selection.count_selected_rows ();
 
-							if (selected_count > 0) {
-								var m_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.INFO,
-								                                  ButtonsType.YES_NO,
-								                                  ngettext("Are you sure you want to remove the selected time record?",
-								                                           "Are you sure you want to remove the %d selected time records?",
-								                                           selected_count).printf (selected_count) + " " +
-								                                  _("The changes will be permanent."));
-
-								if (m_dialog.run () == ResponseType.YES) {
-									selection.selected_foreach ((m, p, i) => {
-										TimeRecord time_record;
-										this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
-										try {
-											time_record.remove ();
-										} catch (ApplicationError e) {
-											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-											                                  MessageType.ERROR, ButtonsType.CLOSE,
-											                                  _("Error: %s"), e.message);
-											e_dialog.run ();
-											e_dialog.destroy ();
-										}
-									});
-									this.list = null;
-									this.tree_view.model = null;
-
-								}
-
-								m_dialog.destroy ();
-							} else {
+							if (selected_count <= 0) {
 								var e_dialog = new MessageDialog (this.cpanel.window,
 								                                  DialogFlags.MODAL,
 								                                  MessageType.ERROR,
@@ -244,7 +215,38 @@ namespace Mobilect {
 								                                  _("No time record selected."));
 								e_dialog.run ();
 								e_dialog.destroy ();
+
+								return;
 							}
+
+							var m_dialog = new MessageDialog (this.cpanel.window,
+							                                  DialogFlags.MODAL,
+							                                  MessageType.INFO,
+							                                  ButtonsType.YES_NO,
+							                                  ngettext("Are you sure you want to remove the selected time record?",
+							                                           "Are you sure you want to remove the %d selected time records?",
+							                                           selected_count).printf (selected_count) + " " +
+							                                  _("The changes will be permanent."));
+
+							if (m_dialog.run () == ResponseType.YES) {
+								selection.selected_foreach ((m, p, i) => {
+									TimeRecord time_record;
+									this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
+									try {
+										time_record.remove ();
+									} catch (ApplicationError e) {
+										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
+										                                  MessageType.ERROR, ButtonsType.CLOSE,
+										                                  _("Error: %s"), e.message);
+										e_dialog.run ();
+										e_dialog.destroy ();
+									}
+								});
+								this.list = null;
+								this.tree_view.model = null;
+							}
+
+							m_dialog.destroy ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -273,32 +275,7 @@ namespace Mobilect {
 				var selection = tree_view.get_selection ();
 				int selected_count = selection.count_selected_rows ();
 
-				if (selected_count > 0) {
-					selection.selected_foreach ((m, p, i) => {
-						TimeRecord time_record;
-						this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
-
-						var dialog = new TimeRecordEditDialog (_("Time Record Properties"),
-						                                       this.cpanel.window,
-						                                       time_record);
-						dialog.response.connect ((d, r) => {
-							if (r == ResponseType.ACCEPT) {
-								try {
-									dialog.time_record.update ();
-								} catch (Error e) {
-									stderr.printf (_("Error: %s\n"), e.message);
-								}
-
-								this.list = null;
-								this.tree_view.model = null;
-							}
-
-							d.destroy ();
-						});
-
-						dialog.show_all ();
-					});
-				} else {
+				if (selected_count <= 0) {
 					var e_dialog = new MessageDialog (this.cpanel.window,
 					                                  DialogFlags.MODAL,
 					                                  MessageType.ERROR,
@@ -306,7 +283,34 @@ namespace Mobilect {
 					                                  _("No time record selected."));
 					e_dialog.run ();
 					e_dialog.destroy ();
+
+					return;
 				}
+
+				selection.selected_foreach ((m, p, i) => {
+					TimeRecord time_record;
+					this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
+
+					var dialog = new TimeRecordEditDialog (_("Time Record Properties"),
+					                                       this.cpanel.window,
+					                                       time_record);
+					dialog.response.connect ((d, r) => {
+						if (r == ResponseType.ACCEPT) {
+							try {
+								dialog.time_record.update ();
+							} catch (Error e) {
+								stderr.printf (_("Error: %s\n"), e.message);
+							}
+
+							this.list = null;
+							this.tree_view.model = null;
+						}
+
+						d.destroy ();
+					});
+
+					dialog.show_all ();
+				});
 			}
 
 		}

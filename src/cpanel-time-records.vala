@@ -115,6 +115,30 @@ namespace Mobilect {
 				hbox.add (search_spinner);
 
 
+				/* Set period */
+				var date = new DateTime.now_local ().add_days (-10);
+				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
+
+				DateDay last_day;
+				if (period == 0) {
+					last_day = 15;
+				} else {
+					last_day = 31;
+					while (!Date.valid_dmy (last_day,
+					                        (DateMonth) date.get_month (),
+					                        (DateYear) date.get_year ())) {
+						last_day--;
+					}
+				}
+
+				start_entry.set_dmy ((15 * period) + 1,
+				                     date.get_month (),
+				                     date.get_year ());
+				end_entry.set_dmy (last_day,
+				                   date.get_month (),
+				                   date.get_year ());
+
+
 				ui_def =
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
@@ -257,7 +281,7 @@ namespace Mobilect {
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_EDIT,
-						stock_id = Stock.EDIT,
+						stock_id = Stock.PROPERTIES,
 						label = _("_Edit"),
 						accelerator = _("<Control>E"),
 						tooltip = _("Edit information about the selected time records"),

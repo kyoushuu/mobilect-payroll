@@ -66,15 +66,14 @@ namespace Mobilect {
 				window.present ();
 			}
 
-			private string help_link_id (string name, string? link_id) {
-				// TODO: if (AppInfo.get_default_for_uri_scheme ("help") != null) {
-				return link_id != null? "help:%s/%s".printf(name, link_id) : "help:%s".printf (name);
+			internal string help_link_uri (string name, string? link_id) {
+				return link_id != null? "help:%s".printf (name) : "help:%s/%s".printf (name, link_id);
 			}
 
 			public void show_help (string? name, string? link_id) {
 				try {
 					show_uri ((window as Widget).get_screen (),
-					          help_link_id (name?? PACKAGE, link_id),
+					          help_link_uri (name?? PACKAGE, link_id),
 					          CURRENT_TIME);
 				} catch (Error e) {
 					var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,

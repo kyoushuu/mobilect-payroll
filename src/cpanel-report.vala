@@ -81,7 +81,6 @@ namespace Mobilect {
 				});
 
 				page_setup = new PageSetup ();
-				page_setup.set_orientation (PageOrientation.LANDSCAPE);
 				page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 
 				grid = new Grid ();
@@ -478,7 +477,6 @@ namespace Mobilect {
 						callback = (a) => {
 							if (settings == null) {
 								settings = new PrintSettings ();
-								settings.set_orientation (PageOrientation.LANDSCAPE);
 								settings.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 							}
 
@@ -590,12 +588,14 @@ namespace Mobilect {
 				if (type_combo.active == 0) {
 					pr = new RegularReport (start_entry.get_date (), end_entry.get_date ());
 					(pr as RegularReport).deductions = deduc_view.model as ListStore;
+					pr.title = _("SEMI-MONTHLY PAYROLL");
 				} else {
 					pr = new OvertimeReport (start_entry.get_date (), end_entry.get_date ());
+					pr.title = _("MONTHLY OVERTIME PAYROLL");
 				}
-				pr.title = _("SEMI-MONTHLY PAYROLL");
 				pr.employees = this.cpanel.window.app.database.get_employees ();
 				pr.default_page_setup = page_setup;
+				pr.show_progress = true;
 
 				if (settings != null) {
 					pr.print_settings = settings;

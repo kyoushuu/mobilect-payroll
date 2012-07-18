@@ -72,7 +72,7 @@ namespace Mobilect {
 						accelerator = _("F1"),
 						tooltip = _("Open manual"),
 						callback = (a) => {
-							app.show_help (null, null);
+							this.app.show_help (null, null);
 						}
 					},
 					Gtk.ActionEntry () {
@@ -132,7 +132,7 @@ namespace Mobilect {
 					"  </menubar>" +
 					"  <toolbar action=\"toolbar\">" +
 					"    <placeholder name=\"ToolbarAdditions\" />" +
-					"    <separator/>" +
+					"    <separator expand=\"true\" />" +
 					"    <placeholder name=\"FileToolItems\">" +
 					"      <toolitem name=\"Quit\" action=\"file-quit\" />" +
 					"    </placeholder>" +

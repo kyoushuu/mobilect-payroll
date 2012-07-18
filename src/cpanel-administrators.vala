@@ -213,7 +213,7 @@ namespace Mobilect {
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_EDIT,
-						stock_id = Stock.EDIT,
+						stock_id = Stock.PROPERTIES,
 						label = _("_Edit"),
 						accelerator = _("<Control>E"),
 						tooltip = _("Edit information about the selected administrators"),
@@ -223,7 +223,7 @@ namespace Mobilect {
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_PASSWORD,
-						stock_id = Stock.PROPERTIES,
+						stock_id = Stock.DIALOG_AUTHENTICATION,
 						label = _("_Change Password"),
 						tooltip = _("Change password of selected administrators"),
 						callback = (a) => {

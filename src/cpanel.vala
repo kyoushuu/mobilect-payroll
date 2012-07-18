@@ -89,7 +89,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = "cpanel",
 						stock_id = null,
-						label = _("_Administrator")
+						label = _("_Control Panel")
 					},
 					Gtk.ActionEntry () {
 						name = "cpanel-logout",

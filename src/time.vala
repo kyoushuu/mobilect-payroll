@@ -24,7 +24,7 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class Time {
+		public struct Time {
 
 			private int _hour;
 			public int hour {

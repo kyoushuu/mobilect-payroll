@@ -174,7 +174,7 @@ namespace Mobilect {
 						value.set_int (record.rate);
 						break;
 					case Columns.HOURRATE:
-						value.set_double (record.get_rate_per_hour ());
+						value.set_double (record.rate_per_hour);
 						break;
 					case Columns.HOURS:
 						value.set_double (filter != null? record.get_hours (filter) : 0);

@@ -32,7 +32,8 @@ namespace Mobilect {
 			public string middlename { get; set; }
 			public string tin { get; set; }
 			public int rate { get; set; }
-			/*public TimeRecordList time_records { get; private set; }*/
+			public double rate_per_day { get { return rate / 26.0; } }
+			public double rate_per_hour { get { return rate / (26.0 * 8.0); } }
 
 			internal weak Database database { get; private set; }
 			internal weak EmployeeList list { get; set; }
@@ -82,10 +83,6 @@ namespace Mobilect {
 
 			public string get_name () {
 				return lastname + ", " + firstname + " " + middlename;
-			}
-
-			public double get_rate_per_hour () {
-				return rate / (26.0 * 8.0);
 			}
 
 			public int get_open_time_records_num () throws ApplicationError {

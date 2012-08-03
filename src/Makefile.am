@@ -8,6 +8,7 @@ AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
+	-DG_LOG_DOMAIN=\"Mobilect-Payroll\" \
 	$(GTK_CFLAGS) \
 	$(GDK_CFLAGS) \
 	$(PANGO_CFLAGS) \
@@ -61,8 +62,9 @@ mobilect_payroll_SOURCES = \
 	report/regular-report.vala \
 	report/overtime-report.vala \
 	datetime/time.vala \
-	datetime/date-entry.vala \
-	datetime/date-time-entry.vala \
+	datetime/time-spin-button.vala \
+	datetime/date-spin-button.vala \
+	datetime/date-time-spin-button.vala \
 	filter/filter.vala \
 	filter/pay-group.vala \
 	filter/pay-period.vala \

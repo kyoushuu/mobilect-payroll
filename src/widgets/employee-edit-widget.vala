@@ -54,16 +54,23 @@ namespace Mobilect {
 
 
 			public EmployeeEditWidget (Employee employee) {
+				push_composite_child ();
+
+
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
+				grid.row_homogeneous = true;
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
 				this.add (grid);
+				grid.show ();
+
 
 				var lastname_label = new Label (_("_Last Name:"));
 				lastname_label.use_underline = true;
 				lastname_label.xalign = 0.0f;
 				grid.add (lastname_label);
+				lastname_label.show ();
 
 				lastname_entry = new Entry ();
 				lastname_entry.hexpand = true;
@@ -72,11 +79,14 @@ namespace Mobilect {
 				                     lastname_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				lastname_entry.show ();
+
 
 				var firstname_label = new Label (_("_First Name:"));
 				firstname_label.use_underline = true;
 				firstname_label.xalign = 0.0f;
 				grid.add (firstname_label);
+				firstname_label.show ();
 
 				firstname_entry = new Entry ();
 				firstname_entry.hexpand = true;
@@ -85,11 +95,14 @@ namespace Mobilect {
 				                     firstname_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				firstname_entry.show ();
+
 
 				var middlename_label = new Label (_("_Middle Name:"));
 				middlename_label.use_underline = true;
 				middlename_label.xalign = 0.0f;
 				grid.add (middlename_label);
+				middlename_label.show ();
 
 				middlename_entry = new Entry ();
 				middlename_entry.hexpand = true;
@@ -98,11 +111,14 @@ namespace Mobilect {
 				                     middlename_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				middlename_entry.show ();
+
 
 				var tin_label = new Label (_("_TIN Number:"));
 				tin_label.use_underline = true;
 				tin_label.xalign = 0.0f;
 				grid.add (tin_label);
+				tin_label.show ();
 
 				tin_entry = new Entry ();
 				tin_entry.hexpand = true;
@@ -111,11 +127,14 @@ namespace Mobilect {
 				                     tin_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				tin_entry.show ();
+
 
 				var rate_label = new Label (_("_Rate:"));
 				rate_label.use_underline = true;
 				rate_label.xalign = 0.0f;
 				grid.add (rate_label);
+				rate_label.show ();
 
 				rate_spin = new SpinButton (new Adjustment (3500,
 				                                            0, 1000000,
@@ -126,6 +145,11 @@ namespace Mobilect {
 				                     rate_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				rate_spin.show ();
+
+
+				pop_composite_child ();
+
 
 				this.employee = employee;
 			}

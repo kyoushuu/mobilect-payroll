@@ -46,16 +46,23 @@ namespace Mobilect {
 
 
 			public AdministratorEditWidget (Administrator administrator) {
+				push_composite_child ();
+
+
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
+				grid.row_homogeneous = true;
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
 				this.add (grid);
+				grid.show ();
+
 
 				var username_label = new Label (_("_Username:"));
 				username_label.use_underline = true;
 				username_label.xalign = 0.0f;
 				grid.add (username_label);
+				username_label.show ();
 
 				username_entry = new Entry ();
 				username_entry.hexpand = true;
@@ -64,6 +71,11 @@ namespace Mobilect {
 				                     username_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				username_entry.show ();
+
+
+				pop_composite_child ();
+
 
 				this.administrator = administrator;
 			}

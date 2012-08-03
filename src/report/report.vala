@@ -27,6 +27,11 @@ namespace Mobilect {
 
 	namespace Payroll {
 
+		public errordomain ReportError {
+			PERIOD_START_AFTER_END
+		}
+
+
 		public class Report : PrintOperation {
 
 			public string title { get; set; }
@@ -55,12 +60,12 @@ namespace Mobilect {
 			internal int payslip_per_page;
 
 
-			public Report (Date start, Date end) {
+			public Report (Date start, Date end) throws ReportError {
 				this.start = start;
 				this.end = end;
 
 				if (start.compare (end) > 0) {
-					this.end = start;
+					throw new ReportError.PERIOD_START_AFTER_END (_("Start of period is after end of period."));
 				}
 			}
 
@@ -272,7 +277,7 @@ namespace Mobilect {
 				layout.set_alignment (Pango.Alignment.LEFT);
 
 				cr.move_to (x + padding, y + padding);
-				layout.set_markup (_("GROSS EARNINGS: rate/day/month P %.2lf (# of days    )").printf ((double) employee.rate/26), -1);
+				layout.set_markup (_("GROSS EARNINGS: rate/day/month P %.2lf (# of days    )").printf (employee.rate_per_day), -1);
 				cairo_show_layout (cr, layout);
 				y += text_font_height + (padding * 2);
 
@@ -282,7 +287,7 @@ namespace Mobilect {
 				cr.stroke ();
 
 				cr.move_to (x + padding, y + padding);
-				layout.set_markup (_("OVERTIME: rate/hr P %.2lf (# of hrs    )").printf ((double) employee.rate/26/8), -1);
+				layout.set_markup (_("OVERTIME: rate/hr P %.2lf (# of hrs    )").printf (employee.rate_per_hour), -1);
 				cairo_show_layout (cr, layout);
 				y += text_font_height + (padding * 2);
 

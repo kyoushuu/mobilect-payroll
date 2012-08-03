@@ -21,7 +21,7 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class TimePeriod : Object {
+		public struct TimePeriod {
 
 			public Time start { get; set; }
 			public Time end { get; set; }
@@ -30,10 +30,6 @@ namespace Mobilect {
 			public TimePeriod (Time start, Time end) {
 				this.start = start;
 				this.end = end;
-			}
-
-			public TimePeriod duplicate () {
-				return new TimePeriod (this.start, this.end);
 			}
 
 			public bool is_equal (TimePeriod time_period) {

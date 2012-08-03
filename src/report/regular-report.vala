@@ -27,6 +27,12 @@ namespace Mobilect {
 
 	namespace Payroll {
 
+		public errordomain RegularReportError {
+			PERIOD_START_NOT_MONTH_START_OR_MIDDLE,
+			PERIOD_END_NOT_MONTH_END_OR_MIDDLE
+		}
+
+
 		public class RegularReport : Report {
 
 			public ListStore deductions { get; set; }
@@ -50,8 +56,33 @@ namespace Mobilect {
 			private int pages_payslip;
 
 
-			public RegularReport (Date start, Date end) {
+			public RegularReport (Date start, Date end) throws ReportError, RegularReportError {
 				base (start, end);
+
+				if (start.get_day () != 1 && start.get_day () != 16) {
+					throw new RegularReportError.PERIOD_START_NOT_MONTH_START_OR_MIDDLE (_("Period start should be 1st or 16th day of the month."));
+				}
+
+				var period = (int) Math.round ((start.get_day () - 1) / 30.0);
+
+				DateDay last_day;
+				if (period == 0) {
+					last_day = 15;
+				} else {
+					last_day = 31;
+					while (!Date.valid_dmy (last_day,
+					                        start.get_month (),
+					                        start.get_year ())) {
+						last_day--;
+					}
+				}
+
+				var correct_end = Date ();
+				correct_end.set_dmy (last_day, start.get_month (), start.get_year ());
+				if (correct_end.compare (end) != 0) {
+					throw new RegularReportError.PERIOD_END_NOT_MONTH_END_OR_MIDDLE (_("Period end should be 15th or last day of the month."));
+				}
+
 
 				for (var d = start; d.compare (end) <= 0; d.add_days (1)) {
 					if (d.get_weekday () != DateWeekday.SUNDAY) {
@@ -63,21 +94,18 @@ namespace Mobilect {
 				filter.date_start = start;
 				filter.date_end = end;
 				filter.time_periods = new TimePeriod[] {
-					new TimePeriod (new Time (8,0), new Time (12,0)),
-					new TimePeriod (new Time (13,0), new Time (17,0))
+					TimePeriod (Time (8,0), Time (12,0)),
+					TimePeriod (Time (13,0), Time (17,0))
 				};
-
-				begin_print.connect (begin_print_handler);
-				draw_page.connect (draw_page_handler);
-				request_page_setup.connect ((c, n, s) => {
-					if (n < pages_payroll) {
-						s.set_orientation (PageOrientation.LANDSCAPE);
-					}
-				});
 			}
 
+			public override void request_page_setup (PrintContext context, int page_nr, PageSetup setup) {
+				if (page_nr < pages_payroll) {
+					setup.set_orientation (PageOrientation.LANDSCAPE);
+				}
+			}
 
-			public void begin_print_handler (Gtk.PrintContext context) {
+			public override void begin_print (PrintContext context) {
 				update_font_height (context);
 
 				/* Get height of header and footer */
@@ -106,10 +134,9 @@ namespace Mobilect {
 				pages_payroll = (int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 10) / lines_per_page);
 				pages_payslip = (int) Math.ceil ((double) employees.size / payslip_per_page);
 				set_n_pages (pages_payroll + pages_payslip);
-
 			}
 
-			public void draw_page_handler (PrintContext context, int page_nr) {
+			public override void draw_page (PrintContext context, int page_nr) {
 				var cr = context.get_cairo_context ();
 
 				var layout = context.create_pango_layout ();
@@ -289,7 +316,7 @@ namespace Mobilect {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
 						double days_wo_pay = days - (employee.get_hours (filter)/8);
 						/* Half-month salary - (salary per day times days without pay) */
-						double salary = (employee.rate/2) - (employee.rate * days_wo_pay/26);
+						double salary = (employee.rate/2) - (employee.rate_per_day * days_wo_pay);
 						if (salary < 0) {
 							salary = 0;
 						}

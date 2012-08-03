@@ -47,17 +47,6 @@ namespace Mobilect {
 					}
 				});
 
-				this.switch_page.connect ((t, p, n) => {
-					if (current_page != null) {
-						current_page.changed_from ();
-					}
-
-					var page = (p as CPanelTab);
-					page.changed_to ();
-
-					current_page = page;
-				});
-
 
 				string ui_def =
 					"<ui>" +
@@ -82,7 +71,7 @@ namespace Mobilect {
 				try {
 					window.ui_manager.add_ui_from_string (ui_def, -1);
 				} catch (Error e) {
-					stderr.printf (_("Error: %s\n"), e.message);
+					critical ("Failed to add UI to UI Manager: %s", e.message);
 				}
 
 				Gtk.ActionEntry[] actions = {
@@ -121,12 +110,12 @@ namespace Mobilect {
 					}
 				}
 
-				this.add_page (new CPanelEmployees (this), _("_Employees"));
-				this.add_page (new CPanelAdministrators (this), _("_Administrators"));
-				this.add_page (new CPanelTimeRecords (this), _("_Time Records"));
-				this.add_page (new CPanelHolidays (this), _("_Holidays"));
-				this.add_page (new CPanelReport (this), _("_Report"));
-				this.add_page (new CPanelPreferences (this), _("_Preferences"));
+				this.add_page (new CPanelEmployees (this), _("Employees"));
+				this.add_page (new CPanelAdministrators (this), _("Administrators"));
+				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
+				this.add_page (new CPanelHolidays (this), _("Holidays"));
+				this.add_page (new CPanelReport (this), _("Report"));
+				this.add_page (new CPanelPreferences (this), _("Preferences"));
 			}
 
 			public void add_page (CPanelTab tab, string title) {
@@ -137,11 +126,23 @@ namespace Mobilect {
 					try {
 						window.ui_manager.add_ui_from_string (tab.ui_def, -1);
 					} catch (Error e) {
-						stderr.printf (_("Error: %s\n"), e.message);
+						error ("Failed to add UI to UI Manager: %s", e.message);
 					}
 				}
 			}
 
+			public override void switch_page (Widget page, uint page_num) {
+				base.switch_page (page, page_num);
+
+				if (current_page != null) {
+					current_page.changed_from ();
+				}
+
+				var tab = (page as CPanelTab);
+				tab.changed_to ();
+
+				current_page = tab;
+			}
 		}
 
 	}

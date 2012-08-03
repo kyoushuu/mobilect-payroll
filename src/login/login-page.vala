@@ -31,6 +31,7 @@ namespace Mobilect {
 			public Grid grid { get; private set; }
 			public ButtonBox button_box { get; private set; }
 
+
 			public LoginPage (Window window, string label) {
 				this.window = window;
 
@@ -45,6 +46,7 @@ namespace Mobilect {
 
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
+				grid.row_homogeneous = true;
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
 				box.add (grid);

@@ -36,10 +36,9 @@ namespace Mobilect {
 				OBJECT,
 				ID,
 				USERNAME,
-				FIRSTNAME,
-				NAME,
 				NUM
 			}
+
 
 			public AdministratorList () {
 				stamp = (int) Random.next_int ();
@@ -47,7 +46,37 @@ namespace Mobilect {
 
 			public new void add (Administrator administrator) {
 				administrator.list = this;
+				administrator.notify.connect ((o, p) => {
+					TreeIter iter;
+					create_iter (out iter, o as Administrator);
+					row_changed (get_path (iter), iter);
+				});
 				(this as ArrayList<Administrator>).add (administrator);
+
+				TreeIter iter;
+				create_iter (out iter, administrator);
+				row_inserted (get_path (iter), iter);
+			}
+
+			public new void remove (Administrator administrator) {
+				TreeIter iter;
+				create_iter (out iter, administrator);
+				row_deleted (get_path (iter));
+
+				administrator.list = null;
+				(this as ArrayList<Administrator>).remove (administrator);
+			}
+
+			public new void remove_all () {
+				var list = new Administrator[0];
+
+				foreach (var administrator in this) {
+					list += administrator;
+				}
+
+				foreach (var administrator in list) {
+					remove (administrator);
+				}
 			}
 
 			public bool contains_id (int id) {
@@ -93,10 +122,6 @@ namespace Mobilect {
 						return typeof (int);
 					case Columns.USERNAME:
 						return typeof (string);
-					case Columns.FIRSTNAME:
-						return typeof (string);
-					case Columns.NAME:
-						return typeof (string);
 					default:
 						return Type.INVALID;
 				}
@@ -109,10 +134,10 @@ namespace Mobilect {
 			public bool get_iter (out TreeIter iter, TreePath path) {
 				/* we do not allow children */
 				/* depth 1 = top level; a list only has top level nodes and no children */
-				assert (path.get_depth() == 1);
+				assert (path.get_depth () == 1);
 
 				/* the n-th top level row */
-				return get_iter_with_index (out iter, path.get_indices()[0]);
+				return get_iter_with_index (out iter, path.get_indices ()[0]);
 			}
 
 			public int get_n_columns () {
@@ -132,16 +157,13 @@ namespace Mobilect {
 
 				switch (column) {
 					case Columns.OBJECT:
-						value.set_object (record);
+						value = record;
 						break;
 					case Columns.ID:
-						value.set_int (record.id);
+						value = record.id;
 						break;
 					case Columns.USERNAME:
-						value.set_string (record.username);
-						break;
-					case Columns.NAME:
-						value.set_string (record.username);
+						value = record.username;
 						break;
 				}
 			}

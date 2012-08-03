@@ -28,10 +28,9 @@ namespace Mobilect {
 
 		public errordomain ApplicationError {
 			USERNAME_NOT_FOUND,
-			EMPLOYEE_NOT_FOUND,
 			WRONG_PASSWORD,
 			ALREADY_LOGGED_IN,
-			UNKNOWN
+			NOT_LOGGED_IN
 		}
 
 		public class Application : Gtk.Application {
@@ -43,16 +42,16 @@ namespace Mobilect {
 
 			public Application () {
 				Object (application_id: "com.mobilectpower.payroll");
+
+				database = new Database ();
 			}
 
 			public override void activate () {
-				try {
-					database = new Database ();
-				} catch (Error e) {
-					var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-					                                  MessageType.ERROR, ButtonsType.CLOSE,
+				if (database == null) {
+					var e_dialog = new MessageDialog (this.window, DialogFlags.MODAL,
+					                                  MessageType.ERROR, ButtonsType.OK,
 					                                  _("Failed to load database."));
-					e_dialog.secondary_text = e.message;
+					e_dialog.secondary_text = _("Check error logs for more information about this error.");
 					e_dialog.run ();
 					e_dialog.destroy ();
 
@@ -76,12 +75,7 @@ namespace Mobilect {
 					          help_link_uri (name?? PACKAGE, link_id),
 					          CURRENT_TIME);
 				} catch (Error e) {
-					var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-					                                  MessageType.ERROR, ButtonsType.CLOSE,
-					                                  _("There was an error displaying the help."));
-					e_dialog.secondary_text = e.message;
-					e_dialog.run ();
-					e_dialog.destroy ();
+					warning ("Failed to display the help: %s", e.message);
 				}
 			}
 

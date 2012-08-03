@@ -26,8 +26,8 @@ namespace Mobilect {
 
 		public class CPanelTimeRecords : CPanelTab {
 
-			public DateEntry start_entry { get; private set; }
-			public DateEntry end_entry { get; private set; }
+			public DateSpinButton start_spin { get; private set; }
+			public DateSpinButton end_spin { get; private set; }
 			public TreeView tree_view { get; private set; }
 			public Spinner search_spinner { get; private set; }
 			public Button search_button { get; private set; }
@@ -55,28 +55,49 @@ namespace Mobilect {
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
-					edit ();
+					edit_action ();
 				});
 				sw.add (tree_view);
 
 				TreeViewColumn column;
+				CellRendererText renderer;
 
-				column = new TreeViewColumn.with_attributes (_("Employee"),
-				                                             new CellRendererText (),
-				                                             "text", TimeRecordList.Columns.EMPLOYEE_STRING,
-				                                             null);
+				column = new TreeViewColumn ();
+				renderer = new CellRendererText ();
+				column.title = _("Employee");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, TimeRecordList.Columns.EMPLOYEE, out value);
+					(r as CellRendererText).text = (value as Employee).get_name ();
+				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn.with_attributes (_("Start Date"),
-				                                             new CellRendererText (),
-				                                             "text", TimeRecordList.Columns.START_STRING,
-				                                             null);
+				column = new TreeViewColumn ();
+				renderer = new CellRendererText ();
+				column.title = _("Start Date");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, TimeRecordList.Columns.START, out value);
+					(r as CellRendererText).text = ((DateTime) value).format (_("%a, %d %B, %Y %I:%M %p"));
+				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn.with_attributes (_("End Date"),
-				                                             new CellRendererText (),
-				                                             "text", TimeRecordList.Columns.END_STRING,
-				                                             null);
+				column = new TreeViewColumn ();
+				renderer = new CellRendererText ();
+				column.title = _("End Date");
+				column.pack_start (renderer, false);
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					Value value;
+					m.get_value (i, TimeRecordList.Columns.END, out value);
+					var dt = ((DateTime) value);
+					if (dt != null) {
+						(r as CellRendererText).text = dt.format (_("%a, %d %B, %Y %I:%M %p"));
+					} else {
+						(r as CellRendererText).text = _("Open");
+					}
+				});
 				tree_view.append_column (column);
 
 
@@ -84,25 +105,22 @@ namespace Mobilect {
 				date_label.use_underline = true;
 				hbox.add (date_label);
 
-				start_entry = new DateEntry ();
-				hbox.add (start_entry);
+				start_spin = new DateSpinButton ();
+				hbox.add (start_spin);
 
 				var to_label = new Label (_("_to"));
 				to_label.use_underline = true;
 				hbox.add (to_label);
 
-				end_entry = new DateEntry ();
-				hbox.add (end_entry);
+				end_spin = new DateSpinButton ();
+				hbox.add (end_spin);
 
 				search_button = new Button.with_mnemonic (_("_Search"));
 				search_button.clicked.connect ((b) => {
 					search_spinner.show ();
 					search_spinner.start ();
 
-					this.list = null;
-					this.tree_view.model = null;
-
-					this.list = this.cpanel.window.app.database.get_time_records_within_date (start_entry.get_date (), end_entry.get_date ());
+					this.list = this.cpanel.window.app.database.get_time_records_within_date (start_spin.date, end_spin.date);
 					this.tree_view.model = this.list;
 
 					search_spinner.stop ();
@@ -116,7 +134,7 @@ namespace Mobilect {
 
 
 				/* Set period */
-				var date = new DateTime.now_local ().add_days (-10);
+				var date = new DateTime.now_local ().add_days (-15);
 				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
 
 				DateDay last_day;
@@ -131,12 +149,12 @@ namespace Mobilect {
 					}
 				}
 
-				start_entry.set_dmy ((15 * period) + 1,
-				                     date.get_month (),
-				                     date.get_year ());
-				end_entry.set_dmy (last_day,
-				                   date.get_month (),
-				                   date.get_year ());
+				start_spin.set_dmy ((15 * period) + 1,
+				                    date.get_month (),
+				                    date.get_year ());
+				end_spin.set_dmy (last_day,
+				                  date.get_month (),
+				                  date.get_year ());
 
 
 				ui_def =
@@ -179,48 +197,7 @@ namespace Mobilect {
 						accelerator = _("<Control>plus"),
 						tooltip = _("Add a time record to database"),
 						callback = (a) => {
-							var database = this.cpanel.window.app.database;
-							var time_record = new TimeRecord (0, database, null);
-
-							var dialog = new TimeRecordEditDialog (_("Add Time Record"),
-							                                       this.cpanel.window,
-							                                       time_record);
-							dialog.response.connect((d, r) => {
-								if (r == ResponseType.ACCEPT) {
-									if (time_record.employee == null) {
-										var e_dialog = new MessageDialog (this.cpanel.window,
-										                                  DialogFlags.MODAL,
-										                                  MessageType.ERROR,
-										                                  ButtonsType.OK,
-										                                  _("No employee selected."));
-										e_dialog.secondary_text = _("Select atleast one time record first.");
-										e_dialog.run ();
-										e_dialog.destroy ();
-
-										return;
-									}
-
-									try {
-										database.add_time_record (time_record.employee_id,
-										                          time_record.start,
-										                          time_record.end);
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  _("Failed to add time record."));
-										e_dialog.secondary_text = e.message;
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
-
-									this.list = null;
-									this.tree_view.model = null;
-
-								}
-
-								d.destroy ();
-							});
-							dialog.show_all ();
+							add_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -230,53 +207,7 @@ namespace Mobilect {
 						accelerator = _("<Control>minus"),
 						tooltip = _("Remove the selected time records from database"),
 						callback = (a) => {
-							var selection = tree_view.get_selection ();
-							int selected_count = selection.count_selected_rows ();
-
-							if (selected_count <= 0) {
-								var e_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.ERROR,
-								                                  ButtonsType.OK,
-								                                  _("No time record selected."));
-								e_dialog.secondary_text = _("Select atleast one time record first.");
-								e_dialog.run ();
-								e_dialog.destroy ();
-
-								return;
-							}
-
-							var m_dialog = new MessageDialog (this.cpanel.window,
-							                                  DialogFlags.MODAL,
-							                                  MessageType.INFO,
-							                                  ButtonsType.YES_NO,
-							                                  ngettext("Are you sure you want to remove the selected time record?",
-							                                           "Are you sure you want to remove the %d selected time records?",
-							                                           selected_count).printf (selected_count));
-							m_dialog.secondary_text = _("The changes will be permanent.");
-
-							if (m_dialog.run () == ResponseType.YES) {
-								selection.selected_foreach ((m, p, i) => {
-									TimeRecord time_record;
-									this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
-									try {
-										time_record.remove ();
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  ngettext("Failed to remove selected time record.",
-										                                           "Failed to remove selected time records.",
-										                                  selected_count));
-										e_dialog.secondary_text = e.message;
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
-								});
-								this.list = null;
-								this.tree_view.model = null;
-							}
-
-							m_dialog.destroy ();
+							remove_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -286,7 +217,7 @@ namespace Mobilect {
 						accelerator = _("<Control>E"),
 						tooltip = _("Edit information about the selected time records"),
 						callback = (a) => {
-							edit ();
+							edit_action ();
 						}
 					}
 				};
@@ -301,47 +232,108 @@ namespace Mobilect {
 				});
 			}
 
-			public void edit () {
-				var selection = tree_view.get_selection ();
+
+			private GLib.List<TimeRecord> get_selected (TreeSelection selection) {
+				var time_records = new GLib.List<TimeRecord>();
+
 				int selected_count = selection.count_selected_rows ();
-
 				if (selected_count <= 0) {
-					var e_dialog = new MessageDialog (this.cpanel.window,
-					                                  DialogFlags.MODAL,
-					                                  MessageType.ERROR,
-					                                  ButtonsType.OK,
-					                                  _("No time record selected."));
-					e_dialog.secondary_text = _("Select atleast one time record first.");
-					e_dialog.run ();
-					e_dialog.destroy ();
+					this.cpanel.window.show_error_dialog (_("No time record selected"),
+					                                      _("Select at least one time record first."));
 
+					return time_records;
+				}
+
+				foreach (var p in selection.get_selected_rows (null)) {
+					TimeRecord time_record;
+					TreeIter iter;
+					list.get_iter (out iter, p);
+					this.list.get (iter, TimeRecordList.Columns.OBJECT, out time_record);
+					time_records.append (time_record);
+				}
+
+				return time_records;
+			}
+
+			private void add_action () {
+				var database = this.cpanel.window.app.database;
+				var time_record = new TimeRecord (0, database, null);
+
+				var dialog = new TimeRecordEditDialog (_("Add Time Record"),
+				                                       this.cpanel.window,
+				                                       time_record);
+				dialog.response.connect ((d, r) => {
+					d.hide ();
+
+					if (r == ResponseType.ACCEPT) {
+						if (time_record.employee == null) {
+							this.cpanel.window.show_error_dialog (_("No employee selected"),
+							                                      _("Select at least one employee first."));
+
+							return;
+						}
+
+						database.add_time_record (time_record.employee_id,
+						                          time_record.start,
+						                          time_record.end);
+					}
+
+					d.destroy ();
+				});
+				dialog.show_all ();
+			}
+
+			private void remove_action () {
+				var selection = tree_view.get_selection ();
+				var time_records = get_selected (selection);
+
+				int selected_count = selection.count_selected_rows ();
+				if (selected_count < 1) {
 					return;
 				}
 
-				selection.selected_foreach ((m, p, i) => {
-					TimeRecord time_record;
-					this.list.get (i, TimeRecordList.Columns.OBJECT, out time_record);
+				var m_dialog = new MessageDialog (this.cpanel.window,
+				                                  DialogFlags.MODAL,
+				                                  MessageType.WARNING,
+				                                  ButtonsType.NONE,
+				                                  ngettext ("Are you sure you want to remove the selected time record?",
+				                                            "Are you sure you want to remove the %d selected time records?",
+				                                            selected_count).printf (selected_count));
+				m_dialog.secondary_text = ngettext ("All information about this time record will be deleted and cannot be restored.",
+				                                    "All information about these time records will be deleted and cannot be restored.",
+				                                    selected_count);
+				m_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+				                      Stock.DELETE, ResponseType.ACCEPT);
 
+				if (m_dialog.run () == ResponseType.ACCEPT) {
+					foreach (var time_record in time_records) {
+						time_record.remove ();
+					};
+				}
+
+				m_dialog.destroy ();
+			}
+
+			private void edit_action () {
+				var selection = tree_view.get_selection ();
+				var time_records = get_selected (selection);
+
+				foreach (var time_record in time_records) {
 					var dialog = new TimeRecordEditDialog (_("Time Record Properties"),
 					                                       this.cpanel.window,
 					                                       time_record);
 					dialog.response.connect ((d, r) => {
-						if (r == ResponseType.ACCEPT) {
-							try {
-								dialog.time_record.update ();
-							} catch (Error e) {
-								stderr.printf (_("Error: %s\n"), e.message);
-							}
+						d.hide ();
 
-							this.list = null;
-							this.tree_view.model = null;
+						if (r == ResponseType.ACCEPT) {
+							dialog.time_record.update ();
 						}
 
 						d.destroy ();
 					});
 
 					dialog.show_all ();
-				});
+				}
 			}
 
 		}

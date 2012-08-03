@@ -33,16 +33,22 @@ namespace Mobilect {
 
 
 			public PasswordWidget () {
+				push_composite_child ();
+
+
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
+				grid.row_homogeneous = true;
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
 				this.add (grid);
+
 
 				var password_label = new Label (_("_Password:"));
 				password_label.use_underline = true;
 				password_label.xalign = 0.0f;
 				grid.add (password_label);
+				password_label.show ();
 
 				password_entry = new Entry ();
 				password_entry.visibility = false;
@@ -52,11 +58,14 @@ namespace Mobilect {
 				                     password_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				password_entry.show ();
+
 
 				var verify_label = new Label (_("_Verify:"));
 				verify_label.use_underline = true;
 				verify_label.xalign = 0.0f;
 				grid.add (verify_label);
+				verify_label.show ();
 
 				verify_entry = new Entry ();
 				verify_entry.visibility = false;
@@ -66,6 +75,10 @@ namespace Mobilect {
 				                     verify_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				verify_entry.show ();
+
+
+				pop_composite_child ();
 			}
 
 			public string? get_password () {

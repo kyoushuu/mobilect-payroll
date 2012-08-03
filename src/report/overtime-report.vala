@@ -59,35 +59,35 @@ namespace Mobilect {
 			public PayGroup[] pay_groups { get; set; }
 
 
-			public OvertimeReport (Date start, Date end) {
+			public OvertimeReport (Date start, Date end) throws ReportError {
 				base (start, end);
 
 				var period_8am_5pm_regular = new PayPeriod (_("8am-5pm"),
 				                                            false,
 				                                            1.0,
 				                                            new TimePeriod[] {
-																new TimePeriod (new Time (8,0), new Time (12,0)),
-																new TimePeriod (new Time (13,0), new Time (17,0))
-															});
+																											TimePeriod (Time (8,0), Time (12,0)),
+																											TimePeriod (Time (13,0), Time (17,0))
+																										});
 				var period_8am_5pm_sunday = new PayPeriod (_("8am-5pm"),
 				                                           false,
 				                                           1.3,
 				                                           new TimePeriod[] {
-															   new TimePeriod (new Time (8,0), new Time (12,0)),
-															   new TimePeriod (new Time (13,0), new Time (17,0))
-														   });
+																										 TimePeriod (Time (8,0), Time (12,0)),
+																										 TimePeriod (Time (13,0), Time (17,0))
+																									 });
 				var period_5pm_10pm = new PayPeriod (_("5pm-10pm"),
 				                                     true,
 				                                     1.25,
 				                                     new TimePeriod[] {
-														 new TimePeriod (new Time (17,0), new Time (22,0))
-													 });
+																							 TimePeriod (Time (17,0), Time (22,0))
+																						 });
 				var period_10pm_6am = new PayPeriod (_("10pm-6am"),
 				                                     true,
 				                                     1.5,
 				                                     new TimePeriod[] {
-														 new TimePeriod (new Time (22,0), new Time (6,0))
-													 });
+																							 TimePeriod (Time (22,0), Time (6,0))
+																						 });
 
 				var pay_periods_regular = new PayPeriod[] {
 					period_8am_5pm_regular,
@@ -145,18 +145,16 @@ namespace Mobilect {
 					              pay_periods_sunday,
 					              null)
 				};
-
-				begin_print.connect (begin_print_handler);
-				draw_page.connect (draw_page_handler);
-				request_page_setup.connect ((c, n, s) => {
-					if (n < pages_payroll) {
-						s.set_orientation (PageOrientation.LANDSCAPE);
-					}
-				});
 			}
 
 
-			public void begin_print_handler (PrintContext context) {
+			public override void request_page_setup (PrintContext context, int page_nr, PageSetup setup) {
+				if (page_nr < pages_payroll) {
+					setup.set_orientation (PageOrientation.LANDSCAPE);
+				}
+			}
+
+			public override void begin_print (PrintContext context) {
 				update_font_height (context);
 
 				/* Get height of header and footer */
@@ -493,7 +491,7 @@ namespace Mobilect {
 						cr.rel_move_to (number_column_width, 0);
 
 						/* Hourly Rate */
-						rate = employee.rate/(26*8);
+						rate = employee.rate_per_hour;
 						layout.set_markup ("%.2lf".printf (rate), -1);
 						cairo_show_layout (cr, layout);
 						cr.rel_move_to (number_column_width, 0);
@@ -555,7 +553,7 @@ namespace Mobilect {
 				}
 			}
 
-			public void draw_page_handler (Gtk.PrintContext context, int page_nr) {
+			public override void draw_page (PrintContext context, int page_nr) {
 				var cr = context.get_cairo_context ();
 
 				if (page_nr < pages_payroll) {

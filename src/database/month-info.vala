@@ -113,6 +113,7 @@ namespace Mobilect {
 					} catch (Error e) {
 						/* Set as non-holiday on error */
 						is_holiday[i] = HolidayType.NON_HOLIDAY;
+						critical ("Failed to get day types from database: %s", e.message);
 					}
 				}
 			}
@@ -175,6 +176,7 @@ namespace Mobilect {
 						database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 					}
 				} catch (Error e) {
+					critical ("Failed to set day type in database: %s", e.message);
 				}
 			}
 
@@ -206,10 +208,10 @@ namespace Mobilect {
 			public bool get_iter (out TreeIter iter, TreePath path) {
 				/* we do not allow children */
 				/* depth 1 = top level; a list only has top level nodes and no children */
-				assert (path.get_depth() == 1);
+				assert (path.get_depth () == 1);
 
 				/* the n-th top level row */
-				return create_iter (out iter, path.get_indices()[0]);
+				return create_iter (out iter, path.get_indices ()[0]);
 			}
 
 			public int get_n_columns () {
@@ -229,16 +231,16 @@ namespace Mobilect {
 
 				switch (column) {
 					case Columns.ID:
-						value.set_int (id);
+						value = id;
 						break;
 					case Columns.DAY:
-						value.set_int (id+1);
+						value = id+1;
 						break;
 					case Columns.WEEKDAY:
-						value.set_int (get_weekday (id+1));
+						value = get_weekday (id+1);
 						break;
 					case Columns.HOLIDAY_TYPE:
-						value.set_int (is_holiday[id]);
+						value = is_holiday[id];
 						break;
 				}
 			}

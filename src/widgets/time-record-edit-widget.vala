@@ -30,8 +30,8 @@ namespace Mobilect {
 
 			public ComboBox employee_combobox { get; private set; }
 
-			public DateTimeEntry start_entry { get; private set; }
-			public DateTimeEntry end_entry { get; private set; }
+			public DateTimeSpinButton start_entry { get; private set; }
+			public DateTimeSpinButton end_entry { get; private set; }
 
 			public CheckButton open_end_check { get; private set; }
 
@@ -52,7 +52,7 @@ namespace Mobilect {
 						open_end_check.active = tr_null;
 						end_entry.sensitive = !tr_null;
 
-						var employees = time_record.database.get_employees ();
+						var employees = time_record.database.employee_list;
 						employee_combobox.model = employees;
 
 						if (_time_record.employee != null) {
@@ -68,16 +68,23 @@ namespace Mobilect {
 
 
 			public TimeRecordEditWidget (TimeRecord time_record) {
+				push_composite_child ();
+
+
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
+				grid.row_homogeneous = true;
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
 				this.add (grid);
+				grid.show ();
+
 
 				var employee_label = new Label (_("_Employee:"));
 				employee_label.use_underline = true;
 				employee_label.xalign = 0.0f;
 				grid.add (employee_label);
+				employee_label.show ();
 
 				employee_combobox = new ComboBox ();
 				employee_combobox.hexpand = true;
@@ -85,46 +92,58 @@ namespace Mobilect {
 				                     employee_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				employee_combobox.show ();
 
 				var employee_cell_renderer = new CellRendererText ();
 				employee_combobox.pack_start (employee_cell_renderer, true);
 				employee_combobox.add_attribute (employee_cell_renderer,
 				                                 "text", EmployeeList.Columns.NAME);
 
+
 				var start_label = new Label (_("_Start:"));
 				start_label.use_underline = true;
 				start_label.xalign = 0.0f;
 				grid.add (start_label);
+				start_label.show ();
 
-				start_entry = new DateTimeEntry ();
+				start_entry = new DateTimeSpinButton ();
 				start_entry.hexpand = true;
 				grid.attach_next_to (start_entry,
 				                     start_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				start_entry.show ();
+
 
 				var end_label = new Label (_("_End:"));
 				end_label.use_underline = true;
 				end_label.xalign = 0.0f;
 				grid.add (end_label);
+				end_label.show ();
 
-				end_entry = new DateTimeEntry ();
+				end_entry = new DateTimeSpinButton ();
 				end_entry.hexpand = true;
 				grid.attach_next_to (end_entry,
 				                     end_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				end_entry.show ();
+
 
 				open_end_check = new CheckButton.with_mnemonic (_("_Open end"));
 				open_end_check.hexpand = true;
 				open_end_check.toggled.connect ((t) => {
 					end_entry.sensitive = !open_end_check.active;
 				});
-
 				grid.attach_next_to (open_end_check,
 				                     end_label,
 				                     PositionType.BOTTOM,
 				                     3, 1);
+				open_end_check.show ();
+
+
+				pop_composite_child ();
+
 
 				this.time_record = time_record;
 			}

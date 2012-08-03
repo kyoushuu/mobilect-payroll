@@ -46,7 +46,7 @@ namespace Mobilect {
 					return _employee != null? _employee.id : -1;
 				}
 				set {
-					var e = database.get_employee (value);
+					var e = database.employee_list.get_with_id (value);
 					if (e != null) {
 						_employee = e;
 					}
@@ -89,49 +89,21 @@ namespace Mobilect {
 						}
 
 						cell_data = data_model.get_value_at (1, 0);
-						if (time_val.from_iso8601 (database.dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
+						if (time_val.from_iso8601 (database.dh_string.get_str_from_value (cell_data).replace (" ", "T"))) {
 							this.start = new DateTime.from_timeval_local (time_val);
 						}
 
 						cell_data = data_model.get_value_at (2, 0);
-						if (time_val.from_iso8601 (database.dh_string.get_str_from_value (cell_data).replace (" ", "T") + "Z")) {
+						if (time_val.from_iso8601 (database.dh_string.get_str_from_value (cell_data).replace (" ", "T"))) {
 							this.end = new DateTime.from_timeval_local (time_val);
 						}
 					} catch (Error e) {
-						stderr.printf (_("Error: %s\n"), e.message);
+						critical ("Failed to get time record data from database: %s", e.message);
 					}
 				}
 			}
 
-			public string get_start_string (bool to_local) {
-				var dt = this.start;
-
-				if (to_local) {
-					dt = dt.to_local ();
-				} else {
-					dt = dt.to_utc ();
-				}
-
-				return dt.format ("%F %T");
-			}
-
-			public string? get_end_string (bool to_local) {
-				var dt = this.end;
-
-				if (dt == null) {
-					return null;
-				}
-
-				if (to_local) {
-					dt = dt.to_local ();
-				} else {
-					dt = dt.to_utc ();
-				}
-
-				return dt.format ("%F %T");
-			}
-
-			public void update () throws ApplicationError {
+			public void update () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 				var value_employee_id = Value (typeof (int));
@@ -160,21 +132,25 @@ namespace Mobilect {
 					stmt_params.get_holder ("year").set_value (value_year);
 					stmt_params.get_holder ("month").set_value (value_month);
 					stmt_params.get_holder ("day").set_value (value_day);
-					stmt_params.get_holder ("start").set_value_str (database.dh_string, this.get_start_string (false));
-					stmt_params.get_holder ("end").set_value_str (database.dh_string, this.get_end_string (false));
+					stmt_params.get_holder ("start").set_value_str (database.dh_string, this.start.format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (database.dh_string,
+					                                              this.end != null?
+					                                              this.end.format ("%F %T") : null);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (ApplicationError e) {
-					throw e;
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to update time record in database: %s", e.message);
 				}
 			}
 
-			public void remove () throws ApplicationError {
+			public void remove () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
 				value_id.set_int (this.id);
+
+				if (list != null) {
+					list.remove (this);
+				}
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("DELETE FROM time_records" +
@@ -183,7 +159,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to remove time record from database: %s", e.message);
 				}
 			}
 

@@ -34,14 +34,11 @@ namespace Mobilect {
 			public Button button_logout { get; private set; }
 			public Button button_admin { get; private set; }
 
-			public EmployeeLoginPage (Window window) {
-				base (window, _("Employee Login"));
 
-				window.notebook.switch_page.connect ((t, p, n) => {
-					if (n == window.PAGE_LOGIN_EMPLOYEE) {
-						reload ();
-					}
-				});
+			public EmployeeLoginPage (Window window) {
+				base (window, _("Employee Log In"));
+
+				this.list = this.window.app.database.employee_list;
 
 				var name_label = new Label (_("_Name:"));
 				name_label.use_underline = true;
@@ -50,10 +47,16 @@ namespace Mobilect {
 
 				name_combobox = new ComboBox ();
 				name_combobox.hexpand = true;
+				name_combobox.model = this.list;
 				grid.attach_next_to (name_combobox,
 				                     name_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+
+				TreeIter iter;
+				if (this.list.get_iter_first (out iter)) {
+					this.name_combobox.set_active_iter (iter);
+				}
 
 				var name_cell_renderer = new CellRendererText ();
 				name_combobox.pack_start (name_cell_renderer, true);
@@ -74,11 +77,11 @@ namespace Mobilect {
 				                     PositionType.RIGHT,
 				                     2, 1);
 
-				button_login = new Button.with_mnemonic (_("Log_in"));
+				button_login = new Button.with_mnemonic (_("Log _In"));
 				button_login.can_default = true;
 				button_box.add (button_login);
 
-				button_logout = new Button.with_mnemonic (_("Log_out"));
+				button_logout = new Button.with_mnemonic (_("Log _Out"));
 				button_logout.can_default = true;
 				button_box.add (button_logout);
 
@@ -87,7 +90,6 @@ namespace Mobilect {
 				button_box.set_child_secondary (button_admin, true);
 
 				this.button_login.clicked.connect ((t) => {
-					TreeIter iter;
 					Employee employee;
 
 					try {
@@ -99,7 +101,7 @@ namespace Mobilect {
 
 						if (employee.get_password_checksum () !=
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
-							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
+							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password"));
 
 						if (employee.get_open_time_records_num () > 0)
 							throw new ApplicationError.ALREADY_LOGGED_IN (_("You are already logged in."));
@@ -114,17 +116,11 @@ namespace Mobilect {
 
 						this.password_entry.text = "";
 					} catch (Error e) {
-						var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-						                                  MessageType.ERROR, ButtonsType.CLOSE,
-						                                  _("Failed to login."));
-						e_dialog.secondary_text = e.message;
-						e_dialog.run ();
-						e_dialog.destroy ();
+						this.window.show_error_dialog (_("Failed to log in"), e.message);
 					}
 				});
 
 				this.button_logout.clicked.connect ((t) => {
-					TreeIter iter;
 					Employee employee;
 
 					try {
@@ -138,6 +134,9 @@ namespace Mobilect {
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
 							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
 
+						if (employee.get_open_time_records_num () < 1)
+							throw new ApplicationError.NOT_LOGGED_IN (_("Not logged in."));
+
 						employee.log_employee_out ();
 
 						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
@@ -148,28 +147,13 @@ namespace Mobilect {
 
 						this.password_entry.text = "";
 					} catch (Error e) {
-						var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-						                                  MessageType.ERROR, ButtonsType.CLOSE,
-						                                  _("Failed to log out."));
-						e_dialog.secondary_text = e.message;
-						e_dialog.run ();
-						e_dialog.destroy ();
+						this.window.show_error_dialog (_("Failed to log out"), e.message);
 					}
 				});
 
 				this.button_admin.clicked.connect ((t) => {
 					this.window.notebook.page = this.window.PAGE_LOGIN_ADMIN;
 				});
-			}
-
-			public void reload () {
-				this.list = this.window.app.database.get_employees ();
-				this.name_combobox.model = this.list;
-
-				TreeIter iter;
-				if (this.list.get_iter_first (out iter)) {
-					this.name_combobox.set_active_iter (iter);
-				}
 			}
 
 		}

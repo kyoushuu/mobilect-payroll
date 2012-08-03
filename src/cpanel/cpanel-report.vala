@@ -35,13 +35,12 @@ namespace Mobilect {
 			public const string ACTION_PRINT_PREVIEW = "cpanel-report-print-preview";
 			public const string ACTION_EXPORT = "cpanel-report-export";
 
-			public EmployeeList list;
-
 			public Grid grid { get; private set; }
 
-			public ComboBoxText type_combo { get; private set; }
-			public DateEntry start_entry { get; private set; }
-			public DateEntry end_entry { get; private set; }
+			public RadioButton regular_radio { get; private set; }
+			public RadioButton overtime_radio { get; private set; }
+			public DateSpinButton start_spin { get; private set; }
+			public DateSpinButton end_spin { get; private set; }
 			public TreeView deduc_view { get; private set; }
 
 			private FontDescription title_font = FontDescription.from_string ("Sans Bold 14");
@@ -76,17 +75,13 @@ namespace Mobilect {
 			public CPanelReport (CPanel cpanel) {
 				base (cpanel, ACTION);
 
-				this.changed_to.connect (() => {
-					reload ();
-				});
-
 				page_setup = new PageSetup ();
 				page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
 				grid.row_spacing = 3;
-				grid.column_spacing = 12;
+				grid.column_spacing = 6;
 				this.add_with_viewport (grid);
 
 				var type_label = new Label (_("_Type:"));
@@ -94,31 +89,34 @@ namespace Mobilect {
 				type_label.xalign = 0.0f;
 				grid.add (type_label);
 
-				type_combo = new ComboBoxText ();
-				type_combo.append_text (_("Regular"));
-				type_combo.append_text (_("Overtime"));
-				type_combo.active = 0;
-				grid.attach_next_to (type_combo,
+				regular_radio = new RadioButton.with_mnemonic (null, _("Re_gular"));
+				grid.attach_next_to (regular_radio,
 				                     type_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+
+				overtime_radio = new RadioButton.with_mnemonic_from_widget (regular_radio, _("_Overtime"));
+				grid.attach_next_to (overtime_radio,
+				                     regular_radio,
+				                     PositionType.RIGHT,
+				                     1, 1);
 
 				var period_label = new Label (_("_Period:"));
 				period_label.use_underline = true;
 				period_label.xalign = 0.0f;
 				grid.add (period_label);
 
-				start_entry = new DateEntry ();
-				grid.attach_next_to (start_entry,
+				start_spin = new DateSpinButton ();
+				grid.attach_next_to (start_spin,
 				                     period_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
 
-				end_entry = new DateEntry ();
-				grid.attach_next_to (end_entry,
-				                     start_entry,
-				                     PositionType.BOTTOM,
-				                     2, 1);
+				end_spin = new DateSpinButton ();
+				grid.attach_next_to (end_spin,
+				                     start_spin,
+				                     PositionType.RIGHT,
+				                     1, 1);
 
 				var deduc_scroll = new ScrolledWindow (null, null);
 				deduc_scroll.expand = true;
@@ -156,7 +154,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.TAX, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
@@ -179,7 +177,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.LOAN, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
@@ -202,7 +200,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.PAG_IBIG, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
@@ -225,7 +223,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.SSS_LOAN, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
@@ -248,7 +246,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.VALE, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
@@ -271,7 +269,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.MOESALA_LOAN, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
@@ -294,13 +292,13 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Columns.MOESALA_SAVINGS, out value);
-					(r as CellRendererText).text = "%.2lf".printf (value.get_double ());
+					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
 				deduc_view.append_column (column);
 
 
 				/* Set period */
-				var date = new DateTime.now_local ().add_days (-10);
+				var date = new DateTime.now_local ().add_days (-15);
 				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
 
 				DateDay last_day;
@@ -315,12 +313,12 @@ namespace Mobilect {
 					}
 				}
 
-				start_entry.set_dmy ((15 * period) + 1,
-				                     date.get_month (),
-				                     date.get_year ());
-				end_entry.set_dmy (last_day,
-				                   date.get_month (),
-				                   date.get_year ());
+				start_spin.set_dmy ((15 * period) + 1,
+				                    date.get_month (),
+				                    date.get_year ());
+				end_spin.set_dmy (last_day,
+				                  date.get_month (),
+				                  date.get_year ());
 
 
 				ui_def =
@@ -377,17 +375,28 @@ namespace Mobilect {
 							                                      ResponseType.REJECT);
 
 							var content_area = dialog.get_content_area ();
+							var action_area = dialog.get_action_area ();
+
+							dialog.border_width = 5;
+							content_area.spacing = 2; /* 2 * 5 + 2 = 12 */
+							(action_area as Container).border_width = 5;
+
 
 							var sf_grid = new Grid ();
 							sf_grid.orientation = Orientation.VERTICAL;
+							sf_grid.row_homogeneous = true;
 							sf_grid.row_spacing = 3;
 							sf_grid.column_spacing = 12;
+							sf_grid.border_width = 5;
 							content_area.add (sf_grid);
+							sf_grid.show ();
+
 
 							var title_label = new Label (_("_Title:"));
 							title_label.use_underline = true;
 							title_label.xalign = 0.0f;
 							sf_grid.add (title_label);
+							title_label.show ();
 
 							var title_font_button = new FontButton ();
 							title_font_button.font_desc = title_font;
@@ -395,11 +404,14 @@ namespace Mobilect {
 							                        title_label,
 							                        PositionType.RIGHT,
 							                        2, 1);
+							title_font_button.show ();
+
 
 							var company_name_label = new Label (_("_Company Name:"));
 							company_name_label.use_underline = true;
 							company_name_label.xalign = 0.0f;
 							sf_grid.add (company_name_label);
+							company_name_label.show ();
 
 							var company_name_font_button = new FontButton ();
 							company_name_font_button.font_desc = company_name_font;
@@ -407,11 +419,14 @@ namespace Mobilect {
 							                        company_name_label,
 							                        PositionType.RIGHT,
 							                        2, 1);
+							company_name_font_button.show ();
+
 
 							var header_label = new Label (_("_Header:"));
 							header_label.use_underline = true;
 							header_label.xalign = 0.0f;
 							sf_grid.add (header_label);
+							header_label.show ();
 
 							var header_font_button = new FontButton ();
 							header_font_button.font_desc = header_font;
@@ -419,11 +434,14 @@ namespace Mobilect {
 							                        header_label,
 							                        PositionType.RIGHT,
 							                        2, 1);
+							header_font_button.show ();
+
 
 							var text_label = new Label (_("_Text:"));
 							text_label.use_underline = true;
 							text_label.xalign = 0.0f;
 							sf_grid.add (text_label);
+							text_label.show ();
 
 							var text_font_button = new FontButton ();
 							text_font_button.font_desc = text_font;
@@ -431,11 +449,14 @@ namespace Mobilect {
 							                        text_label,
 							                        PositionType.RIGHT,
 							                        2, 1);
+							text_font_button.show ();
+
 
 							var number_label = new Label (_("_Number:"));
 							number_label.use_underline = true;
 							number_label.xalign = 0.0f;
 							sf_grid.add (number_label);
+							number_label.show ();
 
 							var number_font_button = new FontButton ();
 							number_font_button.font_desc = number_font;
@@ -443,11 +464,14 @@ namespace Mobilect {
 							                        number_label,
 							                        PositionType.RIGHT,
 							                        2, 1);
+							number_font_button.show ();
+
 
 							var emp_number_label = new Label (_("_Emphasized Number:"));
 							emp_number_label.use_underline = true;
 							emp_number_label.xalign = 0.0f;
 							sf_grid.add (emp_number_label);
+							emp_number_label.show ();
 
 							var emp_number_font_button = new FontButton ();
 							emp_number_font_button.font_desc = emp_number_font;
@@ -455,8 +479,9 @@ namespace Mobilect {
 							                        emp_number_label,
 							                        PositionType.RIGHT,
 							                        2, 1);
+							emp_number_font_button.show ();
 
-							dialog.show_all ();
+
 							if (dialog.run () == ResponseType.ACCEPT) {
 								title_font = title_font_button.get_font_desc ();
 								company_name_font = company_name_font_button.get_font_desc ();
@@ -465,6 +490,7 @@ namespace Mobilect {
 								number_font = number_font_button.get_font_desc ();
 								emp_number_font = emp_number_font_button.get_font_desc ();
 							}
+
 							dialog.destroy ();
 						}
 					},
@@ -491,22 +517,14 @@ namespace Mobilect {
 						accelerator = _("<Control>P"),
 						tooltip = _("Print payroll and payslips"),
 						callback = (a) => {
-							var pr = create_report ();
-
 							try {
+								var pr = create_report ();
 								pr.print_dialog (this.cpanel.window);
+								settings = pr.print_settings;
 							} catch (Error e) {
-								var e_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.ERROR,
-								                                  ButtonsType.OK,
-								                                  _("Failed to print report."));
-								e_dialog.secondary_text = e.message;
-								e_dialog.run ();
-								e_dialog.destroy ();
+								this.cpanel.window.show_error_dialog (_("Failed to print report"),
+								                                      e.message);
 							}
-
-							settings = pr.print_settings;
 						}
 					},
 					Gtk.ActionEntry () {
@@ -516,22 +534,14 @@ namespace Mobilect {
 						accelerator = _("<Shift><Control>P"),
 						tooltip = _("Print preview of payroll and payslips"),
 						callback = (a) => {
-							var pr = create_report ();
-
 							try {
+								var pr = create_report ();
 								pr.preview_dialog (this.cpanel.window);
+								settings = pr.print_settings;
 							} catch (Error e) {
-								var e_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.ERROR,
-								                                  ButtonsType.OK,
-								                                  _("Failed to preview report."));
-								e_dialog.secondary_text = e.message;
-								e_dialog.run ();
-								e_dialog.destroy ();
+								this.cpanel.window.show_error_dialog (_("Failed to preview report"),
+								                                      e.message);
 							}
-
-							settings = pr.print_settings;
 						}
 					},
 					Gtk.ActionEntry () {
@@ -541,41 +551,36 @@ namespace Mobilect {
 						accelerator = _("<Control>E"),
 						tooltip = _("Export payroll and payslips to a PDF file"),
 						callback = (a) => {
-							var pr = create_report ();
-							var dialog = new FileChooserDialog (_("Export"),
-							                                    this.cpanel.window,
-							                                    FileChooserAction.SAVE,
-							                                    Stock.CANCEL, ResponseType.REJECT,
-							                                    Stock.SAVE, ResponseType.ACCEPT);
-							dialog.do_overwrite_confirmation = true;
-							if (type_combo.active == 0) {
-								dialog.set_current_name (_("payroll-regular_%s-%s.pdf").printf (pr.format_date (start_entry.get_date (), "%Y%m%d"),
-								                                                                pr.format_date (end_entry.get_date (), "%Y%m%d")));
-							} else {
-								dialog.set_current_name (_("payroll-overtime_%s-%s.pdf").printf (pr.format_date (start_entry.get_date (), "%Y%m%d"),
-								                                                                 pr.format_date (end_entry.get_date (), "%Y%m%d")));
-							}
+							try {
+								var pr = create_report ();
 
-							if (dialog.run () == ResponseType.ACCEPT) {
-								pr.export_filename = dialog.get_filename ();
+								var dialog = new FileChooserDialog (_("Export"),
+								                                    this.cpanel.window,
+								                                    FileChooserAction.SAVE,
+								                                    Stock.CANCEL, ResponseType.REJECT,
+								                                    Stock.SAVE, ResponseType.ACCEPT);
+								dialog.do_overwrite_confirmation = true;
 
-								try {
+								string current_name;
+								if (regular_radio.active) {
+									current_name = _("payroll-regular_%s-%s.pdf");
+								} else {
+									current_name = _("payroll-overtime_%s-%s.pdf");
+								}
+								dialog.set_current_name (current_name.printf (pr.format_date (start_spin.date, "%Y%m%d"),
+								                                              pr.format_date (end_spin.date, "%Y%m%d")));
+
+								if (dialog.run () == ResponseType.ACCEPT) {
+									pr.export_filename = dialog.get_filename ();
 									pr.export (this.cpanel.window);
-								} catch (Error e) {
-									var e_dialog = new MessageDialog (this.cpanel.window,
-									                                  DialogFlags.MODAL,
-									                                  MessageType.ERROR,
-									                                  ButtonsType.OK,
-									                                  _("Failed to export report."));
-									e_dialog.secondary_text = e.message;
-									e_dialog.run ();
-									e_dialog.destroy ();
+									settings = pr.print_settings;
 								}
 
-								settings = pr.print_settings;
+								dialog.destroy ();
+							} catch (Error e) {
+								this.cpanel.window.show_error_dialog (_("Failed to export report"),
+								                                      e.message);
 							}
-
-							dialog.destroy ();
 						}
 					}
 				};
@@ -583,17 +588,17 @@ namespace Mobilect {
 				this.action_group.add_actions (actions, this);
 			}
 
-			private Report create_report () {
+			private Report create_report () throws ReportError, RegularReportError {
 				Report pr;
-				if (type_combo.active == 0) {
-					pr = new RegularReport (start_entry.get_date (), end_entry.get_date ());
+				if (regular_radio.active) {
+					pr = new RegularReport (start_spin.date, end_spin.date);
 					(pr as RegularReport).deductions = deduc_view.model as ListStore;
 					pr.title = _("SEMI-MONTHLY PAYROLL");
 				} else {
-					pr = new OvertimeReport (start_entry.get_date (), end_entry.get_date ());
+					pr = new OvertimeReport (start_spin.date, end_spin.date);
 					pr.title = _("MONTHLY OVERTIME PAYROLL");
 				}
-				pr.employees = this.cpanel.window.app.database.get_employees ();
+				pr.employees = this.cpanel.window.app.database.employee_list;
 				pr.default_page_setup = page_setup;
 				pr.show_progress = true;
 
@@ -604,7 +609,9 @@ namespace Mobilect {
 				return pr;
 			}
 
-			public void reload () {
+			public override void changed_to () {
+				base.changed_to ();
+
 				var deduc_store = new ListStore (Columns.NUM,
 				                                 typeof (int),
 				                                 typeof (string),
@@ -615,16 +622,16 @@ namespace Mobilect {
 				                                 typeof (double),
 				                                 typeof (double),
 				                                 typeof (double));
-				this.list = this.cpanel.window.app.database.get_employees ();
+				deduc_view.model = deduc_store;
+
+				var list = this.cpanel.window.app.database.employee_list;
 				for (int i = 0; i < list.size; i++) {
 					var employee = (list as ArrayList<Employee>).get (i);
 					deduc_store.insert_with_values (null, -1,
 					                                Columns.NAME, employee.get_name (),
 					                                Columns.ID, employee.id);
 				}
-				deduc_view.model = deduc_store;
 			}
-
 		}
 
 	}

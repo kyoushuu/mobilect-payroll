@@ -78,7 +78,7 @@ namespace Mobilect {
 
 				filter.time_periods = new TimePeriod[this.time_periods.length];
 				for (int i = 0; i < this.time_periods.length; i++) {
-					filter.time_periods[i] = this.time_periods[i].duplicate ();
+					filter.time_periods[i] = this.time_periods[i];
 				}
 
 				filter.use_holiday_type = use_holiday_type;

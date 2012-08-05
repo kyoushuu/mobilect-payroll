@@ -31,6 +31,7 @@ namespace Mobilect {
 			public SpinButton year_spin { get; private set; }
 			public ComboBoxText month_combo { get; private set; }
 			public TreeView tree_view { get; private set; }
+			public TreeModelSort sort { get; private set; }
 
 			public MonthInfo mh { get; private set; }
 
@@ -53,24 +54,22 @@ namespace Mobilect {
 				sw.add (tree_view);
 
 				TreeViewColumn column;
-				CellRendererText renderer_text;
+				CellRendererText renderer;
 
-				column = new TreeViewColumn ();
-				renderer_text = new CellRendererText ();
-				column.title = _("Day");
-				column.pack_start (renderer_text, false);
-				column.set_cell_data_func (renderer_text, (c, r, m, i) => {
+				renderer = new CellRendererText ();
+				column = new TreeViewColumn.with_attributes (_("Day"), renderer);
+				column.sort_column_id = MonthInfo.Columns.DAY;
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, MonthInfo.Columns.DAY, out value);
 					(r as CellRendererText).text = value.get_int ().to_string ();
 				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn ();
-				renderer_text = new CellRendererText ();
-				column.title = _("Weekday");
-				column.pack_start (renderer_text, false);
-				column.set_cell_data_func (renderer_text, (c, r, m, i) => {
+				renderer = new CellRendererText ();
+				column = new TreeViewColumn.with_attributes (_("Weekday"), renderer);
+				column.sort_column_id = MonthInfo.Columns.WEEKDAY;
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					string text;
 
@@ -123,7 +122,6 @@ namespace Mobilect {
 				holiday_type_model.insert_with_values (null, -1, 0, _("Special Holiday"));
 				holiday_type_model.insert_with_values (null, -1, 0, _("Regular Holiday"));
 
-				column = new TreeViewColumn ();
 				var renderer_combo = new CellRendererCombo ();
 				renderer_combo.editable = true;
 				renderer_combo.has_entry = false;
@@ -133,12 +131,13 @@ namespace Mobilect {
 					mh.set_day_type (new TreePath.from_string (s).get_indices ()[0] + 1,                         // day
 					                 (MonthInfo.HolidayType) holiday_type_model.get_path (i).get_indices ()[0]); // holiday type
 				});
-				column.title = _("Holiday Type");
-				column.pack_start (renderer_combo, false);
+				column = new TreeViewColumn.with_attributes (_("Holiday Type"), renderer_combo);
+				column.sort_column_id = MonthInfo.Columns.HOLIDAY_TYPE;
 				column.set_cell_data_func (renderer_combo, (c, r, m, i) => {
 					Value value;
 					TreeIter iter;
 					string text;
+
 					m.get_value (i, MonthInfo.Columns.HOLIDAY_TYPE, out value);
 					holiday_type_model.iter_nth_child (out iter, null, (MonthInfo.HolidayType) value);
 					holiday_type_model.get (iter, 0, out text);
@@ -185,7 +184,30 @@ namespace Mobilect {
 			public void update () {
 				mh = new MonthInfo (this.cpanel.window.app.database,
 				                    (int) year_spin.value, month_combo.active + 1);
-				tree_view.model = mh;
+
+				sort = new TreeModelSort.with_model (mh);
+				sort.set_sort_func (MonthInfo.Columns.DAY, (model, a, b) => {
+					Value day1, day2;
+					model.get_value (a, MonthInfo.Columns.DAY, out day1);
+					model.get_value (b, MonthInfo.Columns.DAY, out day2);
+
+					return (int) day1 - (int) day2;
+				});
+				sort.set_sort_func (MonthInfo.Columns.WEEKDAY, (model, a, b) => {
+					Value day1, day2;
+					model.get_value (a, MonthInfo.Columns.WEEKDAY, out day1);
+					model.get_value (b, MonthInfo.Columns.WEEKDAY, out day2);
+
+					return (int) day1 - (int) day2;
+				});
+				sort.set_sort_func (MonthInfo.Columns.HOLIDAY_TYPE, (model, a, b) => {
+					Value day1, day2;
+					model.get_value (a, MonthInfo.Columns.HOLIDAY_TYPE, out day1);
+					model.get_value (b, MonthInfo.Columns.HOLIDAY_TYPE, out day2);
+
+					return (MonthInfo.HolidayType) day1 - (MonthInfo.HolidayType) day2;
+				});
+				tree_view.model = sort;
 			}
 
 		}

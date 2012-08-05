@@ -30,8 +30,8 @@ namespace Mobilect {
 
 			public ComboBox employee_combobox { get; private set; }
 
-			public DateTimeSpinButton start_entry { get; private set; }
-			public DateTimeSpinButton end_entry { get; private set; }
+			public DateTimeSpinButton start_spin { get; private set; }
+			public DateTimeSpinButton end_spin { get; private set; }
 
 			public CheckButton open_end_check { get; private set; }
 
@@ -45,12 +45,12 @@ namespace Mobilect {
 
 					if (value != null) {
 						var dt = new DateTime.now_local ();
-						start_entry.set_date_time (value.start?? dt);
-						end_entry.set_date_time (value.end?? dt);
+						start_spin.set_date_time (value.start?? dt);
+						end_spin.set_date_time (value.end?? start_spin.get_date_time ());
 
 						var tr_null = (value.end == null);
 						open_end_check.active = tr_null;
-						end_entry.sensitive = !tr_null;
+						end_spin.sensitive = !tr_null;
 
 						var employees = time_record.database.employee_list;
 						employee_combobox.model = employees;
@@ -106,13 +106,13 @@ namespace Mobilect {
 				grid.add (start_label);
 				start_label.show ();
 
-				start_entry = new DateTimeSpinButton ();
-				start_entry.hexpand = true;
-				grid.attach_next_to (start_entry,
+				start_spin = new DateTimeSpinButton ();
+				start_spin.hexpand = true;
+				grid.attach_next_to (start_spin,
 				                     start_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
-				start_entry.show ();
+				start_spin.show ();
 
 
 				var end_label = new Label (_("_End:"));
@@ -121,20 +121,20 @@ namespace Mobilect {
 				grid.add (end_label);
 				end_label.show ();
 
-				end_entry = new DateTimeSpinButton ();
-				end_entry.hexpand = true;
-				grid.attach_next_to (end_entry,
+				end_spin = new DateTimeSpinButton ();
+				end_spin.hexpand = true;
+				grid.attach_next_to (end_spin,
 				                     end_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
-				end_entry.show ();
+				end_spin.show ();
 
 
 				open_end_check = new CheckButton.with_mnemonic (_("_Open end"));
 				open_end_check.hexpand = true;
 				open_end_check.toggled.connect ((t) => {
-					end_entry.sensitive = !open_end_check.active;
-				});
+															 end_spin.sensitive = !open_end_check.active;
+														 });
 				grid.attach_next_to (open_end_check,
 				                     end_label,
 				                     PositionType.BOTTOM,
@@ -157,8 +157,8 @@ namespace Mobilect {
 						this._time_record.employee = employee;
 					}
 
-					this._time_record.start = this.start_entry.get_date_time ();
-					this._time_record.end = (this.open_end_check.active)? null : this.end_entry.get_date_time ();
+					this._time_record.start = this.start_spin.get_date_time ();
+					this._time_record.end = (this.open_end_check.active)? null : this.end_spin.get_date_time ();
 				}
 			}
 

@@ -30,6 +30,7 @@ namespace Mobilect {
 		public class CPanelEmployees : CPanelTab {
 
 			public TreeView tree_view { get; private set; }
+			public TreeModelSort sort { get; private set; }
 			public EmployeeList list;
 
 			public const string ACTION = "cpanel-employees";
@@ -38,13 +39,40 @@ namespace Mobilect {
 			public const string ACTION_EDIT = "cpanel-employees-edit";
 			public const string ACTION_PASSWORD = "cpanel-employees-password";
 
+
 			public CPanelEmployees (CPanel cpanel) {
 				base (cpanel, ACTION);
 
-				this.list = this.cpanel.window.app.database.employee_list;
+				list = this.cpanel.window.app.database.employee_list;
 
-				tree_view = new TreeView ();
-				tree_view.model = this.list ;
+				sort = new TreeModelSort.with_model (this.list);
+				sort.set_sort_func (EmployeeList.Columns.NAME, (model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					return strcmp (employee1.get_name (),
+					               employee2.get_name ());
+				});
+				sort.set_sort_func (EmployeeList.Columns.TIN, (model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					return strcmp (employee1.tin, employee2.tin);
+				});
+				sort.set_sort_func (EmployeeList.Columns.RATE, (model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					return employee1.rate - employee2.rate;
+				});
+				sort.set_sort_func (EmployeeList.Columns.HOURRATE, (model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					return (int) Math.round(employee1.rate_per_hour - employee2.rate_per_hour);
+				});
+
+				tree_view = new TreeView.with_model (sort);
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
@@ -57,20 +85,20 @@ namespace Mobilect {
 
 				column = new TreeViewColumn.with_attributes (_("Employee Name"),
 				                                             new CellRendererText (),
-				                                             "text", EmployeeList.Columns.NAME,
-				                                             null);
+				                                             "text", EmployeeList.Columns.NAME);
+				column.sort_column_id = EmployeeList.Columns.NAME;
+				column.expand = true;
 				tree_view.append_column (column);
 
 				column = new TreeViewColumn.with_attributes (_("TIN Number"),
 				                                             new CellRendererText (),
-				                                             "text", EmployeeList.Columns.TIN,
-				                                             null);
+				                                             "text", EmployeeList.Columns.TIN);
+				column.sort_column_id = EmployeeList.Columns.TIN;
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
-				column.title = _("Rate");
-				column.pack_start (renderer, false);
+				column = new TreeViewColumn.with_attributes (_("Rate"), renderer);
+				column.sort_column_id = EmployeeList.Columns.RATE;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, EmployeeList.Columns.RATE, out value);
@@ -78,10 +106,9 @@ namespace Mobilect {
 				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
-				column.title = _("Rate per Hour");
-				column.pack_start (renderer, false);
+				column = new TreeViewColumn.with_attributes (_("Rate per Hour"), renderer);
+				column.sort_column_id = EmployeeList.Columns.HOURRATE;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, EmployeeList.Columns.HOURRATE, out value);
@@ -192,8 +219,11 @@ namespace Mobilect {
 
 				foreach (var p in selection.get_selected_rows (null)) {
 					Employee employee;
+					TreePath path;
 					TreeIter iter;
-					list.get_iter (out iter, p);
+
+					path = sort.convert_path_to_child_path (p);
+					list.get_iter (out iter, path);
 					this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
 					employees.append (employee);
 				}

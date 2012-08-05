@@ -29,6 +29,8 @@ namespace Mobilect {
 			public DateSpinButton date_spin { get; private set; }
 			public TimeSpinButton time_spin { get; private set; }
 
+			public signal void value_changed ();
+
 
 			public DateTimeSpinButton () {
 				this.spacing = 6;
@@ -36,10 +38,12 @@ namespace Mobilect {
 				push_composite_child ();
 
 				date_spin = new DateSpinButton ();
+				date_spin.value_changed.connect (changed);
 				this.add (date_spin);
 				date_spin.show ();
 
 				time_spin = new TimeSpinButton ();
+				time_spin.value_changed.connect (changed);
 				this.add (time_spin);
 				time_spin.show ();
 
@@ -60,6 +64,10 @@ namespace Mobilect {
 				                   date_time.get_year ());
 				time_spin.set_hm (date_time.get_hour (),
 				                  date_time.get_minute ());
+			}
+
+			private void changed () {
+				value_changed ();
 			}
 
 		}

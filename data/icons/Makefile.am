@@ -1,3 +1,5 @@
+## Process this file with automake to produce Makefile.in
+
 public_icons_themes = \
 	hicolor	\
 	HighContrastLargePrint \

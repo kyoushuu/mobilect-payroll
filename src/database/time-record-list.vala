@@ -42,6 +42,7 @@ namespace Mobilect {
 				NUM
 			}
 
+
 			public TimeRecordList () {
 				stamp = (int) Random.next_int ();
 			}
@@ -110,6 +111,7 @@ namespace Mobilect {
 
 				return null;
 			}
+
 
 			/* TreeModel implementation */
 			public Type get_column_type (int index_) {
@@ -196,7 +198,7 @@ namespace Mobilect {
 				return false;
 			}
 
-			public int iter_n_children (TreeIter? iter) requires (iter.stamp == this.stamp) {
+			public int iter_n_children (TreeIter? iter) {
 				if (iter != null) {
 					return 0;
 				}

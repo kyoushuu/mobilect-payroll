@@ -52,21 +52,14 @@ namespace Mobilect {
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
 					"    <menu name=\"FileMenu\" action=\"file\">" +
-					"      <placeholder name=\"FileMenuAdditions\">" +
-					"        <menuitem name=\"Logout\" action=\"cpanel-logout\" />" +
+					"      <placeholder name=\"FileMenuCloseAdditions\">" +
+					"        <menuitem name=\"Close\" action=\"cpanel-close\" />" +
 					"      </placeholder>" +
 					"    </menu>" +
-					"    <placeholder name=\"MenuAdditions\">" +
-					"      <placeholder name=\"CPanelMenuAdditions\" />" +
-					"    </placeholder>" +
 					"  </menubar>" +
 					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"ToolbarAdditions\">" +
-					"      <placeholder name=\"CPanelToolItems\">" +
-					"        <placeholder name=\"CPanelToolItemsAdditions\" />" +
-					"        <separator />" +
-					"        <toolitem name=\"Logout\" action=\"cpanel-logout\" />" +
-					"      </placeholder>" +
+					"    <placeholder name=\"FileToolbarCloseAdditions\">" +
+					"      <toolitem name=\"Close\" action=\"cpanel-close\" />" +
 					"    </placeholder>" +
 					"  </toolbar>" +
 					"</ui>";
@@ -78,10 +71,9 @@ namespace Mobilect {
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
-						name = "cpanel-logout",
-						stock_id = Stock.STOP,
-						label = _("_Log out"),
-						tooltip = _("Log out"),
+						name = "cpanel-close",
+						stock_id = Stock.CLOSE,
+						tooltip = _("Close control panel"),
 						callback = (a) => {
 							this.window.notebook.page = this.window.PAGE_LOGIN_EMPLOYEE;
 						}
@@ -112,7 +104,6 @@ namespace Mobilect {
 				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
 				this.add_page (new CPanelHolidays (this), _("Holidays"));
 				this.add_page (new CPanelReport (this), _("Report"));
-				this.add_page (new CPanelPreferences (this), _("Preferences"));
 			}
 
 			public void add_page (CPanelTab tab, string title) {

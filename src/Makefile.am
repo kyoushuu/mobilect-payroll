@@ -53,7 +53,6 @@ mobilect_payroll_SOURCES = \
 	cpanel/cpanel-time-records.vala \
 	cpanel/cpanel-holidays.vala \
 	cpanel/cpanel-report.vala \
-	cpanel/cpanel-preferences.vala \
 	report/report.vala \
 	report/regular-report.vala \
 	report/overtime-report.vala \

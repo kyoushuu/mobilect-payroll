@@ -33,7 +33,7 @@ namespace Mobilect {
 			public const string ACTION = "cpanel-administrators";
 			public const string ACTION_ADD = "cpanel-administrators-add";
 			public const string ACTION_REMOVE = "cpanel-administrators-remove";
-			public const string ACTION_EDIT = "cpanel-administrators-edit";
+			public const string ACTION_PROPERTIES = "cpanel-administrators-properties";
 			public const string ACTION_PASSWORD = "cpanel-administrators-password";
 
 
@@ -70,43 +70,31 @@ namespace Mobilect {
 				ui_def =
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
-					"    <placeholder name=\"MenuAdditions\">" +
-					"      <placeholder name=\"CPanelMenuAdditions\">" +
-					"        <menu name=\"CPanelAdministratorsMenu\" action=\"" + ACTION + "\">" +
-					"          <menuitem name=\"AddAdministrator\" action=\"" + ACTION_ADD + "\" />" +
-					"          <menuitem name=\"RemoveAdministrator\" action=\"" + ACTION_REMOVE + "\" />" +
-					"          <separator />" +
-					"          <menuitem name=\"EditAdministrator\" action=\"" + ACTION_EDIT + "\" />" +
-					"          <menuitem name=\"PasswordAdministrator\" action=\"" + ACTION_PASSWORD + "\" />" +
-					"        </menu>" +
+					"    <menu name=\"EditMenu\" action=\"edit\">" +
+					"      <placeholder name=\"EditMenuAdditions\">" +
+					"        <menuitem name=\"AddAdministrator\" action=\"" + ACTION_ADD + "\" />" +
+					"        <menuitem name=\"RemoveAdministrator\" action=\"" + ACTION_REMOVE + "\" />" +
+					"        <separator />" +
+					"        <menuitem name=\"PropertiesAdministrator\" action=\"" + ACTION_PROPERTIES + "\" />" +
+					"        <menuitem name=\"PasswordAdministrator\" action=\"" + ACTION_PASSWORD + "\" />" +
 					"      </placeholder>" +
-					"    </placeholder>" +
+					"    </menu>" +
 					"  </menubar>" +
 					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"ToolbarAdditions\">" +
-					"      <placeholder name=\"CPanelToolItems\">" +
-					"        <placeholder name=\"CPanelToolItemsAdditions\">" +
-					"          <toolitem name=\"AddAdministrator\" action=\"" + ACTION_ADD + "\" />" +
-					"          <toolitem name=\"RemoveAdministrator\" action=\"" + ACTION_REMOVE + "\" />" +
-					"          <toolitem name=\"EditAdministrator\" action=\"" + ACTION_EDIT + "\" />" +
-					"          <toolitem name=\"PasswordAdministrator\" action=\"" + ACTION_PASSWORD + "\" />" +
-					"        </placeholder>" +
-					"      </placeholder>" +
+					"    <placeholder name=\"EditToolbarAdditions\">" +
+					"      <toolitem name=\"AddAdministrator\" action=\"" + ACTION_ADD + "\" />" +
+					"      <toolitem name=\"RemoveAdministrator\" action=\"" + ACTION_REMOVE + "\" />" +
+					"      <toolitem name=\"PropertiesAdministrator\" action=\"" + ACTION_PROPERTIES + "\" />" +
+					"      <toolitem name=\"PasswordAdministrator\" action=\"" + ACTION_PASSWORD + "\" />" +
 					"    </placeholder>" +
 					"  </toolbar>" +
 					"</ui>";
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
-						name = ACTION,
-						stock_id = null,
-						label = _("_Administrators")
-					},
-					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						label = _("_Add"),
-						accelerator = _("<Control>plus"),
+						accelerator = _("<Control>I"),
 						tooltip = _("Add an administrator to database"),
 						callback = (a) => {
 							add_action ();
@@ -115,18 +103,16 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
-						label = _("_Remove"),
-						accelerator = _("<Control>minus"),
+						accelerator = _("Delete"),
 						tooltip = _("Remove the selected administrators from database"),
 						callback = (a) => {
 							remove_action ();
 						}
 					},
 					Gtk.ActionEntry () {
-						name = ACTION_EDIT,
+						name = ACTION_PROPERTIES,
 						stock_id = Stock.PROPERTIES,
-						label = _("_Edit"),
-						accelerator = _("<Control>E"),
+						accelerator = _("<Alt>Return"),
 						tooltip = _("Edit information about the selected administrators"),
 						callback = (a) => {
 							edit_action ();
@@ -145,12 +131,12 @@ namespace Mobilect {
 
 				this.action_group.add_actions (actions, this);
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
-				this.action_group.get_action (ACTION_EDIT).sensitive = false;
+				this.action_group.get_action (ACTION_PROPERTIES).sensitive = false;
 				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
-					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
+					this.action_group.get_action (ACTION_PROPERTIES).sensitive = selected;
 					this.action_group.get_action (ACTION_PASSWORD).sensitive = selected;
 				});
 			}

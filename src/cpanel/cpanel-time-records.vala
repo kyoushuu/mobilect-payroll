@@ -37,7 +37,7 @@ namespace Mobilect {
 			public const string ACTION = "cpanel-time-records";
 			public const string ACTION_ADD = "cpanel-time-records-add";
 			public const string ACTION_REMOVE = "cpanel-time-records-remove";
-			public const string ACTION_EDIT = "cpanel-time-records-edit";
+			public const string ACTION_PROPERTIES = "cpanel-time-records-properties";
 
 
 			public CPanelTimeRecords (CPanel cpanel) {
@@ -189,41 +189,29 @@ namespace Mobilect {
 				ui_def =
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
-					"    <placeholder name=\"MenuAdditions\">" +
-					"      <placeholder name=\"CPanelMenuAdditions\">" +
-					"        <menu name=\"CPanelTimeRecordsMenu\" action=\"" + ACTION + "\">" +
-					"          <menuitem name=\"AddTimeRecord\" action=\"" + ACTION_ADD + "\" />" +
-					"          <menuitem name=\"RemoveTimeRecord\" action=\"" + ACTION_REMOVE + "\" />" +
-					"          <separator />" +
-					"          <menuitem name=\"EditTimeRecord\" action=\"" + ACTION_EDIT + "\" />" +
-					"        </menu>" +
+					"    <menu name=\"EditMenu\" action=\"edit\">" +
+					"      <placeholder name=\"EditMenuAdditions\">" +
+					"        <menuitem name=\"AddTimeRecord\" action=\"" + ACTION_ADD + "\" />" +
+					"        <menuitem name=\"RemoveTimeRecord\" action=\"" + ACTION_REMOVE + "\" />" +
+					"        <separator />" +
+					"        <menuitem name=\"PropertiesTimeRecord\" action=\"" + ACTION_PROPERTIES + "\" />" +
 					"      </placeholder>" +
-					"    </placeholder>" +
+					"    </menu>" +
 					"  </menubar>" +
 					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"ToolbarAdditions\">" +
-					"      <placeholder name=\"CPanelToolItems\">" +
-					"        <placeholder name=\"CPanelToolItemsAdditions\">" +
-					"          <toolitem name=\"AddTimeRecord\" action=\"" + ACTION_ADD + "\" />" +
-					"          <toolitem name=\"RemoveTimeRecord\" action=\"" + ACTION_REMOVE + "\" />" +
-					"          <toolitem name=\"EditTimeRecord\" action=\"" + ACTION_EDIT + "\" />" +
-					"        </placeholder>" +
-					"      </placeholder>" +
+					"    <placeholder name=\"EditToolbarAdditions\">" +
+					"      <toolitem name=\"AddTimeRecord\" action=\"" + ACTION_ADD + "\" />" +
+					"      <toolitem name=\"RemoveTimeRecord\" action=\"" + ACTION_REMOVE + "\" />" +
+					"      <toolitem name=\"PropertiesTimeRecord\" action=\"" + ACTION_PROPERTIES + "\" />" +
 					"    </placeholder>" +
 					"  </toolbar>" +
 					"</ui>";
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
-						name = ACTION,
-						stock_id = null,
-						label = _("_Time Records")
-					},
-					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						label = _("_Add"),
-						accelerator = _("<Control>plus"),
+						accelerator = _("<Control>I"),
 						tooltip = _("Add a time record to database"),
 						callback = (a) => {
 							add_action ();
@@ -232,18 +220,16 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
-						label = _("_Remove"),
-						accelerator = _("<Control>minus"),
+						accelerator = _("Delete"),
 						tooltip = _("Remove the selected time records from database"),
 						callback = (a) => {
 							remove_action ();
 						}
 					},
 					Gtk.ActionEntry () {
-						name = ACTION_EDIT,
+						name = ACTION_PROPERTIES,
 						stock_id = Stock.PROPERTIES,
-						label = _("_Edit"),
-						accelerator = _("<Control>E"),
+						accelerator = _("<Alt>Return"),
 						tooltip = _("Edit information about the selected time records"),
 						callback = (a) => {
 							edit_action ();
@@ -253,11 +239,11 @@ namespace Mobilect {
 
 				this.action_group.add_actions (actions, this);
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
-				this.action_group.get_action (ACTION_EDIT).sensitive = false;
+				this.action_group.get_action (ACTION_PROPERTIES).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
 					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
-					this.action_group.get_action (ACTION_EDIT).sensitive = selected;
+					this.action_group.get_action (ACTION_PROPERTIES).sensitive = selected;
 				});
 			}
 

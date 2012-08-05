@@ -33,7 +33,7 @@ namespace Mobilect {
 			public const string ACTION_PAGE_SETUP = "cpanel-report-page-setup";
 			public const string ACTION_PRINT = "cpanel-report-print";
 			public const string ACTION_PRINT_PREVIEW = "cpanel-report-print-preview";
-			public const string ACTION_EXPORT = "cpanel-report-export";
+			public const string ACTION_SAVE = "cpanel-report-save";
 
 			public Grid grid { get; private set; }
 
@@ -324,46 +324,41 @@ namespace Mobilect {
 				ui_def =
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
-					"    <placeholder name=\"MenuAdditions\">" +
-					"      <placeholder name=\"CPanelMenuAdditions\">" +
-					"        <menu name=\"CPanelReportMenu\" action=\"" + ACTION + "\">" +
-					"          <menuitem name=\"SelectFontReport\" action=\"" + ACTION_SELECT_FONT + "\" />" +
+					"    <menu name=\"FileMenu\" action=\"file\">" +
+					"      <placeholder name=\"FileMenuSaveAdditions\">" +
+					"          <menuitem name=\"SaveReport\" action=\"" + ACTION_SAVE + "\" />" +
+					"      </placeholder>" +
+					"      <placeholder name=\"FileMenuExportAdditions\">" +
 					"          <menuitem name=\"PageSetupReport\" action=\"" + ACTION_PAGE_SETUP + "\" />" +
-					"          <separator />" +
 					"          <menuitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
 					"          <menuitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
-					"          <menuitem name=\"ExportReport\" action=\"" + ACTION_EXPORT + "\" />" +
-					"        </menu>" +
 					"      </placeholder>" +
-					"    </placeholder>" +
+					"    </menu>" +
+					"    <menu name=\"FormatMenu\" action=\"format\">" +
+					"      <placeholder name=\"FormatMenuAdditions\">" +
+					"        <menuitem name=\"SelectFontReport\" action=\"" + ACTION_SELECT_FONT + "\" />" +
+					"      </placeholder>" +
+					"    </menu>" +
 					"  </menubar>" +
 					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"ToolbarAdditions\">" +
-					"      <placeholder name=\"CPanelToolItems\">" +
-					"        <placeholder name=\"CPanelToolItemsAdditions\">" +
-					"          <toolitem name=\"SelectFontReport\" action=\"" + ACTION_SELECT_FONT + "\" />" +
-					"          <toolitem name=\"PageSetupReport\" action=\"" + ACTION_PAGE_SETUP + "\" />" +
-					"          <separator />" +
-					"          <toolitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
-					"          <toolitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
-					"          <toolitem name=\"ExportReport\" action=\"" + ACTION_EXPORT + "\" />" +
-					"        </placeholder>" +
-					"      </placeholder>" +
+					"    <placeholder name=\"FormatToolbarAdditions\">" +
+					"      <toolitem name=\"SelectFontReport\" action=\"" + ACTION_SELECT_FONT + "\" />" +
+					"    </placeholder>" +
+					"    <placeholder name=\"FileToolbarSaveAdditions\">" +
+					"      <toolitem name=\"SaveReport\" action=\"" + ACTION_SAVE + "\" />" +
+					"    </placeholder>" +
+					"    <placeholder name=\"FileToolbarExportAdditions\">" +
+					"      <toolitem name=\"PageSetupReport\" action=\"" + ACTION_PAGE_SETUP + "\" />" +
+					"      <toolitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
+					"      <toolitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
 					"    </placeholder>" +
 					"  </toolbar>" +
 					"</ui>";
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
-						name = ACTION,
-						stock_id = null,
-						label = _("_Report")
-					},
-					Gtk.ActionEntry () {
 						name = ACTION_SELECT_FONT,
 						stock_id = Stock.SELECT_FONT,
-						label = _("Select _Fonts"),
-						accelerator = _("<Control>F"),
 						tooltip = _("Select fonts to use in the report"),
 						callback = (a) => {
 							var dialog = new Dialog.with_buttons (_("Select Fonts"),
@@ -497,8 +492,6 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_PAGE_SETUP,
 						stock_id = Stock.PAGE_SETUP,
-						label = _("Page _Setup"),
-						accelerator = _("<Control>S"),
 						tooltip = _("Customize the page size, orientation and margins"),
 						callback = (a) => {
 							if (settings == null) {
@@ -513,7 +506,6 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_PRINT,
 						stock_id = Stock.PRINT,
-						label = _("_Print"),
 						accelerator = _("<Control>P"),
 						tooltip = _("Print payroll and payslips"),
 						callback = (a) => {
@@ -530,7 +522,6 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_PRINT_PREVIEW,
 						stock_id = Stock.PRINT_PREVIEW,
-						label = _("Print Previe_w"),
 						accelerator = _("<Shift><Control>P"),
 						tooltip = _("Print preview of payroll and payslips"),
 						callback = (a) => {
@@ -545,10 +536,9 @@ namespace Mobilect {
 						}
 					},
 					Gtk.ActionEntry () {
-						name = ACTION_EXPORT,
+						name = ACTION_SAVE,
 						stock_id = Stock.SAVE,
-						label = _("_Export"),
-						accelerator = _("<Control>E"),
+						accelerator = _("<Control>S"),
 						tooltip = _("Export payroll and payslips to a PDF file"),
 						callback = (a) => {
 							try {

@@ -36,6 +36,7 @@ namespace Mobilect {
 			public UIManager ui_manager { get; private set; }
 			public Notebook notebook { get; private set; }
 
+
 			public Window (Application app) {
 				this.title = _("Mobilect Payroll");
 				this.default_width = 600;
@@ -60,6 +61,22 @@ namespace Mobilect {
 						callback = (a) => {
 							destroy ();
 						}
+					},
+					Gtk.ActionEntry () {
+						name = "edit",
+						label = _("_Edit")
+					},
+					Gtk.ActionEntry () {
+						name = "edit-preferences",
+						stock_id = Stock.PREFERENCES,
+						tooltip = _("Preferences"),
+						callback = (a) => {
+							destroy ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = "format",
+						label = _("_Format")
 					},
 					Gtk.ActionEntry () {
 						name = "help",
@@ -117,9 +134,22 @@ namespace Mobilect {
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
 					"    <menu name=\"FileMenu\" action=\"file\">" +
+					"      <placeholder name=\"FileMenuSaveAdditions\" />" +
+					"      <separator/>" +
 					"      <placeholder name=\"FileMenuAdditions\" />" +
 					"      <separator/>" +
+					"      <placeholder name=\"FileMenuExportAdditions\" />" +
+					"      <separator/>" +
+					"      <placeholder name=\"FileMenuCloseAdditions\" />" +
 					"      <menuitem name=\"Quit\" action=\"file-quit\" />" +
+					"    </menu>" +
+					"    <menu name=\"EditMenu\" action=\"edit\">" +
+					"      <placeholder name=\"EditMenuAdditions\" />" +
+					"      <separator/>" +
+					"      <menuitem name=\"Preferences\" action=\"edit-preferences\" />" +
+					"    </menu>" +
+					"    <menu name=\"FormatMenu\" action=\"format\">" +
+					"      <placeholder name=\"FormatMenuAdditions\" />" +
 					"    </menu>" +
 					"    <placeholder name=\"MenuAdditions\" />" +
 					"    <menu name=\"HelpMenu\" action=\"help\">" +
@@ -131,11 +161,21 @@ namespace Mobilect {
 					"    </menu>" +
 					"  </menubar>" +
 					"  <toolbar action=\"toolbar\">" +
+					"    <placeholder name=\"EditToolbarAdditions\" />" +
+					"    <separator/>" +
+					"    <placeholder name=\"FormatToolbarAdditions\" />" +
+					"    <separator/>" +
 					"    <placeholder name=\"ToolbarAdditions\" />" +
+					"    <separator/>" +
+					"    <placeholder name=\"FileToolbarSaveAdditions\" />" +
+					"    <separator/>" +
+					"    <placeholder name=\"FileToolbarAdditions\" />" +
+					"    <separator/>" +
+					"    <placeholder name=\"FileToolbarExportAdditions\" />" +
+					"    <separator/>" +
+					"    <placeholder name=\"FileToolbarCloseAdditions\" />" +
 					"    <separator expand=\"true\" />" +
-					"    <placeholder name=\"FileToolItems\">" +
-					"      <toolitem name=\"Quit\" action=\"file-quit\" />" +
-					"    </placeholder>" +
+					"    <toolitem name=\"Quit\" action=\"file-quit\" />" +
 					"  </toolbar>" +
 					"</ui>";
 

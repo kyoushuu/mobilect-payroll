@@ -75,6 +75,14 @@ namespace Mobilect {
 				lastname_entry = new Entry ();
 				lastname_entry.hexpand = true;
 				lastname_entry.activates_default = true;
+				lastname_entry.secondary_icon_tooltip_text = _("Last name is empty");
+				lastname_entry.changed.connect ((e) => {
+														if (lastname_entry.text_length > 0) {
+															lastname_entry.secondary_icon_stock = null;
+														} else {
+															lastname_entry.secondary_icon_stock = Stock.DIALOG_WARNING;
+														}
+													});
 				grid.attach_next_to (lastname_entry,
 				                     lastname_label,
 				                     PositionType.RIGHT,

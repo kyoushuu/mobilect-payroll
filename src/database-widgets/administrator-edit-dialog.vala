@@ -24,21 +24,21 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class EmployeeEditDialog : Dialog {
+		public class AdministratorEditDialog : Dialog {
 
-			public Employee employee {
+			public Administrator administrator {
 				get {
-					return widget.employee;
+					return widget.administrator;
 				}
 				set {
-					widget.employee = value;
+					widget.administrator = value;
 				}
 			}
 
-			public EmployeeEditWidget widget { get; private set; }
+			public AdministratorEditWidget widget { get; private set; }
 
 
-			public EmployeeEditDialog (string title, Window parent, Employee employee) {
+			public AdministratorEditDialog (string title, Window parent, Administrator administrator) {
 				Object (title: title,
 				        transient_for: parent);
 
@@ -57,8 +57,13 @@ namespace Mobilect {
 
 				push_composite_child ();
 
-				widget = new EmployeeEditWidget (employee);
+				widget = new AdministratorEditWidget (administrator);
 				widget.border_width = 5;
+				widget.username_entry.changed.connect ((e) => {
+														set_response_sensitive (ResponseType.ACCEPT,
+														                        widget.username_entry.text_length > 0);
+													});
+				widget.username_entry.changed ();
 				content_area.add (widget);
 
 				widget.show ();

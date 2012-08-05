@@ -67,6 +67,14 @@ namespace Mobilect {
 				username_entry = new Entry ();
 				username_entry.hexpand = true;
 				username_entry.activates_default = true;
+				username_entry.secondary_icon_tooltip_text = _("Username is empty");
+				username_entry.changed.connect ((e) => {
+														if (username_entry.text_length > 0) {
+															username_entry.secondary_icon_stock = null;
+														} else {
+															username_entry.secondary_icon_stock = Stock.DIALOG_WARNING;
+														}
+													});
 				grid.attach_next_to (username_entry,
 				                     username_label,
 				                     PositionType.RIGHT,

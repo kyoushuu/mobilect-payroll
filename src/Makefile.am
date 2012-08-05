@@ -1,9 +1,5 @@
 ## Process this file with automake to produce Makefile.in
 
-## Created by Anjuta
-
-
-
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
@@ -39,14 +35,14 @@ mobilect_payroll_SOURCES = \
 	database/time-record.vala \
 	database/time-record-list.vala \
 	database/month-info.vala \
+	database-widgets/administrator-edit-widget.vala \
+	database-widgets/administrator-edit-dialog.vala \
+	database-widgets/employee-edit-widget.vala \
+	database-widgets/employee-edit-dialog.vala \
+	database-widgets/time-record-edit-widget.vala \
+	database-widgets/time-record-edit-dialog.vala \
 	widgets/password-widget.vala \
 	widgets/password-dialog.vala \
-	widgets/administrator-edit-widget.vala \
-	widgets/administrator-edit-dialog.vala \
-	widgets/employee-edit-widget.vala \
-	widgets/employee-edit-dialog.vala \
-	widgets/time-record-edit-widget.vala \
-	widgets/time-record-edit-dialog.vala \
 	login/login-page.vala \
 	login/employee-login-page.vala \
 	login/admin-login-page.vala \

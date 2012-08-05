@@ -50,11 +50,20 @@ namespace Mobilect {
 
 				widget = new PasswordWidget ();
 				widget.border_width = 5;
+				widget.password_entry.changed.connect (changed);
+				widget.verify_entry.changed.connect (changed);
+				changed ();
 				content_area.add (widget);
 
 				widget.show ();
 
 				pop_composite_child ();
+			}
+
+			private void changed () {
+				set_response_sensitive (ResponseType.ACCEPT,
+				                        widget.password_entry.text_length > 0 &&
+				                        widget.password_entry.text == widget.verify_entry.text);
 			}
 
 		}

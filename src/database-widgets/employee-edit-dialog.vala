@@ -24,27 +24,28 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class TimeRecordEditDialog : Dialog {
+		public class EmployeeEditDialog : Dialog {
 
-			public TimeRecord time_record {
+			public Employee employee {
 				get {
-					return widget.time_record;
+					return widget.employee;
 				}
 				set {
-					widget.time_record = value;
+					widget.employee = value;
 				}
 			}
 
-			public TimeRecordEditWidget widget { get; private set; }
+			public EmployeeEditWidget widget { get; private set; }
 
 
-			public TimeRecordEditDialog (string title, Window parent, TimeRecord time_record) {
+			public EmployeeEditDialog (string title, Window parent, Employee employee) {
 				Object (title: title,
 				        transient_for: parent);
 
 				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,
 				                  Stock.SAVE, ResponseType.ACCEPT);
 				this.set_default_response (ResponseType.ACCEPT);
+
 
 				var content_area = this.get_content_area ();
 				var action_area = this.get_action_area ();
@@ -56,8 +57,13 @@ namespace Mobilect {
 
 				push_composite_child ();
 
-				widget = new TimeRecordEditWidget (time_record);
+				widget = new EmployeeEditWidget (employee);
 				widget.border_width = 5;
+				widget.lastname_entry.changed.connect ((e) => {
+														set_response_sensitive (ResponseType.ACCEPT,
+														                        widget.lastname_entry.text_length > 0);
+													});
+				widget.lastname_entry.changed ();
 				content_area.add (widget);
 
 				widget.show ();
@@ -71,7 +77,6 @@ namespace Mobilect {
 														}
 													});
 			}
-
 		}
 
 	}

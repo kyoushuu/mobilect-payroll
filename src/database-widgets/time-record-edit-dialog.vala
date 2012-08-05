@@ -24,28 +24,27 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class AdministratorEditDialog : Dialog {
+		public class TimeRecordEditDialog : Dialog {
 
-			public Administrator administrator {
+			public TimeRecord time_record {
 				get {
-					return widget.administrator;
+					return widget.time_record;
 				}
 				set {
-					widget.administrator = value;
+					widget.time_record = value;
 				}
 			}
 
-			public AdministratorEditWidget widget { get; private set; }
+			public TimeRecordEditWidget widget { get; private set; }
 
 
-			public AdministratorEditDialog (string title, Window parent, Administrator administrator) {
+			public TimeRecordEditDialog (string title, Window parent, TimeRecord time_record) {
 				Object (title: title,
 				        transient_for: parent);
 
 				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,
 				                  Stock.SAVE, ResponseType.ACCEPT);
 				this.set_default_response (ResponseType.ACCEPT);
-
 
 				var content_area = this.get_content_area ();
 				var action_area = this.get_action_area ();
@@ -57,8 +56,13 @@ namespace Mobilect {
 
 				push_composite_child ();
 
-				widget = new AdministratorEditWidget (administrator);
+				widget = new TimeRecordEditWidget (time_record);
 				widget.border_width = 5;
+				widget.employee_combobox.changed.connect (changed);
+				widget.start_spin.value_changed.connect (changed);
+				widget.end_spin.value_changed.connect (changed);
+				widget.open_end_check.toggled.connect (changed);
+				changed ();
 				content_area.add (widget);
 
 				widget.show ();
@@ -72,6 +76,14 @@ namespace Mobilect {
 														}
 													});
 			}
+
+			private void changed () {
+				set_response_sensitive (ResponseType.ACCEPT,
+				                        widget.employee_combobox.active != -1 &&
+				                        (widget.open_end_check.active ||
+				                         widget.start_spin.get_date_time ().compare (widget.end_spin.get_date_time ()) < 0));
+			}
+
 		}
 
 	}

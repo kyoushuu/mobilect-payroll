@@ -51,10 +51,12 @@ namespace Mobilect {
 				string ui_def =
 					"<ui>" +
 					"  <menubar name=\"menubar\">" +
-					"    <placeholder name=\"MenuAdditions\">" +
-					"      <menu name=\"CPanelMenu\" action=\"cpanel\">" +
+					"    <menu name=\"FileMenu\" action=\"file\">" +
+					"      <placeholder name=\"FileMenuAdditions\">" +
 					"        <menuitem name=\"Logout\" action=\"cpanel-logout\" />" +
-					"      </menu>" +
+					"      </placeholder>" +
+					"    </menu>" +
+					"    <placeholder name=\"MenuAdditions\">" +
 					"      <placeholder name=\"CPanelMenuAdditions\" />" +
 					"    </placeholder>" +
 					"  </menubar>" +
@@ -75,11 +77,6 @@ namespace Mobilect {
 				}
 
 				Gtk.ActionEntry[] actions = {
-					Gtk.ActionEntry () {
-						name = "cpanel",
-						stock_id = null,
-						label = _("_Control Panel")
-					},
 					Gtk.ActionEntry () {
 						name = "cpanel-logout",
 						stock_id = Stock.STOP,

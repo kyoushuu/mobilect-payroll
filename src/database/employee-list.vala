@@ -218,7 +218,7 @@ namespace Mobilect {
 				return false;
 			}
 
-			public int iter_n_children (TreeIter? iter) requires (iter.stamp == this.stamp) {
+			public int iter_n_children (TreeIter? iter) {
 				if (iter != null) {
 					return 0;
 				}

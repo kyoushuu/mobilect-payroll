@@ -54,6 +54,8 @@ namespace Mobilect {
 				password_entry.visibility = false;
 				password_entry.hexpand = true;
 				password_entry.activates_default = true;
+				password_entry.secondary_icon_tooltip_text = _("Password is empty");
+				password_entry.changed.connect (changed);
 				grid.attach_next_to (password_entry,
 				                     password_label,
 				                     PositionType.RIGHT,
@@ -71,6 +73,8 @@ namespace Mobilect {
 				verify_entry.visibility = false;
 				verify_entry.hexpand = true;
 				verify_entry.activates_default = true;
+				verify_entry.secondary_icon_tooltip_text = _("Passwords didn't match");
+				verify_entry.changed.connect (changed);
 				grid.attach_next_to (verify_entry,
 				                     verify_label,
 				                     PositionType.RIGHT,
@@ -86,6 +90,19 @@ namespace Mobilect {
 					return null;
 				} else {
 					return password_entry.text;
+				}
+			}
+
+			private void changed () {
+				if (password_entry.text_length > 0) {
+					password_entry.secondary_icon_stock = null;
+				} else {
+					password_entry.secondary_icon_stock = Stock.DIALOG_WARNING;
+				}
+				if (password_entry.text == verify_entry.text) {
+					verify_entry.secondary_icon_stock = null;
+				} else {
+					verify_entry.secondary_icon_stock = Stock.DIALOG_WARNING;
 				}
 			}
 

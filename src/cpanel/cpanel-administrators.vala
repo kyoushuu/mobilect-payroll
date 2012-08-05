@@ -27,6 +27,7 @@ namespace Mobilect {
 		public class CPanelAdministrators : CPanelTab {
 
 			public TreeView tree_view { get; private set; }
+			public TreeModelSort sort { get; private set; }
 			public AdministratorList list;
 
 			public const string ACTION = "cpanel-administrators";
@@ -35,13 +36,22 @@ namespace Mobilect {
 			public const string ACTION_EDIT = "cpanel-administrators-edit";
 			public const string ACTION_PASSWORD = "cpanel-administrators-password";
 
+
 			public CPanelAdministrators (CPanel cpanel) {
 				base (cpanel, ACTION);
 
 				this.list = this.cpanel.window.app.database.administrator_list;
 
-				tree_view = new TreeView ();
-				tree_view.model = this.list;
+				sort = new TreeModelSort.with_model (this.list);
+				sort.set_sort_func (AdministratorList.Columns.USERNAME, (model, a, b) => {
+					var administrator1 = a.user_data as Administrator;
+					var administrator2 = b.user_data as Administrator;
+
+					return strcmp (administrator1.username,
+					               administrator2.username);
+				});
+
+				tree_view = new TreeView.with_model (sort);
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
@@ -51,8 +61,9 @@ namespace Mobilect {
 
 				var column = new TreeViewColumn.with_attributes (_("Username"),
 				                                                 new CellRendererText (),
-				                                                 "text", AdministratorList.Columns.USERNAME,
-				                                                 null);
+				                                                 "text", AdministratorList.Columns.USERNAME);
+				column.sort_column_id = AdministratorList.Columns.USERNAME;
+				column.expand = true;
 				tree_view.append_column (column);
 
 
@@ -158,8 +169,11 @@ namespace Mobilect {
 
 				foreach (var p in selection.get_selected_rows (null)) {
 					Administrator administrator;
+					TreePath path;
 					TreeIter iter;
-					list.get_iter (out iter, p);
+
+					path = sort.convert_path_to_child_path (p);
+					list.get_iter (out iter, path);
 					this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
 					administrators.append (administrator);
 				}

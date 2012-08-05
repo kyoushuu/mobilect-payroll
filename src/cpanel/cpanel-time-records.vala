@@ -29,6 +29,7 @@ namespace Mobilect {
 			public DateSpinButton start_spin { get; private set; }
 			public DateSpinButton end_spin { get; private set; }
 			public TreeView tree_view { get; private set; }
+			public TreeModelSort sort { get; private set; }
 			public Spinner search_spinner { get; private set; }
 			public Button search_button { get; private set; }
 			public TimeRecordList list;
@@ -37,6 +38,7 @@ namespace Mobilect {
 			public const string ACTION_ADD = "cpanel-time-records-add";
 			public const string ACTION_REMOVE = "cpanel-time-records-remove";
 			public const string ACTION_EDIT = "cpanel-time-records-edit";
+
 
 			public CPanelTimeRecords (CPanel cpanel) {
 				base (cpanel, ACTION);
@@ -62,10 +64,10 @@ namespace Mobilect {
 				TreeViewColumn column;
 				CellRendererText renderer;
 
-				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
-				column.title = _("Employee");
-				column.pack_start (renderer, false);
+				column = new TreeViewColumn.with_attributes (_("Employee"), renderer);
+				column.sort_column_id = TimeRecordList.Columns.EMPLOYEE;
+				column.expand = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, TimeRecordList.Columns.EMPLOYEE, out value);
@@ -73,10 +75,9 @@ namespace Mobilect {
 				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
-				column.title = _("Start Date");
-				column.pack_start (renderer, false);
+				column = new TreeViewColumn.with_attributes (_("Start Date"), renderer);
+				column.sort_column_id = TimeRecordList.Columns.START;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, TimeRecordList.Columns.START, out value);
@@ -84,10 +85,9 @@ namespace Mobilect {
 				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn ();
 				renderer = new CellRendererText ();
-				column.title = _("End Date");
-				column.pack_start (renderer, false);
+				column = new TreeViewColumn.with_attributes (_("End Date"), renderer);
+				column.sort_column_id = TimeRecordList.Columns.END;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, TimeRecordList.Columns.END, out value);
@@ -121,7 +121,36 @@ namespace Mobilect {
 					search_spinner.start ();
 
 					this.list = this.cpanel.window.app.database.get_time_records_within_date (start_spin.date, end_spin.date);
-					this.tree_view.model = this.list;
+
+					this.sort = new TreeModelSort.with_model (this.list);
+					sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
+						var time_record1 = a.user_data as TimeRecord;
+						var time_record2 = b.user_data as TimeRecord;
+
+						return strcmp (time_record1.employee.get_name (),
+						               time_record2.employee.get_name ());
+					});
+					sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
+						var time_record1 = a.user_data as TimeRecord;
+						var time_record2 = b.user_data as TimeRecord;
+
+						return time_record1.start.compare (time_record2.start);
+					});
+					sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
+						var time_record1 = a.user_data as TimeRecord;
+						var time_record2 = b.user_data as TimeRecord;
+
+						if (time_record1.end != null && time_record2.end != null) {
+							return time_record1.end.compare (time_record2.end);
+						} else if (time_record1.end != null) {
+							return 1;
+						} else if (time_record2.end != null) {
+							return -1;
+						} else {
+							return 0;
+						}
+					});
+					this.tree_view.model = sort;
 
 					search_spinner.stop ();
 					search_spinner.hide ();
@@ -246,8 +275,11 @@ namespace Mobilect {
 
 				foreach (var p in selection.get_selected_rows (null)) {
 					TimeRecord time_record;
+					TreePath path;
 					TreeIter iter;
-					list.get_iter (out iter, p);
+
+					path = sort.convert_path_to_child_path (p);
+					list.get_iter (out iter, path);
 					this.list.get (iter, TimeRecordList.Columns.OBJECT, out time_record);
 					time_records.append (time_record);
 				}

@@ -186,26 +186,8 @@ namespace Mobilect {
 				                  date.get_year ());
 
 
-				ui_def =
-					"<ui>" +
-					"  <menubar name=\"menubar\">" +
-					"    <menu name=\"EditMenu\" action=\"edit\">" +
-					"      <placeholder name=\"EditMenuAdditions\">" +
-					"        <menuitem name=\"AddTimeRecord\" action=\"" + ACTION_ADD + "\" />" +
-					"        <menuitem name=\"RemoveTimeRecord\" action=\"" + ACTION_REMOVE + "\" />" +
-					"        <separator />" +
-					"        <menuitem name=\"PropertiesTimeRecord\" action=\"" + ACTION_PROPERTIES + "\" />" +
-					"      </placeholder>" +
-					"    </menu>" +
-					"  </menubar>" +
-					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"EditToolbarAdditions\">" +
-					"      <toolitem name=\"AddTimeRecord\" action=\"" + ACTION_ADD + "\" />" +
-					"      <toolitem name=\"RemoveTimeRecord\" action=\"" + ACTION_REMOVE + "\" />" +
-					"      <toolitem name=\"PropertiesTimeRecord\" action=\"" + ACTION_PROPERTIES + "\" />" +
-					"    </placeholder>" +
-					"  </toolbar>" +
-					"</ui>";
+				ui_resource_path = "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-time-records-ui.xml";
+
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {

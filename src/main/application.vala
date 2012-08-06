@@ -40,6 +40,7 @@ namespace Mobilect {
 			public Window window { get; private set; }
 			public Database database { get; private set; }
 
+
 			public Application () {
 				Object (application_id: "com.mobilectpower.payroll");
 

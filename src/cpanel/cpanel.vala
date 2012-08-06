@@ -48,23 +48,8 @@ namespace Mobilect {
 				});
 
 
-				string ui_def =
-					"<ui>" +
-					"  <menubar name=\"menubar\">" +
-					"    <menu name=\"FileMenu\" action=\"file\">" +
-					"      <placeholder name=\"FileMenuCloseAdditions\">" +
-					"        <menuitem name=\"Close\" action=\"cpanel-close\" />" +
-					"      </placeholder>" +
-					"    </menu>" +
-					"  </menubar>" +
-					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"FileToolbarCloseAdditions\">" +
-					"      <toolitem name=\"Close\" action=\"cpanel-close\" />" +
-					"    </placeholder>" +
-					"  </toolbar>" +
-					"</ui>";
 				try {
-					window.ui_manager.add_ui_from_string (ui_def, -1);
+						window.ui_manager.add_ui_from_resource ("/com/mobilectpower/Payroll/mobilect-payroll-cpanel-ui.xml");
 				} catch (Error e) {
 					critical ("Failed to add UI to UI Manager: %s", e.message);
 				}
@@ -110,9 +95,9 @@ namespace Mobilect {
 				this.append_page (tab, new Label.with_mnemonic (title));
 
 				window.ui_manager.insert_action_group (tab.action_group, -1);
-				if (tab.ui_def != null) {
+				if (tab.ui_resource_path != null) {
 					try {
-						window.ui_manager.add_ui_from_string (tab.ui_def, -1);
+						window.ui_manager.add_ui_from_resource (tab.ui_resource_path);
 					} catch (Error e) {
 						error ("Failed to add UI to UI Manager: %s", e.message);
 					}

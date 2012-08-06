@@ -28,7 +28,7 @@ namespace Mobilect {
 
 			public weak CPanel cpanel { get; internal set; }
 
-			public string ui_def { get; internal set; }
+			public string ui_resource_path { get; internal set; }
 			public Gtk.ActionGroup action_group { get; internal set; }
 
 

@@ -1,0 +1,19 @@
+<ui>
+  <menubar name="menubar">
+    <menu name="EditMenu" action="edit">
+      <placeholder name="EditMenuAdditions">
+        <menuitem name="AddTimeRecord" action="cpanel-time-records-add" />
+        <menuitem name="RemoveTimeRecord" action="cpanel-time-records-remove" />
+        <separator />
+        <menuitem name="PropertiesTimeRecord" action="cpanel-time-records-properties" />
+      </placeholder>
+    </menu>
+  </menubar>
+  <toolbar action="toolbar">
+    <placeholder name="EditToolbarAdditions">
+      <toolitem name="AddTimeRecord" action="cpanel-time-records-add" />
+      <toolitem name="RemoveTimeRecord" action="cpanel-time-records-remove" />
+      <toolitem name="PropertiesTimeRecord" action="cpanel-time-records-properties" />
+    </placeholder>
+  </toolbar>
+</ui>

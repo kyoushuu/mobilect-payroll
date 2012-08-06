@@ -1,0 +1,21 @@
+<ui>
+  <menubar name="menubar">
+    <menu name="EditMenu" action="edit">
+      <placeholder name="EditMenuAdditions">
+        <menuitem name="AddAdministrator" action="cpanel-administrators-add" />
+        <menuitem name="RemoveAdministrator" action="cpanel-administrators-remove" />
+        <separator />
+        <menuitem name="PropertiesAdministrator" action="cpanel-administrators-properties" />
+        <menuitem name="PasswordAdministrator" action="cpanel-administrators-password" />
+      </placeholder>
+    </menu>
+  </menubar>
+  <toolbar action="toolbar">
+    <placeholder name="EditToolbarAdditions">
+      <toolitem name="AddAdministrator" action="cpanel-administrators-add" />
+      <toolitem name="RemoveAdministrator" action="cpanel-administrators-remove" />
+      <toolitem name="PropertiesAdministrator" action="cpanel-administrators-properties" />
+      <toolitem name="PasswordAdministrator" action="cpanel-administrators-password" />
+    </placeholder>
+  </toolbar>
+</ui>

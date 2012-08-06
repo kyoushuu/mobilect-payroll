@@ -71,7 +71,6 @@ namespace Mobilect {
 						stock_id = Stock.PREFERENCES,
 						tooltip = _("Preferences"),
 						callback = (a) => {
-							destroy ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -130,59 +129,12 @@ namespace Mobilect {
 				var action_group = new Gtk.ActionGroup ("payroll");
 				action_group.add_actions (actions, this);
 
-				string ui =
-					"<ui>" +
-					"  <menubar name=\"menubar\">" +
-					"    <menu name=\"FileMenu\" action=\"file\">" +
-					"      <placeholder name=\"FileMenuSaveAdditions\" />" +
-					"      <separator/>" +
-					"      <placeholder name=\"FileMenuAdditions\" />" +
-					"      <separator/>" +
-					"      <placeholder name=\"FileMenuExportAdditions\" />" +
-					"      <separator/>" +
-					"      <placeholder name=\"FileMenuCloseAdditions\" />" +
-					"      <menuitem name=\"Quit\" action=\"file-quit\" />" +
-					"    </menu>" +
-					"    <menu name=\"EditMenu\" action=\"edit\">" +
-					"      <placeholder name=\"EditMenuAdditions\" />" +
-					"      <separator/>" +
-					"      <menuitem name=\"Preferences\" action=\"edit-preferences\" />" +
-					"    </menu>" +
-					"    <menu name=\"FormatMenu\" action=\"format\">" +
-					"      <placeholder name=\"FormatMenuAdditions\" />" +
-					"    </menu>" +
-					"    <placeholder name=\"MenuAdditions\" />" +
-					"    <menu name=\"HelpMenu\" action=\"help\">" +
-					"      <menuitem name=\"Contents\" action=\"help-contents\"/>" +
-					"      <separator/>" +
-					"      <placeholder name=\"HelpMenuAdditions\" />" +
-					"      <separator/>" +
-					"      <menuitem name=\"About\" action=\"help-about\"/>" +
-					"    </menu>" +
-					"  </menubar>" +
-					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"EditToolbarAdditions\" />" +
-					"    <separator/>" +
-					"    <placeholder name=\"FormatToolbarAdditions\" />" +
-					"    <separator/>" +
-					"    <placeholder name=\"ToolbarAdditions\" />" +
-					"    <separator/>" +
-					"    <placeholder name=\"FileToolbarSaveAdditions\" />" +
-					"    <separator/>" +
-					"    <placeholder name=\"FileToolbarAdditions\" />" +
-					"    <separator/>" +
-					"    <placeholder name=\"FileToolbarExportAdditions\" />" +
-					"    <separator/>" +
-					"    <placeholder name=\"FileToolbarCloseAdditions\" />" +
-					"    <separator expand=\"true\" />" +
-					"    <toolitem name=\"Quit\" action=\"file-quit\" />" +
-					"  </toolbar>" +
-					"</ui>";
-
 				try {
 					ui_manager = new UIManager ();
 					ui_manager.insert_action_group (action_group, -1);
-					ui_manager.add_ui_from_string (ui, -1);
+
+					ui_manager.add_ui_from_resource ("/com/mobilectpower/Payroll/mobilect-payroll-ui.xml");
+
 					this.add_accel_group (ui_manager.get_accel_group ());
 					box.add (ui_manager.get_widget ("/menubar"));
 				} catch (Error e) {

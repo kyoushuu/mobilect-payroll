@@ -64,7 +64,8 @@ mobilect_payroll_SOURCES = \
 	filter/pay-group.vala \
 	filter/pay-period.vala \
 	filter/time-period.vala \
-	config.vapi
+	config.vapi \
+  mobilect-payroll-resources.c
 
 mobilect_payroll_VALAFLAGS = \
 	--pkg gtk+-3.0 \
@@ -93,9 +94,26 @@ mobilect_payroll_LDFLAGS = -mwindows
 mobilect_payroll_LDADD += mobilect-payroll-win32-res.o
 endif
 
+
+
+ui_files = \
+	mobilect-payroll-ui.xml \
+	mobilect-payroll-cpanel-ui.xml \
+	mobilect-payroll-cpanel-employees-ui.xml \
+	mobilect-payroll-cpanel-administrators-ui.xml \
+	mobilect-payroll-cpanel-time-records-ui.xml \
+	mobilect-payroll-cpanel-report-ui.xml
+
+
 mobilect-payroll-win32-res.o: mobilect-payroll.rc
 	$(WINDRES) $< $@
 
+mobilect-payroll-resources.c: mobilect-payroll.gresource.xml $(ui_files)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@ --sourcedir=$(srcdir) --generate $(srcdir)/mobilect-payroll.gresource.xml
+
+
 EXTRA_DIST = \
-	mobilect-payroll.rc.in
+	mobilect-payroll.rc.in \
+	mobilect-payroll.gresource.xml \
+	$(ui_files)
 

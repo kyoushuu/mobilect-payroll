@@ -1,0 +1,21 @@
+<ui>
+  <menubar name="menubar">
+    <menu name="EditMenu" action="edit">
+      <placeholder name="EditMenuAdditions">
+        <menuitem name="AddEmployee" action="cpanel-employees-add" />
+        <menuitem name="RemoveEmployee" action="cpanel-employees-remove" />
+        <separator />
+        <menuitem name="PropertiesEmployee" action="cpanel-employees-properties" />
+        <menuitem name="PasswordEmployee" action="cpanel-employees-password" />
+      </placeholder>
+    </menu>
+  </menubar>
+  <toolbar action="toolbar">
+    <placeholder name="EditToolbarAdditions">
+      <toolitem name="AddEmployee" action="cpanel-employees-add" />
+      <toolitem name="RemoveEmployee" action="cpanel-employees-remove" />
+      <toolitem name="PropertiesEmployee" action="cpanel-employees-properties" />
+      <toolitem name="PasswordEmployee" action="cpanel-employees-password" />
+    </placeholder>
+  </toolbar>
+</ui>

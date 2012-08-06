@@ -117,28 +117,8 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 
-				ui_def =
-					"<ui>" +
-					"  <menubar name=\"menubar\">" +
-					"    <menu name=\"EditMenu\" action=\"edit\">" +
-					"      <placeholder name=\"EditMenuAdditions\">" +
-					"        <menuitem name=\"AddEmployee\" action=\"" + ACTION_ADD + "\" />" +
-					"        <menuitem name=\"RemoveEmployee\" action=\"" + ACTION_REMOVE + "\" />" +
-					"        <separator />" +
-					"        <menuitem name=\"PropertiesEmployee\" action=\"" + ACTION_PROPERTIES + "\" />" +
-					"        <menuitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
-					"      </placeholder>" +
-					"    </menu>" +
-					"  </menubar>" +
-					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"EditToolbarAdditions\">" +
-					"      <toolitem name=\"AddEmployee\" action=\"" + ACTION_ADD + "\" />" +
-					"      <toolitem name=\"RemoveEmployee\" action=\"" + ACTION_REMOVE + "\" />" +
-					"      <toolitem name=\"PropertiesEmployee\" action=\"" + ACTION_PROPERTIES + "\" />" +
-					"      <toolitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
-					"    </placeholder>" +
-					"  </toolbar>" +
-					"</ui>";
+				ui_resource_path = "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-employees-ui.xml";
+
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {

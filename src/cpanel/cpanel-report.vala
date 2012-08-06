@@ -98,7 +98,7 @@ namespace Mobilect {
 				overtime_radio = new RadioButton.with_mnemonic_from_widget (regular_radio, _("_Overtime"));
 				grid.attach_next_to (overtime_radio,
 				                     regular_radio,
-				                     PositionType.RIGHT,
+				                     PositionType.BOTTOM,
 				                     1, 1);
 
 				var period_label = new Label (_("_Period:"));
@@ -115,7 +115,7 @@ namespace Mobilect {
 				end_spin = new DateSpinButton ();
 				grid.attach_next_to (end_spin,
 				                     start_spin,
-				                     PositionType.RIGHT,
+				                     PositionType.BOTTOM,
 				                     1, 1);
 
 				var deduc_scroll = new ScrolledWindow (null, null);
@@ -321,39 +321,8 @@ namespace Mobilect {
 				                  date.get_year ());
 
 
-				ui_def =
-					"<ui>" +
-					"  <menubar name=\"menubar\">" +
-					"    <menu name=\"FileMenu\" action=\"file\">" +
-					"      <placeholder name=\"FileMenuSaveAdditions\">" +
-					"          <menuitem name=\"SaveReport\" action=\"" + ACTION_SAVE + "\" />" +
-					"      </placeholder>" +
-					"      <placeholder name=\"FileMenuExportAdditions\">" +
-					"          <menuitem name=\"PageSetupReport\" action=\"" + ACTION_PAGE_SETUP + "\" />" +
-					"          <menuitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
-					"          <menuitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
-					"      </placeholder>" +
-					"    </menu>" +
-					"    <menu name=\"FormatMenu\" action=\"format\">" +
-					"      <placeholder name=\"FormatMenuAdditions\">" +
-					"        <menuitem name=\"SelectFontReport\" action=\"" + ACTION_SELECT_FONT + "\" />" +
-					"      </placeholder>" +
-					"    </menu>" +
-					"  </menubar>" +
-					"  <toolbar action=\"toolbar\">" +
-					"    <placeholder name=\"FormatToolbarAdditions\">" +
-					"      <toolitem name=\"SelectFontReport\" action=\"" + ACTION_SELECT_FONT + "\" />" +
-					"    </placeholder>" +
-					"    <placeholder name=\"FileToolbarSaveAdditions\">" +
-					"      <toolitem name=\"SaveReport\" action=\"" + ACTION_SAVE + "\" />" +
-					"    </placeholder>" +
-					"    <placeholder name=\"FileToolbarExportAdditions\">" +
-					"      <toolitem name=\"PageSetupReport\" action=\"" + ACTION_PAGE_SETUP + "\" />" +
-					"      <toolitem name=\"PrintReport\" action=\"" + ACTION_PRINT + "\" />" +
-					"      <toolitem name=\"PrintPreviewReport\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
-					"    </placeholder>" +
-					"  </toolbar>" +
-					"</ui>";
+				ui_resource_path = "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-report-ui.xml";
+
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {

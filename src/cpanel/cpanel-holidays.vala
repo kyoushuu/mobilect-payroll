@@ -37,26 +37,35 @@ namespace Mobilect {
 
 
 			public CPanelHolidays (CPanel cpanel) {
-				base (cpanel, ACTION);
+				base (cpanel);
 
 				var dt = new DateTime.now_local ();
 
+
+				push_composite_child ();
+
+
 				var vbox = new Box (Orientation.VERTICAL, 3);
 				this.add_with_viewport (vbox);
+				vbox.show ();
 
 				var hbox = new Box (Orientation.HORIZONTAL, 3);
 				vbox.add (hbox);
+				hbox.show ();
 
 				var sw = new ScrolledWindow (null, null);
 				vbox.pack_start (sw, true, true, 0);
+				sw.show ();
 
 				tree_view = new TreeView ();
 				sw.add (tree_view);
+				tree_view.show ();
 
 				TreeViewColumn column;
 				CellRendererText renderer;
 
 				renderer = new CellRendererText ();
+				renderer.xalign = 1;
 				column = new TreeViewColumn.with_attributes (_("Day"), renderer);
 				column.sort_column_id = MonthInfo.Columns.DAY;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
@@ -71,49 +80,39 @@ namespace Mobilect {
 				column.sort_column_id = MonthInfo.Columns.WEEKDAY;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
-					string text;
+					string markup;
 
 					m.get_value (i, MonthInfo.Columns.WEEKDAY, out value);
 					var wd = (DateWeekday) value;
 					switch (wd) {
 						case DateWeekday.SUNDAY:
-							text = _("Sun");
+							markup = _("<span foreground=\"red\">Sun</span>");
 							break;
 						case DateWeekday.MONDAY:
-							text = _("Mon");
+							markup = _("Mon");
 							break;
 						case DateWeekday.TUESDAY:
-							text = _("Tue");
+							markup = _("Tue");
 							break;
 						case DateWeekday.WEDNESDAY:
-							text = _("Wed");
+							markup = _("Wed");
 							break;
 						case DateWeekday.THURSDAY:
-							text = _("Thu");
+							markup = _("Thu");
 							break;
 						case DateWeekday.FRIDAY:
-							text = _("Fri");
+							markup = _("Fri");
 							break;
 						case DateWeekday.SATURDAY:
-							text = _("Sat");
+							markup = _("Sat");
 							break;
 						default:
-							text = null;
+							markup = null;
 							break;
 					}
 
 					var rt = r as CellRendererText;
-					rt.text = text;
-					if (wd == DateWeekday.SUNDAY) {
-						rt.foreground_rgba = Gdk.RGBA () {
-							red = 1.0,
-							green = 0.0,
-							blue = 0.0,
-							alpha = 1.0
-						};
-					} else {
-						rt.foreground_set = false;
-					}
+					rt.markup = markup;
 				});
 				tree_view.append_column (column);
 
@@ -149,6 +148,7 @@ namespace Mobilect {
 				var date_label = new Label (_("_Date:"));
 				date_label.use_underline = true;
 				hbox.add (date_label);
+				date_label.show ();
 
 
 				year_spin = new SpinButton (new Adjustment (dt.get_year (),
@@ -160,6 +160,7 @@ namespace Mobilect {
 					update ();
 				});
 				hbox.add (year_spin);
+				year_spin.show ();
 
 				month_combo = new ComboBoxText ();
 				month_combo.append_text (_("January"));
@@ -179,6 +180,10 @@ namespace Mobilect {
 				});
 				month_combo.active = dt.get_month () - 1;
 				hbox.add (month_combo);
+				month_combo.show ();
+
+
+				pop_composite_child ();
 			}
 
 			public void update () {

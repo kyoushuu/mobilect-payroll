@@ -6,19 +6,18 @@ AM_CPPFLAGS = \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
 	-DG_LOG_DOMAIN=\"Mobilect-Payroll\" \
 	$(GTK_CFLAGS) \
-	$(GDK_CFLAGS) \
+	$(GLIB_CFLAGS) \
 	$(PANGO_CFLAGS) \
 	$(CAIRO_CFLAGS) \
 	$(PANGOCAIRO_CFLAGS) \
-	$(GDA_CFLAGS) \
 	$(XML_CFLAGS) \
+	$(GDA_CFLAGS) \
 	$(GEE_CFLAGS) \
 	-I$(top_srcdir)/src \
 	-include $(top_builddir)/config.h
 
 AM_CFLAGS = \
-	-w \
-	-g
+	-w
 
 
 bin_PROGRAMS = mobilect-payroll
@@ -41,8 +40,11 @@ mobilect_payroll_SOURCES = \
 	database-widgets/employee-edit-dialog.vala \
 	database-widgets/time-record-edit-widget.vala \
 	database-widgets/time-record-edit-dialog.vala \
+	widgets/find-widget.vala \
+	widgets/find-dialog.vala \
 	widgets/password-widget.vala \
 	widgets/password-dialog.vala \
+	widgets/sort-tree-view-dialog.vala \
 	login/login-page.vala \
 	login/employee-login-page.vala \
 	login/admin-login-page.vala \
@@ -70,6 +72,8 @@ mobilect_payroll_SOURCES = \
 mobilect_payroll_VALAFLAGS = \
 	--pkg gtk+-3.0 \
 	--pkg gdk-3.0 \
+	--pkg glib-2.0 \
+	--pkg gobject-2.0 \
 	--pkg pango \
 	--pkg cairo \
 	--pkg pangocairo \
@@ -80,12 +84,12 @@ mobilect_payroll_VALAFLAGS = \
 
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \
-	$(GDK_LIBS) \
+	$(GLIB_LIBS) \
 	$(PANGO_LIBS) \
 	$(CAIRO_LIBS) \
 	$(PANGOCAIRO_LIBS) \
-	$(GDA_LIBS) \
 	$(XML_LIBS) \
+	$(GDA_LIBS) \
 	$(GEE_LIBS)
 
 

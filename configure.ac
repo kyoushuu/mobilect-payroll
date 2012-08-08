@@ -75,21 +75,25 @@ AM_GNU_GETTEXT([external])
 
 GETTEXT_PACKAGE="$PACKAGE"
 AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [GETTEXT package name])
 
 
 dnl ***************************************************************************
 dnl Check packages
 dnl ***************************************************************************
 
-PKG_CHECK_MODULES(GTK, [gtk+-3.0])
-PKG_CHECK_MODULES(GDK, [gdk-3.0])
-PKG_CHECK_MODULES(PANGO, [pango])
-PKG_CHECK_MODULES(CAIRO, [cairo])
-PKG_CHECK_MODULES(PANGOCAIRO, [pangocairo])
-PKG_CHECK_MODULES(GDA, [libgda-5.0])
-PKG_CHECK_MODULES(XML, [libxml-2.0])
-PKG_CHECK_MODULES(GEE, [gee-1.0])
+GTK_REQUIRED=3.4.0
+GLIB_REQUIRED=2.32.0
+GDA_REQUIRED=5.0.0
+
+PKG_CHECK_MODULES(GTK, gtk+-3.0 >= $GTK_REQUIRED gdk-3.0 >= $GTK_REQUIRED)
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED)
+PKG_CHECK_MODULES(PANGO, pango)
+PKG_CHECK_MODULES(CAIRO, cairo)
+PKG_CHECK_MODULES(PANGOCAIRO, pangocairo)
+PKG_CHECK_MODULES(XML, libxml-2.0)
+PKG_CHECK_MODULES(GDA, libgda-5.0 >= $GDA_REQUIRED)
+PKG_CHECK_MODULES(GEE, gee-1.0)
 
 
 dnl ***************************************************************************

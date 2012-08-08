@@ -24,44 +24,55 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class LoginPage : Frame {
-
-			public weak Window window { get; internal set; }
+		public class FindWidget : Box {
 
 			public Grid grid { get; private set; }
-			public ButtonBox button_box { get; private set; }
+
+			public DateSpinButton start_spin { get; private set; }
+			public DateSpinButton end_spin { get; private set; }
 
 
-			public LoginPage (Window window, string label) {
-				this.window = window;
-
-				this.label = @"<b>$label</b>";
-				this.halign = Align.CENTER;
-				this.valign = Align.CENTER;
-				(this.label_widget as Label).use_markup = true;
-
-
+			public FindWidget () {
 				push_composite_child ();
 
-
-				var box = new Box (Orientation.VERTICAL, 12);
-				box.margin = 12;
-				this.add (box);
-				box.show ();
 
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
 				grid.row_homogeneous = true;
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
-				box.add (grid);
+				this.add (grid);
 				grid.show ();
 
-				button_box = new ButtonBox (Orientation.HORIZONTAL);
-				button_box.set_layout (ButtonBoxStyle.END);
-				button_box.spacing = 6;
-				box.add (button_box);
-				button_box.show ();
+
+				var start_date_label = new Label (_("_Start:"));
+				start_date_label.use_underline = true;
+				start_date_label.xalign = 0.0f;
+				grid.add (start_date_label);
+				start_date_label.show ();
+
+				start_spin = new DateSpinButton ();
+				start_spin.hexpand = true;
+				grid.attach_next_to (start_spin,
+				                     start_date_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
+				start_spin.show ();
+
+
+				var end_date_label = new Label (_("_End:"));
+				end_date_label.use_underline = true;
+				end_date_label.xalign = 0.0f;
+				grid.add (end_date_label);
+				end_date_label.show ();
+
+				end_spin = new DateSpinButton ();
+				end_spin.hexpand = true;
+				grid.attach_next_to (end_spin,
+				                     end_date_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
+				end_spin.show ();
 
 
 				pop_composite_child ();

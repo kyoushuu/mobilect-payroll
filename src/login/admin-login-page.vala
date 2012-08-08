@@ -36,10 +36,15 @@ namespace Mobilect {
 			public AdminLoginPage (Window window) {
 				base (window, _("Administrator Log In"));
 
+
+				push_composite_child ();
+
+
 				var username_label = new Label (_("_Username:"));
 				username_label.use_underline = true;
 				username_label.xalign = 0.0f;
 				grid.add (username_label);
+				username_label.show ();
 
 				username_entry = new Entry ();
 				username_entry.hexpand = true;
@@ -48,11 +53,13 @@ namespace Mobilect {
 				                     username_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				username_entry.show ();
 
 				var password_label = new Label (_("_Password:"));
 				password_label.use_underline = true;
 				password_label.xalign = 0.0f;
 				grid.add (password_label);
+				password_label.show ();
 
 				password_entry = new Entry ();
 				password_entry.hexpand = true;
@@ -62,13 +69,20 @@ namespace Mobilect {
 				                     password_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				password_entry.show ();
 
 				button_login = new Button.with_mnemonic (_("Log _In"));
 				button_login.can_default = true;
 				button_box.add (button_login);
+				button_login.show ();
 
 				button_cancel = new Button.from_stock (Stock.CANCEL);
 				button_box.add (button_cancel);
+				button_cancel.show ();
+
+
+				pop_composite_child ();
+
 
 				button_login.clicked.connect ((t) => {
 					try {

@@ -34,6 +34,8 @@ namespace Mobilect {
 			public Application app { get; private set; }
 
 			public UIManager ui_manager { get; private set; }
+			public MenuBar menubar { get; private set; }
+			public Toolbar toolbar { get; private set; }
 			public Notebook notebook { get; private set; }
 
 
@@ -44,8 +46,13 @@ namespace Mobilect {
 				this.application = app;
 				this.app = app;
 
+
+				push_composite_child ();
+
+
 				var box = new Box (Orientation.VERTICAL, 0);
 				this.add (box);
+				box.show ();
 
 
 				Gtk.ActionEntry[] actions = {
@@ -72,6 +79,10 @@ namespace Mobilect {
 						tooltip = _("Preferences"),
 						callback = (a) => {
 						}
+					},
+					Gtk.ActionEntry () {
+						name = "view",
+						label = _("_View")
 					},
 					Gtk.ActionEntry () {
 						name = "format",
@@ -126,25 +137,41 @@ namespace Mobilect {
 					}
 				};
 
+				Gtk.ToggleActionEntry[] toggle_actions = {
+					Gtk.ToggleActionEntry () {
+						name = "view-toolbar",
+						label = _("Toolbar"),
+						tooltip = _("Show or hide the toolbar"),
+						callback = (a) => {
+							toolbar.visible = (a as ToggleAction).active;
+						},
+						is_active = true
+					}
+				};
+
 				var action_group = new Gtk.ActionGroup ("payroll");
 				action_group.add_actions (actions, this);
+				action_group.add_toggle_actions (toggle_actions, this);
+
+				ui_manager = new UIManager ();
+				ui_manager.insert_action_group (action_group, -1);
+				this.add_accel_group (ui_manager.get_accel_group ());
 
 				try {
-					ui_manager = new UIManager ();
-					ui_manager.insert_action_group (action_group, -1);
-
 					ui_manager.add_ui_from_resource ("/com/mobilectpower/Payroll/mobilect-payroll-ui.xml");
-
-					this.add_accel_group (ui_manager.get_accel_group ());
-					box.add (ui_manager.get_widget ("/menubar"));
 				} catch (Error e) {
 					error ("Failed to add UI to UI Manager: %s", e.message);
 				}
 
-				var toolbar = ui_manager.get_widget ("/toolbar");
+				menubar = ui_manager.get_widget ("/menubar") as MenuBar;
+				box.add (menubar);
+				menubar.show ();
+
+				toolbar = ui_manager.get_widget ("/toolbar") as Toolbar;
 				(toolbar as Toolbar).set_style (ToolbarStyle.BOTH_HORIZ);
 				toolbar.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
 				box.add (toolbar);
+				toolbar.show ();
 
 				notebook = new Notebook ();
 				notebook.show_border = false;
@@ -153,26 +180,28 @@ namespace Mobilect {
 				notebook.halign = Align.FILL;
 				notebook.valign = Align.FILL;
 				box.add (notebook);
+				notebook.show ();
 
 
 				/* Employee Login Page */
 				var emp_login_page = new EmployeeLoginPage (this);
 				PAGE_LOGIN_EMPLOYEE = notebook.append_page (emp_login_page);
-
+				emp_login_page.show ();
 
 				/* Administrator Login Page */
 				var admin_login_page = new AdminLoginPage (this);
 				PAGE_LOGIN_ADMIN = notebook.append_page (admin_login_page);
-
+				admin_login_page.show ();
 
 				/* Administrator Page */
 				var cpanel = new CPanel (this);
 				cpanel.hexpand = true;
 				cpanel.vexpand = true;
 				PAGE_ADMIN = notebook.append_page (cpanel);
+				cpanel.show ();
 
 
-				this.show_all ();
+				pop_composite_child ();
 
 
 				/* Grab default */
@@ -218,12 +247,12 @@ namespace Mobilect {
 			}
 
 			public void show_error_dialog (string primary, string secondary) {
-				var e_dialog = new MessageDialog (this, DialogFlags.MODAL,
-				                                  MessageType.ERROR, ButtonsType.OK,
-				                                  primary);
-				e_dialog.secondary_text = secondary;
-				e_dialog.run ();
-				e_dialog.destroy ();
+				var dialog = new MessageDialog (this, DialogFlags.MODAL,
+				                                MessageType.ERROR, ButtonsType.OK,
+				                                primary);
+				dialog.secondary_text = secondary;
+				dialog.run ();
+				dialog.destroy ();
 			}
 
 		}

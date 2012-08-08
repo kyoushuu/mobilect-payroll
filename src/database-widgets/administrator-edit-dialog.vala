@@ -27,15 +27,15 @@ namespace Mobilect {
 		public class AdministratorEditDialog : Dialog {
 
 			public Administrator administrator {
-				get {
+				public get {
 					return widget.administrator;
 				}
-				set {
+				public set {
 					widget.administrator = value;
 				}
 			}
 
-			public AdministratorEditWidget widget { get; private set; }
+			public AdministratorEditWidget widget { public get; private set; }
 
 
 			public AdministratorEditDialog (string title, Window parent, Administrator administrator) {

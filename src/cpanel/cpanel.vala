@@ -93,15 +93,7 @@ namespace Mobilect {
 
 			public void add_page (CPanelTab tab, string title) {
 				this.append_page (tab, new Label.with_mnemonic (title));
-
-				window.ui_manager.insert_action_group (tab.action_group, -1);
-				if (tab.ui_resource_path != null) {
-					try {
-						window.ui_manager.add_ui_from_resource (tab.ui_resource_path);
-					} catch (Error e) {
-						error ("Failed to add UI to UI Manager: %s", e.message);
-					}
-				}
+				tab.show ();
 			}
 
 			public override void switch_page (Widget page, uint page_num) {
@@ -116,6 +108,7 @@ namespace Mobilect {
 
 				current_page = tab;
 			}
+
 		}
 
 	}

@@ -18,6 +18,7 @@
 
 
 using Gtk;
+using Gdk;
 
 
 namespace Mobilect {
@@ -26,40 +27,51 @@ namespace Mobilect {
 
 		public class CPanelTimeRecords : CPanelTab {
 
-			public DateSpinButton start_spin { get; private set; }
-			public DateSpinButton end_spin { get; private set; }
-			public TreeView tree_view { get; private set; }
-			public TreeModelSort sort { get; private set; }
-			public Spinner search_spinner { get; private set; }
-			public Button search_button { get; private set; }
-			public TimeRecordList list;
-
 			public const string ACTION = "cpanel-time-records";
 			public const string ACTION_ADD = "cpanel-time-records-add";
 			public const string ACTION_REMOVE = "cpanel-time-records-remove";
 			public const string ACTION_PROPERTIES = "cpanel-time-records-properties";
+			public const string ACTION_SELECT_ALL = "cpanel-time-records-select-all";
+			public const string ACTION_DESELECT_ALL = "cpanel-time-records-deselect-all";
+			public const string ACTION_FIND = "cpanel-time-records-find";
+			public const string ACTION_SORT_BY = "cpanel-time-records-sort-by";
+
+			public TreeView tree_view { get; private set; }
+			public TreeModelSort sort { get; private set; }
+			public TimeRecordList list;
 
 
 			public CPanelTimeRecords (CPanel cpanel) {
-				base (cpanel, ACTION);
+				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-time-records-ui.xml");
 
 
-				var vbox = new Box (Orientation.VERTICAL, 3);
-				this.add_with_viewport (vbox);
+				push_composite_child ();
 
-				var hbox = new Box (Orientation.HORIZONTAL, 3);
-				vbox.add (hbox);
-
-				var sw = new ScrolledWindow (null, null);
-				vbox.pack_start (sw, true, true, 0);
 
 				tree_view = new TreeView ();
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
-					edit_action ();
+					properties_action ();
 				});
-				sw.add (tree_view);
+				tree_view.button_press_event.connect ((w, e) => {
+					/* Is not right-click? */
+					if (e.button != 3) {
+						return false;
+					}
+
+					return show_popup (3, e.time);
+				});
+				tree_view.key_press_event.connect ((w, e) => {
+					/* Has key modifier or not menu key? */
+					if (e.state != 0 || e.keyval != Key.Menu) {
+						return false;
+					}
+
+					return show_popup (0, e.time);
+				});
+				this.add (tree_view);
+				tree_view.show ();
 
 				TreeViewColumn column;
 				CellRendererText renderer;
@@ -101,92 +113,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 
-				var date_label = new Label (_("_Date:"));
-				date_label.use_underline = true;
-				hbox.add (date_label);
-
-				start_spin = new DateSpinButton ();
-				hbox.add (start_spin);
-
-				var to_label = new Label (_("_to"));
-				to_label.use_underline = true;
-				hbox.add (to_label);
-
-				end_spin = new DateSpinButton ();
-				hbox.add (end_spin);
-
-				search_button = new Button.with_mnemonic (_("_Search"));
-				search_button.clicked.connect ((b) => {
-					search_spinner.show ();
-					search_spinner.start ();
-
-					this.list = this.cpanel.window.app.database.get_time_records_within_date (start_spin.date, end_spin.date);
-
-					this.sort = new TreeModelSort.with_model (this.list);
-					sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
-						var time_record1 = a.user_data as TimeRecord;
-						var time_record2 = b.user_data as TimeRecord;
-
-						return strcmp (time_record1.employee.get_name (),
-						               time_record2.employee.get_name ());
-					});
-					sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
-						var time_record1 = a.user_data as TimeRecord;
-						var time_record2 = b.user_data as TimeRecord;
-
-						return time_record1.start.compare (time_record2.start);
-					});
-					sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
-						var time_record1 = a.user_data as TimeRecord;
-						var time_record2 = b.user_data as TimeRecord;
-
-						if (time_record1.end != null && time_record2.end != null) {
-							return time_record1.end.compare (time_record2.end);
-						} else if (time_record1.end != null) {
-							return 1;
-						} else if (time_record2.end != null) {
-							return -1;
-						} else {
-							return 0;
-						}
-					});
-					this.tree_view.model = sort;
-
-					search_spinner.stop ();
-					search_spinner.hide ();
-				});
-				hbox.add (search_button);
-
-				search_spinner = new Spinner ();
-				search_spinner.no_show_all = true;
-				hbox.add (search_spinner);
-
-
-				/* Set period */
-				var date = new DateTime.now_local ().add_days (-15);
-				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
-
-				DateDay last_day;
-				if (period == 0) {
-					last_day = 15;
-				} else {
-					last_day = 31;
-					while (!Date.valid_dmy (last_day,
-					                        (DateMonth) date.get_month (),
-					                        (DateYear) date.get_year ())) {
-						last_day--;
-					}
-				}
-
-				start_spin.set_dmy ((15 * period) + 1,
-				                    date.get_month (),
-				                    date.get_year ());
-				end_spin.set_dmy (last_day,
-				                  date.get_month (),
-				                  date.get_year ());
-
-
-				ui_resource_path = "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-time-records-ui.xml";
+				pop_composite_child ();
 
 
 				Gtk.ActionEntry[] actions = {
@@ -214,7 +141,102 @@ namespace Mobilect {
 						accelerator = _("<Alt>Return"),
 						tooltip = _("Edit information about the selected time records"),
 						callback = (a) => {
-							edit_action ();
+							properties_action ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_SELECT_ALL,
+						stock_id = Stock.SELECT_ALL,
+						accelerator = _("<Control>A"),
+						tooltip = _("Select all time records"),
+						callback = (a) => {
+							tree_view.get_selection ().select_all ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_DESELECT_ALL,
+						label = _("_Deselect All"),
+						accelerator = _("<Shift><Control>A"),
+						tooltip = _("Deselects all selected time records"),
+						callback = (a) => {
+							tree_view.get_selection ().unselect_all ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_FIND,
+						stock_id = Stock.FIND,
+						accelerator = _("<Control>F"),
+						tooltip = _("Find time records"),
+						callback = (a) => {
+							/* Set period */
+							var date = new DateTime.now_local ().add_days (-15);
+							var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
+
+							DateDay last_day;
+							if (period == 0) {
+								last_day = 15;
+							} else {
+								last_day = 31;
+								while (!Date.valid_dmy (last_day,
+								                        (DateMonth) date.get_month (),
+								                        (DateYear) date.get_year ())) {
+									last_day--;
+								}
+							}
+
+
+							var dialog = new FindDialog (_("Find"), this.cpanel.window);
+							dialog.set_start_dmy ((15 * period) + 1, date.get_month (), date.get_year ());
+							dialog.set_end_dmy (last_day, date.get_month (), date.get_year ());
+
+							if (dialog.run () == ResponseType.ACCEPT) {
+								dialog.hide ();
+
+								this.list = this.cpanel.window.app.database.get_time_records_within_date (dialog.get_start_date (), dialog.get_end_date ());
+
+								this.sort = new TreeModelSort.with_model (this.list);
+								sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
+									var time_record1 = a.user_data as TimeRecord;
+									var time_record2 = b.user_data as TimeRecord;
+
+									return strcmp (time_record1.employee.get_name (),
+									               time_record2.employee.get_name ());
+								});
+								sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
+									var time_record1 = a.user_data as TimeRecord;
+									var time_record2 = b.user_data as TimeRecord;
+
+									return time_record1.start.compare (time_record2.start);
+								});
+								sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
+									var time_record1 = a.user_data as TimeRecord;
+									var time_record2 = b.user_data as TimeRecord;
+
+									if (time_record1.end != null && time_record2.end != null) {
+										return time_record1.end.compare (time_record2.end);
+									} else if (time_record1.end != null) {
+										return 1;
+									} else if (time_record2.end != null) {
+										return -1;
+									} else {
+										return 0;
+									}
+								});
+								this.tree_view.model = sort;
+							}
+
+							dialog.destroy ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_SORT_BY,
+						label = _("_Sort By..."),
+						tooltip = _("Sort the view using a column"),
+						callback = (a) => {
+							var dialog = new SortTreeViewDialog (this.cpanel.window,
+							                                     tree_view);
+							dialog.run ();
+							dialog.destroy ();
 						}
 					}
 				};
@@ -232,14 +254,6 @@ namespace Mobilect {
 
 			private GLib.List<TimeRecord> get_selected (TreeSelection selection) {
 				var time_records = new GLib.List<TimeRecord>();
-
-				int selected_count = selection.count_selected_rows ();
-				if (selected_count <= 0) {
-					this.cpanel.window.show_error_dialog (_("No time record selected"),
-					                                      _("Select at least one time record first."));
-
-					return time_records;
-				}
 
 				foreach (var p in selection.get_selected_rows (null)) {
 					TimeRecord time_record;
@@ -280,7 +294,7 @@ namespace Mobilect {
 
 					d.destroy ();
 				});
-				dialog.show_all ();
+				dialog.show ();
 			}
 
 			private void remove_action () {
@@ -292,29 +306,29 @@ namespace Mobilect {
 					return;
 				}
 
-				var m_dialog = new MessageDialog (this.cpanel.window,
+				var dialog = new MessageDialog (this.cpanel.window,
 				                                  DialogFlags.MODAL,
 				                                  MessageType.WARNING,
 				                                  ButtonsType.NONE,
 				                                  ngettext ("Are you sure you want to remove the selected time record?",
-				                                            "Are you sure you want to remove the %d selected time records?",
-				                                            selected_count).printf (selected_count));
-				m_dialog.secondary_text = ngettext ("All information about this time record will be deleted and cannot be restored.",
-				                                    "All information about these time records will be deleted and cannot be restored.",
-				                                    selected_count);
-				m_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
-				                      Stock.DELETE, ResponseType.ACCEPT);
+				                                           "Are you sure you want to remove the %d selected time records?",
+				                                           selected_count).printf (selected_count));
+				dialog.secondary_text = ngettext ("All information about this time record will be deleted and cannot be restored.",
+				                                  "All information about these time records will be deleted and cannot be restored.",
+				                                   selected_count);
+				dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+				                    Stock.DELETE, ResponseType.ACCEPT);
 
-				if (m_dialog.run () == ResponseType.ACCEPT) {
+				if (dialog.run () == ResponseType.ACCEPT) {
 					foreach (var time_record in time_records) {
 						time_record.remove ();
 					};
 				}
 
-				m_dialog.destroy ();
+				dialog.destroy ();
 			}
 
-			private void edit_action () {
+			private void properties_action () {
 				var selection = tree_view.get_selection ();
 				var time_records = get_selected (selection);
 
@@ -332,8 +346,19 @@ namespace Mobilect {
 						d.destroy ();
 					});
 
-					dialog.show_all ();
+					dialog.show ();
 				}
+			}
+
+			private bool show_popup (uint button, uint32 time) {
+				/* Has any selected rows? */
+				if (tree_view.get_selection ().count_selected_rows () <= 0) {
+					return false;
+				}
+
+				var menu = cpanel.window.ui_manager.get_widget ("/popup-time-records") as Gtk.Menu;
+				menu.popup (null, null, null, button, time);
+				return true;
 			}
 
 		}

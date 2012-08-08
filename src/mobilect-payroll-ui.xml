@@ -1,19 +1,28 @@
 <ui>
   <menubar name="menubar">
     <menu name="FileMenu" action="file">
-      <placeholder name="FileMenuSaveAdditions" />
+      <placeholder name="FileSaveMenuAdditions" />
       <separator/>
       <placeholder name="FileMenuAdditions" />
       <separator/>
-      <placeholder name="FileMenuExportAdditions" />
+      <placeholder name="FileExportMenuAdditions" />
       <separator/>
-      <placeholder name="FileMenuCloseAdditions" />
+      <placeholder name="FileCloseMenuAdditions" />
       <menuitem name="Quit" action="file-quit" />
     </menu>
     <menu name="EditMenu" action="edit">
+      <placeholder name="EditSelectedMenuAdditions" />
+      <separator/>
       <placeholder name="EditMenuAdditions" />
       <separator/>
+      <placeholder name="EditSearchMenuAdditions" />
+      <separator/>
       <menuitem name="Preferences" action="edit-preferences" />
+    </menu>
+    <menu name="ViewMenu" action="view">
+      <menuitem name="Toolbar" action="view-toolbar" />
+      <separator/>
+      <placeholder name="ViewMenuAdditions" />
     </menu>
     <menu name="FormatMenu" action="format">
       <placeholder name="FormatMenuAdditions" />
@@ -27,21 +36,19 @@
       <menuitem name="About" action="help-about"/>
     </menu>
   </menubar>
-  <toolbar action="toolbar">
-    <placeholder name="EditToolbarAdditions" />
+  <toolbar name="toolbar">
+    <placeholder name="EditSelectedToolbarAdditions" />
+    <separator/>
+    <placeholder name="EditSearchToolbarAdditions" />
     <separator/>
     <placeholder name="FormatToolbarAdditions" />
     <separator/>
     <placeholder name="ToolbarAdditions" />
     <separator/>
-    <placeholder name="FileToolbarSaveAdditions" />
+    <placeholder name="FileSaveToolbarAdditions" />
     <separator/>
-    <placeholder name="FileToolbarAdditions" />
+    <placeholder name="FileExportToolbarAdditions" />
     <separator/>
-    <placeholder name="FileToolbarExportAdditions" />
-    <separator/>
-    <placeholder name="FileToolbarCloseAdditions" />
-    <separator expand="true" />
-    <toolitem name="Quit" action="file-quit" />
+    <placeholder name="FileCloseToolbarAdditions" />
   </toolbar>
 </ui>

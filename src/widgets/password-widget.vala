@@ -42,6 +42,7 @@ namespace Mobilect {
 				grid.row_spacing = 3;
 				grid.column_spacing = 12;
 				this.add (grid);
+				grid.show ();
 
 
 				var password_label = new Label (_("_Password:"));

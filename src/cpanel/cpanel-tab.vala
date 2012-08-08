@@ -28,22 +28,39 @@ namespace Mobilect {
 
 			public weak CPanel cpanel { get; internal set; }
 
-			public string ui_resource_path { get; internal set; }
 			public Gtk.ActionGroup action_group { get; internal set; }
 
 
 			public virtual signal void changed_to () {
+				if (this.action_group != null) {
+					this.action_group.sensitive = true;
 					this.action_group.visible = true;
+				}
 			}
 
 			public virtual signal void changed_from () {
+				if (this.action_group != null) {
+					this.action_group.sensitive = false;
 					this.action_group.visible = false;
+				}
 			}
 
 
-			public CPanelTab (CPanel cpanel, string name) {
+			public CPanelTab (CPanel cpanel, string? action_name = null, string? ui_resource_path = null) {
 				this.cpanel = cpanel;
-				this.action_group = new Gtk.ActionGroup (name);
+
+				if (action_name != null) {
+					this.action_group = new Gtk.ActionGroup (action_name);
+					cpanel.window.ui_manager.insert_action_group (this.action_group, -1);
+				}
+
+				if (ui_resource_path != null) {
+					try {
+						cpanel.window.ui_manager.add_ui_from_resource (ui_resource_path);
+					} catch (Error e) {
+						error ("Failed to add UI to UI Manager: %s", e.message);
+					}
+				}
 			}
 
 		}

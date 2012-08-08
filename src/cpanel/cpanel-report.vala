@@ -73,57 +73,70 @@ namespace Mobilect {
 
 
 			public CPanelReport (CPanel cpanel) {
-				base (cpanel, ACTION);
+				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-report-ui.xml");
 
 				page_setup = new PageSetup ();
 				page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
+
+
+				push_composite_child ();
+
 
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
 				grid.row_spacing = 3;
 				grid.column_spacing = 6;
 				this.add_with_viewport (grid);
+				grid.show ();
 
 				var type_label = new Label (_("_Type:"));
 				type_label.use_underline = true;
 				type_label.xalign = 0.0f;
 				grid.add (type_label);
+				type_label.show ();
 
 				regular_radio = new RadioButton.with_mnemonic (null, _("Re_gular"));
 				grid.attach_next_to (regular_radio,
 				                     type_label,
 				                     PositionType.RIGHT,
 				                     1, 1);
+				regular_radio.show ();
 
 				overtime_radio = new RadioButton.with_mnemonic_from_widget (regular_radio, _("_Overtime"));
 				grid.attach_next_to (overtime_radio,
 				                     regular_radio,
 				                     PositionType.BOTTOM,
 				                     1, 1);
+				overtime_radio.show ();
 
 				var period_label = new Label (_("_Period:"));
 				period_label.use_underline = true;
 				period_label.xalign = 0.0f;
 				grid.add (period_label);
+				period_label.show ();
 
 				start_spin = new DateSpinButton ();
 				grid.attach_next_to (start_spin,
 				                     period_label,
 				                     PositionType.RIGHT,
 				                     1, 1);
+				start_spin.show ();
 
 				end_spin = new DateSpinButton ();
 				grid.attach_next_to (end_spin,
 				                     start_spin,
 				                     PositionType.BOTTOM,
 				                     1, 1);
+				end_spin.show ();
 
 				var deduc_scroll = new ScrolledWindow (null, null);
 				deduc_scroll.expand = true;
 				grid.add_with_properties (deduc_scroll, width: 3);
+				deduc_scroll.show ();
 
 				deduc_view = new TreeView ();
 				deduc_scroll.add (deduc_view);
+				deduc_view.show ();
 
 				CellRendererSpin renderer;
 				TreeViewColumn column;
@@ -297,6 +310,9 @@ namespace Mobilect {
 				deduc_view.append_column (column);
 
 
+				pop_composite_child ();
+
+
 				/* Set period */
 				var date = new DateTime.now_local ().add_days (-15);
 				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
@@ -321,9 +337,6 @@ namespace Mobilect {
 				                  date.get_year ());
 
 
-				ui_resource_path = "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-report-ui.xml";
-
-
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
 						name = ACTION_SELECT_FONT,
@@ -333,10 +346,10 @@ namespace Mobilect {
 							var dialog = new Dialog.with_buttons (_("Select Fonts"),
 							                                      this.cpanel.window,
 							                                      DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
-							                                      Stock.OK,
-							                                      ResponseType.ACCEPT,
 							                                      Stock.CANCEL,
-							                                      ResponseType.REJECT);
+							                                      ResponseType.REJECT,
+							                                      Stock.OK,
+							                                      ResponseType.ACCEPT);
 
 							var content_area = dialog.get_content_area ();
 							var action_area = dialog.get_action_area ();
@@ -447,6 +460,8 @@ namespace Mobilect {
 
 
 							if (dialog.run () == ResponseType.ACCEPT) {
+								dialog.hide ();
+
 								title_font = title_font_button.get_font_desc ();
 								company_name_font = company_name_font_button.get_font_desc ();
 								header_font = header_font_button.get_font_desc ();
@@ -530,6 +545,8 @@ namespace Mobilect {
 								                                              pr.format_date (end_spin.date, "%Y%m%d")));
 
 								if (dialog.run () == ResponseType.ACCEPT) {
+									dialog.hide ();
+
 									pr.export_filename = dialog.get_filename ();
 									pr.export (this.cpanel.window);
 									settings = pr.print_settings;
@@ -549,13 +566,117 @@ namespace Mobilect {
 
 			private Report create_report () throws ReportError, RegularReportError {
 				Report pr;
+				var start_date = start_spin.date;
+				var end_date = end_spin.date;
+
 				if (regular_radio.active) {
-					pr = new RegularReport (start_spin.date, end_spin.date);
+					pr = new RegularReport (start_date, end_date);
 					(pr as RegularReport).deductions = deduc_view.model as ListStore;
 					pr.title = _("SEMI-MONTHLY PAYROLL");
 				} else {
-					pr = new OvertimeReport (start_spin.date, end_spin.date);
+					var period_8am_5pm_regular = new PayPeriod (_("8am-5pm"),
+					                                            false,
+					                                            1.0,
+					                                            new TimePeriod[] {
+																												TimePeriod (Time (8,0), Time (12,0)),
+																												TimePeriod (Time (13,0), Time (17,0))
+																											});
+					var period_8am_5pm_sunday = new PayPeriod (_("8am-5pm"),
+					                                           false,
+					                                           1.3,
+					                                           new TimePeriod[] {
+																											 TimePeriod (Time (8,0), Time (12,0)),
+																											 TimePeriod (Time (13,0), Time (17,0))
+																										 });
+					var period_5pm_10pm = new PayPeriod (_("5pm-10pm"),
+					                                     true,
+					                                     1.25,
+					                                     new TimePeriod[] {
+																								 TimePeriod (Time (17,0), Time (22,0))
+																							 });
+					var period_10pm_6am = new PayPeriod (_("10pm-6am"),
+					                                     true,
+					                                     1.5,
+					                                     new TimePeriod[] {
+																								 TimePeriod (Time (22,0), Time (0,0)),
+																								 TimePeriod (Time (0,0), Time (6,0))
+																							 });
+
+					var pay_periods_regular = new PayPeriod[] {
+						period_8am_5pm_regular,
+						period_5pm_10pm,
+						period_10pm_6am
+					};
+					var pay_periods_sunday = new PayPeriod[] {
+						period_8am_5pm_sunday,
+						period_5pm_10pm,
+						period_10pm_6am
+					};
+
+					var pay_groups = new PayGroup[] {
+						new PayGroup (_("Non-Holiday"),
+						              false,
+						              MonthInfo.HolidayType.NON_HOLIDAY,
+						              1.0,
+						              new PayPeriod[] {
+														period_5pm_10pm,
+														period_10pm_6am
+													},
+						              null),
+						new PayGroup (_("Sunday, Non-Holiday"),
+						              true,
+						              MonthInfo.HolidayType.NON_HOLIDAY,
+						              1.0,
+						              pay_periods_sunday,
+						              null),
+						new PayGroup (_("Regular Holiday"),
+						              false,
+						              MonthInfo.HolidayType.REGULAR_HOLIDAY,
+						              2.0,
+						              pay_periods_regular,
+						              new double[] {
+														1.0, 0, 0
+													}),
+						new PayGroup (_("Sunday, Regular Holiday"),
+						              true,
+						              MonthInfo.HolidayType.REGULAR_HOLIDAY,
+						              2.0,
+						              pay_periods_sunday,
+						              null),
+						new PayGroup (_("Special Holiday"),
+						              false,
+						              MonthInfo.HolidayType.SPECIAL_HOLIDAY,
+						              1.3,
+						              pay_periods_regular,
+						              new double[] {
+														1.0, 0, 0
+													}),
+						new PayGroup (_("Sunday, Special Holiday"),
+						              true,
+						              MonthInfo.HolidayType.SPECIAL_HOLIDAY,
+						              1.3,
+						              pay_periods_sunday,
+						              null)
+					};
+
+
+					pr = new OvertimeReport (start_date, end_date);
 					pr.title = _("MONTHLY OVERTIME PAYROLL");
+
+					int affected;
+					var affected_pay_groups = new PayGroup[0];
+					foreach (var pay_group in pay_groups) {
+						affected = 0;
+						for (int i = 0; i < pay_group.periods.length; i++) {
+							affected += pay_group.create_filter (i, start_date, end_date)
+								.get_affected_dates (this.cpanel.window.app.database).length;
+						}
+						if (affected > 0) {
+							affected_pay_groups += pay_group;
+						}
+					}
+
+					(pr as OvertimeReport).pay_groups = affected_pay_groups;
 				}
 				pr.employees = this.cpanel.window.app.database.employee_list;
 				pr.default_page_setup = page_setup;
@@ -591,6 +712,7 @@ namespace Mobilect {
 					                                Columns.ID, employee.id);
 				}
 			}
+
 		}
 
 	}

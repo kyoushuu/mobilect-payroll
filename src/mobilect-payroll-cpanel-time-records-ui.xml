@@ -1,19 +1,38 @@
 <ui>
   <menubar name="menubar">
     <menu name="EditMenu" action="edit">
-      <placeholder name="EditMenuAdditions">
-        <menuitem name="AddTimeRecord" action="cpanel-time-records-add" />
-        <menuitem name="RemoveTimeRecord" action="cpanel-time-records-remove" />
+      <placeholder name="EditSelectedMenuAdditions">
+        <menuitem name="TimeRecordAdd" action="cpanel-time-records-add" />
+        <menuitem name="TimeRecordRemove" action="cpanel-time-records-remove" />
         <separator />
-        <menuitem name="PropertiesTimeRecord" action="cpanel-time-records-properties" />
+        <menuitem name="TimeRecordProperties" action="cpanel-time-records-properties" />
+        <separator />
+        <menuitem name="TimeRecordSelectAll" action="cpanel-time-records-select-all" />
+        <menuitem name="TimeRecordDeselectAll" action="cpanel-time-records-deselect-all" />
+      </placeholder>
+      <placeholder name="EditSearchMenuAdditions">
+        <menuitem name="TimeRecordFind" action="cpanel-time-records-find" />
+      </placeholder>
+    </menu>
+    <menu name="ViewMenu" action="view">
+      <placeholder name="ViewMenuAdditions">
+        <menuitem name="TimeRecordSortBy" action="cpanel-time-records-sort-by" />
       </placeholder>
     </menu>
   </menubar>
-  <toolbar action="toolbar">
-    <placeholder name="EditToolbarAdditions">
-      <toolitem name="AddTimeRecord" action="cpanel-time-records-add" />
-      <toolitem name="RemoveTimeRecord" action="cpanel-time-records-remove" />
-      <toolitem name="PropertiesTimeRecord" action="cpanel-time-records-properties" />
+  <popup name="popup-time-records">
+    <menuitem name="TimeRecordProperties" action="cpanel-time-records-properties" />
+    <separator />
+    <menuitem name="TimeRecordRemove" action="cpanel-time-records-remove" />
+  </popup>
+  <toolbar name="toolbar">
+    <placeholder name="EditSelectedToolbarAdditions">
+      <toolitem name="TimeRecordAdd" action="cpanel-time-records-add" />
+      <toolitem name="TimeRecordRemove" action="cpanel-time-records-remove" />
+      <toolitem name="TimeRecordProperties" action="cpanel-time-records-properties" />
+    </placeholder>
+    <placeholder name="EditSearchToolbarAdditions">
+      <toolitem name="TimeRecordFind" action="cpanel-time-records-find" />
     </placeholder>
   </toolbar>
 </ui>

@@ -66,6 +66,10 @@ namespace Mobilect {
 					time.minute == this.minute;
 			}
 
+			public string to_string () {
+				return "%02d:%02d".printf (hour, minute);
+			}
+
 		}
 
 	}

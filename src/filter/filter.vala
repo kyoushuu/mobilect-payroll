@@ -36,8 +36,59 @@ namespace Mobilect {
 			public bool sunday_work = false;
 			public double period = 4.0;
 
+			private Date cached_date_start = Date ();
+			private Date cached_date_end = Date ();
+			private Date[] dates_affected { get; set; }
+			private Database cached_database;
+
 
 			public Filter () {
+			}
+
+			public Date[] get_affected_dates (Database database) {
+				if (date_start.compare (date_end) > 0) {
+					return new Date[0];
+				}
+
+				if (cached_date_start.valid () && date_start.compare (cached_date_start) == 0 &&
+				    cached_date_end.valid () && date_end.compare (cached_date_end) == 0 &&
+				    database == cached_database &&
+				    dates_affected != null) {
+					return dates_affected;
+				}
+
+				MonthInfo month_info = null;
+				var dates = new Date[0];
+
+				for (var date = date_start; date.compare (date_end) <= 0; date.add_days (1)) {
+					if (month_info == null ||
+					    month_info.month != date.get_month () ||
+					    month_info.year != date.get_year ()) {
+						month_info = new MonthInfo (database,
+						                            date.get_year (),
+						                            date.get_month ());
+					}
+
+					if (use_holiday_type) {
+						if (month_info.get_day_type (date.get_day ()) != holiday_type) {
+							continue;
+						}
+					}
+
+					if (sunday_work !=
+					    (month_info.get_weekday (date.get_day ()) == DateWeekday.SUNDAY)) {
+						continue;
+					}
+
+					dates += date;
+				}
+
+				cached_date_start = date_start;
+				cached_date_end = date_end;
+				dates_affected = dates;
+				cached_database = database;
+
+				return dates_affected;
 			}
 
 			/*

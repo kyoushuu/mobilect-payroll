@@ -26,6 +26,7 @@ mobilect_payroll_SOURCES = \
 	main/mobilect-payroll.vala \
 	main/application.vala \
 	main/window.vala \
+	main/preferences-dialog.vala \
 	database/database.vala \
 	database/employee.vala \
 	database/employee-list.vala \
@@ -55,6 +56,7 @@ mobilect_payroll_SOURCES = \
 	cpanel/cpanel-time-records.vala \
 	cpanel/cpanel-holidays.vala \
 	cpanel/cpanel-report.vala \
+  settings/settings.vala \
 	report/report.vala \
 	report/regular-report.vala \
 	report/overtime-report.vala \

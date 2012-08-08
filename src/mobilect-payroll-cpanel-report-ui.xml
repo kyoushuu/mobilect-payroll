@@ -10,16 +10,8 @@
           <menuitem name="ReportPrintPreview" action="cpanel-report-print-preview" />
       </placeholder>
     </menu>
-    <menu name="FormatMenu" action="format">
-      <placeholder name="FormatMenuAdditions">
-        <menuitem name="ReportSelectFont" action="cpanel-report-select-font" />
-      </placeholder>
-    </menu>
   </menubar>
   <toolbar name="toolbar">
-    <placeholder name="FormatToolbarAdditions">
-      <toolitem name="ReportSelectFont" action="cpanel-report-select-font" />
-    </placeholder>
     <placeholder name="FileSaveToolbarAdditions">
       <toolitem name="ReportSave" action="cpanel-report-save" />
     </placeholder>

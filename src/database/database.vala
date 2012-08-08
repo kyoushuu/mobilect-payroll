@@ -33,10 +33,11 @@ namespace Mobilect {
 			public EmployeeList employee_list { get; private set; }
 			public AdministratorList administrator_list { get; private set; }
 
+
 			public Database () {
 				try {
 					/* Create config directory with permission 0754 */
-					var db_dir = "%s/%s".printf (Environment.get_user_config_dir (), PACKAGE);
+					var db_dir = Path.build_filename (Environment.get_user_config_dir (), PACKAGE);
 					DirUtils.create_with_parents (db_dir, 0754);
 
 					/* Connect to database */

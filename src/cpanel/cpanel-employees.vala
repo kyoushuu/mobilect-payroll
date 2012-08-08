@@ -205,8 +205,10 @@ namespace Mobilect {
 						callback = (a) => {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
-							dialog.run ();
-							dialog.destroy ();
+							dialog.response.connect ((d, r) => {
+								d.destroy ();
+							});
+							dialog.show ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -221,6 +223,7 @@ namespace Mobilect {
 				};
 
 				this.action_group.add_actions (actions, this);
+				this.action_group.get_action (ACTION_ADD).is_important = true;
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
 				this.action_group.get_action (ACTION_PROPERTIES).sensitive = false;
 				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
@@ -314,6 +317,7 @@ namespace Mobilect {
 				                    Stock.DELETE, ResponseType.ACCEPT);
 
 				if (dialog.run () == ResponseType.ACCEPT) {
+					dialog.hide ();
 					foreach (var employee in employees) {
 						employee.remove ();
 					}

@@ -79,6 +79,13 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [GETTEXT package name])
 
 
 dnl ***************************************************************************
+dnl GSettings
+dnl ***************************************************************************
+
+GLIB_GSETTINGS
+
+
+dnl ***************************************************************************
 dnl Check packages
 dnl ***************************************************************************
 
@@ -111,6 +118,7 @@ src/mobilect-payroll.rc
 vapi/Makefile
 data/Makefile
 data/mobilect-payroll.desktop.in
+data/com.mobilectpower.payroll.gschema.xml.in
 data/icons/Makefile
 po/Makefile.in
 ])

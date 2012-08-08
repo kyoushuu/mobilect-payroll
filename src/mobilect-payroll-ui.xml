@@ -24,9 +24,6 @@
       <separator/>
       <placeholder name="ViewMenuAdditions" />
     </menu>
-    <menu name="FormatMenu" action="format">
-      <placeholder name="FormatMenuAdditions" />
-    </menu>
     <placeholder name="MenuAdditions" />
     <menu name="HelpMenu" action="help">
       <menuitem name="Contents" action="help-contents"/>

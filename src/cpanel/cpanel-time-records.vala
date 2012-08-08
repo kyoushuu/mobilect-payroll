@@ -188,44 +188,46 @@ namespace Mobilect {
 							var dialog = new FindDialog (_("Find"), this.cpanel.window);
 							dialog.set_start_dmy ((15 * period) + 1, date.get_month (), date.get_year ());
 							dialog.set_end_dmy (last_day, date.get_month (), date.get_year ());
+							dialog.response.connect ((d, r) => {
+								if (r == ResponseType.ACCEPT) {
+									d.hide ();
 
-							if (dialog.run () == ResponseType.ACCEPT) {
-								dialog.hide ();
+									this.list = this.cpanel.window.app.database.get_time_records_within_date (dialog.get_start_date (), dialog.get_end_date ());
 
-								this.list = this.cpanel.window.app.database.get_time_records_within_date (dialog.get_start_date (), dialog.get_end_date ());
+									this.sort = new TreeModelSort.with_model (this.list);
+									sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
+										var time_record1 = a.user_data as TimeRecord;
+										var time_record2 = b.user_data as TimeRecord;
 
-								this.sort = new TreeModelSort.with_model (this.list);
-								sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
-									var time_record1 = a.user_data as TimeRecord;
-									var time_record2 = b.user_data as TimeRecord;
+										return strcmp (time_record1.employee.get_name (),
+											             time_record2.employee.get_name ());
+									});
+									sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
+										var time_record1 = a.user_data as TimeRecord;
+										var time_record2 = b.user_data as TimeRecord;
 
-									return strcmp (time_record1.employee.get_name (),
-									               time_record2.employee.get_name ());
-								});
-								sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
-									var time_record1 = a.user_data as TimeRecord;
-									var time_record2 = b.user_data as TimeRecord;
+										return time_record1.start.compare (time_record2.start);
+									});
+									sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
+										var time_record1 = a.user_data as TimeRecord;
+										var time_record2 = b.user_data as TimeRecord;
 
-									return time_record1.start.compare (time_record2.start);
-								});
-								sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
-									var time_record1 = a.user_data as TimeRecord;
-									var time_record2 = b.user_data as TimeRecord;
+										if (time_record1.end != null && time_record2.end != null) {
+											return time_record1.end.compare (time_record2.end);
+										} else if (time_record1.end != null) {
+											return 1;
+										} else if (time_record2.end != null) {
+											return -1;
+										} else {
+											return 0;
+										}
+									});
+									this.tree_view.model = sort;
+								}
 
-									if (time_record1.end != null && time_record2.end != null) {
-										return time_record1.end.compare (time_record2.end);
-									} else if (time_record1.end != null) {
-										return 1;
-									} else if (time_record2.end != null) {
-										return -1;
-									} else {
-										return 0;
-									}
-								});
-								this.tree_view.model = sort;
-							}
-
-							dialog.destroy ();
+								d.destroy ();
+							});
+							dialog.show ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -235,13 +237,16 @@ namespace Mobilect {
 						callback = (a) => {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
-							dialog.run ();
-							dialog.destroy ();
+							dialog.response.connect ((d, r) => {
+								d.destroy ();
+							});
+							dialog.show ();
 						}
 					}
 				};
 
 				this.action_group.add_actions (actions, this);
+				this.action_group.get_action (ACTION_ADD).is_important = true;
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
 				this.action_group.get_action (ACTION_PROPERTIES).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
@@ -320,6 +325,7 @@ namespace Mobilect {
 				                    Stock.DELETE, ResponseType.ACCEPT);
 
 				if (dialog.run () == ResponseType.ACCEPT) {
+					dialog.hide ();
 					foreach (var time_record in time_records) {
 						time_record.remove ();
 					};

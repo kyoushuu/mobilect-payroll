@@ -29,7 +29,6 @@ namespace Mobilect {
 		public class CPanelReport : CPanelTab {
 
 			public const string ACTION = "cpanel-report";
-			public const string ACTION_SELECT_FONT = "cpanel-report-select-font";
 			public const string ACTION_PAGE_SETUP = "cpanel-report-page-setup";
 			public const string ACTION_PRINT = "cpanel-report-print";
 			public const string ACTION_PRINT_PREVIEW = "cpanel-report-print-preview";
@@ -43,15 +42,16 @@ namespace Mobilect {
 			public DateSpinButton end_spin { get; private set; }
 			public TreeView deduc_view { get; private set; }
 
-			private FontDescription title_font = FontDescription.from_string ("Sans Bold 14");
-			private FontDescription company_name_font = FontDescription.from_string ("Sans Bold 12");
-			private FontDescription header_font = FontDescription.from_string ("Sans Bold 9");
-			private FontDescription text_font = FontDescription.from_string ("Sans 9");
-			private FontDescription number_font = FontDescription.from_string ("Monospace 9");
-			private FontDescription emp_number_font = FontDescription.from_string ("Monospace Bold 9");
+			private FontDescription title_font;
+			private FontDescription company_name_font;
+			private FontDescription header_font;
+			private FontDescription text_font;
+			private FontDescription number_font;
+			private FontDescription emp_number_font;
 
 			private PageSetup page_setup;
-			private PrintSettings settings;
+			private PrintSettings print_settings;
+			private GLib.Settings report_settings;
 
 
 			/* Philippines Legal / FanFold German Legal / US Foolscap */
@@ -77,6 +77,62 @@ namespace Mobilect {
 
 				page_setup = new PageSetup ();
 				page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
+
+				report_settings = this.cpanel.window.app.settings.report;
+				title_font = FontDescription.from_string (report_settings.get_string ("title-font"));
+				company_name_font = FontDescription.from_string (report_settings.get_string ("company-name-font"));
+				header_font = FontDescription.from_string (report_settings.get_string ("header-font"));
+				text_font = FontDescription.from_string (report_settings.get_string ("text-font"));
+				number_font = FontDescription.from_string (report_settings.get_string ("number-font"));
+				emp_number_font = FontDescription.from_string (report_settings.get_string ("emphasized-number-font"));
+				report_settings.changed.connect ((s, k) => {
+					if (!k.has_suffix ("-font")) {
+						return;
+					}
+
+					var font = FontDescription.from_string (report_settings.get_string (k));
+
+					switch (k) {
+						case "title-font":
+							title_font = font;
+							break;
+						case "company-name-font":
+							company_name_font = font;
+							break;
+						case "header-font":
+							header_font = font;
+							break;
+						case "text-font":
+							text_font = font;
+							break;
+						case "number-font":
+							number_font = font;
+							break;
+						case "emphasized-number-font":
+							emp_number_font = font;
+							break;
+					}
+				});
+
+				/* Load page setup */
+				if (FileUtils.test (this.cpanel.window.app.settings.page_setup, FileTest.IS_REGULAR)) {
+					try {
+						page_setup = new PageSetup.from_file (this.cpanel.window.app.settings.page_setup);
+					} catch (Error e) {
+						this.cpanel.window.show_error_dialog (_("Failed to load page setup"),
+						                                      e.message);
+					}
+				}
+
+				/* Load print settings */
+				if (FileUtils.test (this.cpanel.window.app.settings.print_settings, FileTest.IS_REGULAR)) {
+					try {
+						print_settings = new PrintSettings.from_file (this.cpanel.window.app.settings.print_settings);
+					} catch (Error e) {
+						this.cpanel.window.show_error_dialog (_("Failed to load print settings"),
+						                                      e.message);
+					}
+				}
 
 
 				push_composite_child ();
@@ -339,152 +395,26 @@ namespace Mobilect {
 
 				Gtk.ActionEntry[] actions = {
 					Gtk.ActionEntry () {
-						name = ACTION_SELECT_FONT,
-						stock_id = Stock.SELECT_FONT,
-						tooltip = _("Select fonts to use in the report"),
-						callback = (a) => {
-							var dialog = new Dialog.with_buttons (_("Select Fonts"),
-							                                      this.cpanel.window,
-							                                      DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
-							                                      Stock.CANCEL,
-							                                      ResponseType.REJECT,
-							                                      Stock.OK,
-							                                      ResponseType.ACCEPT);
-
-							var content_area = dialog.get_content_area ();
-							var action_area = dialog.get_action_area ();
-
-							dialog.border_width = 5;
-							content_area.spacing = 2; /* 2 * 5 + 2 = 12 */
-							(action_area as Container).border_width = 5;
-
-
-							var sf_grid = new Grid ();
-							sf_grid.orientation = Orientation.VERTICAL;
-							sf_grid.row_homogeneous = true;
-							sf_grid.row_spacing = 3;
-							sf_grid.column_spacing = 12;
-							sf_grid.border_width = 5;
-							content_area.add (sf_grid);
-							sf_grid.show ();
-
-
-							var title_label = new Label (_("_Title:"));
-							title_label.use_underline = true;
-							title_label.xalign = 0.0f;
-							sf_grid.add (title_label);
-							title_label.show ();
-
-							var title_font_button = new FontButton ();
-							title_font_button.font_desc = title_font;
-							sf_grid.attach_next_to (title_font_button,
-							                        title_label,
-							                        PositionType.RIGHT,
-							                        2, 1);
-							title_font_button.show ();
-
-
-							var company_name_label = new Label (_("_Company Name:"));
-							company_name_label.use_underline = true;
-							company_name_label.xalign = 0.0f;
-							sf_grid.add (company_name_label);
-							company_name_label.show ();
-
-							var company_name_font_button = new FontButton ();
-							company_name_font_button.font_desc = company_name_font;
-							sf_grid.attach_next_to (company_name_font_button,
-							                        company_name_label,
-							                        PositionType.RIGHT,
-							                        2, 1);
-							company_name_font_button.show ();
-
-
-							var header_label = new Label (_("_Header:"));
-							header_label.use_underline = true;
-							header_label.xalign = 0.0f;
-							sf_grid.add (header_label);
-							header_label.show ();
-
-							var header_font_button = new FontButton ();
-							header_font_button.font_desc = header_font;
-							sf_grid.attach_next_to (header_font_button,
-							                        header_label,
-							                        PositionType.RIGHT,
-							                        2, 1);
-							header_font_button.show ();
-
-
-							var text_label = new Label (_("_Text:"));
-							text_label.use_underline = true;
-							text_label.xalign = 0.0f;
-							sf_grid.add (text_label);
-							text_label.show ();
-
-							var text_font_button = new FontButton ();
-							text_font_button.font_desc = text_font;
-							sf_grid.attach_next_to (text_font_button,
-							                        text_label,
-							                        PositionType.RIGHT,
-							                        2, 1);
-							text_font_button.show ();
-
-
-							var number_label = new Label (_("_Number:"));
-							number_label.use_underline = true;
-							number_label.xalign = 0.0f;
-							sf_grid.add (number_label);
-							number_label.show ();
-
-							var number_font_button = new FontButton ();
-							number_font_button.font_desc = number_font;
-							sf_grid.attach_next_to (number_font_button,
-							                        number_label,
-							                        PositionType.RIGHT,
-							                        2, 1);
-							number_font_button.show ();
-
-
-							var emp_number_label = new Label (_("_Emphasized Number:"));
-							emp_number_label.use_underline = true;
-							emp_number_label.xalign = 0.0f;
-							sf_grid.add (emp_number_label);
-							emp_number_label.show ();
-
-							var emp_number_font_button = new FontButton ();
-							emp_number_font_button.font_desc = emp_number_font;
-							sf_grid.attach_next_to (emp_number_font_button,
-							                        emp_number_label,
-							                        PositionType.RIGHT,
-							                        2, 1);
-							emp_number_font_button.show ();
-
-
-							if (dialog.run () == ResponseType.ACCEPT) {
-								dialog.hide ();
-
-								title_font = title_font_button.get_font_desc ();
-								company_name_font = company_name_font_button.get_font_desc ();
-								header_font = header_font_button.get_font_desc ();
-								text_font = text_font_button.get_font_desc ();
-								number_font = number_font_button.get_font_desc ();
-								emp_number_font = emp_number_font_button.get_font_desc ();
-							}
-
-							dialog.destroy ();
-						}
-					},
-					Gtk.ActionEntry () {
 						name = ACTION_PAGE_SETUP,
 						stock_id = Stock.PAGE_SETUP,
 						tooltip = _("Customize the page size, orientation and margins"),
 						callback = (a) => {
-							if (settings == null) {
-								settings = new PrintSettings ();
-								settings.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
+							if (this.print_settings == null) {
+								print_settings = new PrintSettings ();
+								print_settings.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 							}
 
-							var new_page_setup = print_run_page_setup_dialog (this.cpanel.window, page_setup, settings);
-							page_setup = new_page_setup;
+							var new_page_setup = print_run_page_setup_dialog (this.cpanel.window, page_setup, print_settings);
+
+							try {
+								page_setup = new_page_setup;
+								page_setup.to_file (this.cpanel.window.app.settings.page_setup);
+
+								print_settings.to_file (this.cpanel.window.app.settings.print_settings);
+							} catch (Error e) {
+								this.cpanel.window.show_error_dialog (_("Failed to save page setup and print settings"),
+								                                      e.message);
+							}
 						}
 					},
 					Gtk.ActionEntry () {
@@ -496,7 +426,9 @@ namespace Mobilect {
 							try {
 								var pr = create_report ();
 								pr.print_dialog (this.cpanel.window);
-								settings = pr.print_settings;
+
+								print_settings = pr.print_settings;
+								print_settings.to_file (this.cpanel.window.app.settings.print_settings);
 							} catch (Error e) {
 								this.cpanel.window.show_error_dialog (_("Failed to print report"),
 								                                      e.message);
@@ -512,7 +444,9 @@ namespace Mobilect {
 							try {
 								var pr = create_report ();
 								pr.preview_dialog (this.cpanel.window);
-								settings = pr.print_settings;
+
+								print_settings = pr.print_settings;
+								print_settings.to_file (this.cpanel.window.app.settings.print_settings);
 							} catch (Error e) {
 								this.cpanel.window.show_error_dialog (_("Failed to preview report"),
 								                                      e.message);
@@ -549,7 +483,9 @@ namespace Mobilect {
 
 									pr.export_filename = dialog.get_filename ();
 									pr.export (this.cpanel.window);
-									settings = pr.print_settings;
+
+									print_settings = pr.print_settings;
+									print_settings.to_file (this.cpanel.window.app.settings.print_settings);
 								}
 
 								dialog.destroy ();
@@ -562,6 +498,7 @@ namespace Mobilect {
 				};
 
 				this.action_group.add_actions (actions, this);
+				this.action_group.get_action (ACTION_SAVE).is_important = true;
 			}
 
 			private Report create_report () throws ReportError, RegularReportError {
@@ -678,12 +615,20 @@ namespace Mobilect {
 
 					(pr as OvertimeReport).pay_groups = affected_pay_groups;
 				}
+
 				pr.employees = this.cpanel.window.app.database.employee_list;
 				pr.default_page_setup = page_setup;
 				pr.show_progress = true;
 
-				if (settings != null) {
-					pr.print_settings = settings;
+				pr.title_font = title_font;
+				pr.company_name_font = company_name_font;
+				pr.header_font = header_font;
+				pr.text_font = text_font;
+				pr.number_font = number_font;
+				pr.emp_number_font = emp_number_font;
+
+				if (print_settings != null) {
+					pr.print_settings = print_settings;
 				}
 
 				return pr;

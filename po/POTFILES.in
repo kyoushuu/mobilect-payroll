@@ -1,7 +1,11 @@
 # List of source files containing translatable strings.
+# Copyright (c) 2012  Mobilect Power Corp.
 
 # Desktop file
 data/mobilect-payroll.desktop.in.in
+
+# Schema file
+data/com.mobilectpower.payroll.gschema.xml.in.in
 
 # Should use C source file, because of multi-line license string
 src/main/window.c
@@ -10,7 +14,6 @@ src/main/window.c
 src/cpanel/cpanel-administrators.vala
 src/cpanel/cpanel-employees.vala
 src/cpanel/cpanel-holidays.vala
-src/cpanel/cpanel-preferences.vala
 src/cpanel/cpanel-report.vala
 src/cpanel/cpanel-tab.vala
 src/cpanel/cpanel-time-records.vala
@@ -23,6 +26,12 @@ src/database/employee.vala
 src/database/month-info.vala
 src/database/time-record-list.vala
 src/database/time-record.vala
+src/database-widgets/administrator-edit-dialog.vala
+src/database-widgets/administrator-edit-widget.vala
+src/database-widgets/employee-edit-dialog.vala
+src/database-widgets/employee-edit-widget.vala
+src/database-widgets/time-record-edit-dialog.vala
+src/database-widgets/time-record-edit-widget.vala
 src/datetime/date-spin-button.vala
 src/datetime/date-time-spin-button.vala
 src/datetime/time-spin-button.vala
@@ -36,14 +45,15 @@ src/login/employee-login-page.vala
 src/login/login-page.vala
 src/main/application.vala
 src/main/mobilect-payroll.vala
+src/main/preferences-dialog.vala
+# src/main/window.vala
 src/report/overtime-report.vala
 src/report/regular-report.vala
+src/report/report-font-settings.vala
 src/report/report.vala
-src/widgets/administrator-edit-dialog.vala
-src/widgets/administrator-edit-widget.vala
-src/widgets/employee-edit-dialog.vala
-src/widgets/employee-edit-widget.vala
+src/settings/settings.vala
+src/widgets/find-dialog.vala
+src/widgets/find-widget.vala
 src/widgets/password-dialog.vala
 src/widgets/password-widget.vala
-src/widgets/time-record-edit-dialog.vala
-src/widgets/time-record-edit-widget.vala
+src/widgets/sort-tree-view-dialog.vala

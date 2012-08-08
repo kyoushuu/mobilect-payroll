@@ -78,15 +78,16 @@ namespace Mobilect {
 						stock_id = Stock.PREFERENCES,
 						tooltip = _("Preferences"),
 						callback = (a) => {
+							var dialog = new PreferencesDialog (this);
+							dialog.response.connect ((d, r) => {
+								d.destroy ();
+							});
+							dialog.show ();
 						}
 					},
 					Gtk.ActionEntry () {
 						name = "view",
 						label = _("_View")
-					},
-					Gtk.ActionEntry () {
-						name = "format",
-						label = _("_Format")
 					},
 					Gtk.ActionEntry () {
 						name = "help",
@@ -143,9 +144,11 @@ namespace Mobilect {
 						label = _("Toolbar"),
 						tooltip = _("Show or hide the toolbar"),
 						callback = (a) => {
-							toolbar.visible = (a as ToggleAction).active;
+							var visible = (a as ToggleAction).active;
+							toolbar.visible = visible;
+							this.app.settings.main.set_boolean ("toolbar-visible", visible);
 						},
-						is_active = true
+						is_active = this.app.settings.main.get_boolean ("toolbar-visible")
 					}
 				};
 
@@ -171,7 +174,7 @@ namespace Mobilect {
 				(toolbar as Toolbar).set_style (ToolbarStyle.BOTH_HORIZ);
 				toolbar.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
 				box.add (toolbar);
-				toolbar.show ();
+				toolbar.visible = this.app.settings.main.get_boolean ("toolbar-visible");
 
 				notebook = new Notebook ();
 				notebook.show_border = false;

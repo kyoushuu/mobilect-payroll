@@ -32,7 +32,7 @@ namespace Mobilect {
 
 
 			public SortTreeViewDialog (Window parent, TreeView tree_view) {
-				Object (title: "Sort By...",
+				Object (title: _("Sort By..."),
 				        transient_for: parent);
 
 				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,

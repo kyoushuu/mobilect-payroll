@@ -385,8 +385,6 @@ namespace Mobilect {
 				cr.stroke ();
 
 				cr.move_to (x + padding, y + padding);
-				layout.set_markup (_(""), -1);
-				cairo_show_layout (cr, layout);
 				y += text_font_height + (padding * 2);
 
 				cr.move_to (x + (width*4/6), total_y);

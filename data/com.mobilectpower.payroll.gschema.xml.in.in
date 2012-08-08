@@ -1,0 +1,55 @@
+<schemalist>
+
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll" path="/com/mobilectpower/payroll/">
+
+    <child name="report" schema="com.mobilectpower.payroll.report"/>
+
+    <key type="b" name="toolbar-visible">
+      <default>true</default>
+      <_summary>Toolbar is Visible</_summary>
+      <_description>Whether the toolbar should be visible.</_description>
+    </key>
+
+  </schema>
+
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.report" path="/com/mobilectpower/payroll/report/">
+
+    <key type="s" name="title-font">
+      <default l10n="messages">'Sans Bold 14'</default>
+      <_summary>Title Font</_summary>
+      <_description>A custom font that will be used for the title of the report.</_description>
+    </key>
+
+    <key type="s" name="company-name-font">
+      <default l10n="messages">'Sans Bold 12'</default>
+      <_summary>Company Name Font</_summary>
+      <_description>A custom font that will be used for the company name in the report.</_description>
+    </key>
+
+    <key type="s" name="header-font">
+      <default l10n="messages">'Sans Bold 9'</default>
+      <_summary>Header Font</_summary>
+      <_description>A custom font that will be used for the headers of tables in the report.</_description>
+    </key>
+
+    <key type="s" name="text-font">
+      <default l10n="messages">'Sans 9'</default>
+      <_summary>Text Font</_summary>
+      <_description>A custom font that will be used for texts in the report.</_description>
+    </key>
+
+    <key type="s" name="number-font">
+      <default l10n="messages">'Monospace 9'</default>
+      <_summary>Number Font</_summary>
+      <_description>A custom font that will be used for numbers in the report.</_description>
+    </key>
+
+    <key type="s" name="emphasized-number-font">
+      <default l10n="messages">'Monospace Bold 9'</default>
+      <_summary>Emphasized Number Font</_summary>
+      <_description>A custom font that will be used for emphasized numbers in the report. These are usually used in columns for total.</_description>
+    </key>
+
+  </schema>
+
+</schemalist>

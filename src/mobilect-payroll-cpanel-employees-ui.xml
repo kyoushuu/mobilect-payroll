@@ -1,21 +1,37 @@
 <ui>
   <menubar name="menubar">
     <menu name="EditMenu" action="edit">
-      <placeholder name="EditMenuAdditions">
-        <menuitem name="AddEmployee" action="cpanel-employees-add" />
-        <menuitem name="RemoveEmployee" action="cpanel-employees-remove" />
+      <placeholder name="EditSelectedMenuAdditions">
+        <menuitem name="EmployeeAdd" action="cpanel-employees-add" />
+        <menuitem name="EmployeeRemove" action="cpanel-employees-remove" />
         <separator />
-        <menuitem name="PropertiesEmployee" action="cpanel-employees-properties" />
-        <menuitem name="PasswordEmployee" action="cpanel-employees-password" />
+        <menuitem name="EmployeeProperties" action="cpanel-employees-properties" />
+        <menuitem name="EmployeePassword" action="cpanel-employees-password" />
+        <separator />
+        <menuitem name="EmployeeSelectAll" action="cpanel-employees-select-all" />
+        <menuitem name="EmployeeDeselectAll" action="cpanel-employees-deselect-all" />
+      </placeholder>
+    </menu>
+    <menu name="ViewMenu" action="view">
+      <placeholder name="ViewMenuAdditions">
+        <menuitem name="EmployeeSortBy" action="cpanel-employees-sort-by" />
+        <separator />
+        <menuitem name="EmployeeRefresh" action="cpanel-employees-refresh" />
       </placeholder>
     </menu>
   </menubar>
-  <toolbar action="toolbar">
-    <placeholder name="EditToolbarAdditions">
-      <toolitem name="AddEmployee" action="cpanel-employees-add" />
-      <toolitem name="RemoveEmployee" action="cpanel-employees-remove" />
-      <toolitem name="PropertiesEmployee" action="cpanel-employees-properties" />
-      <toolitem name="PasswordEmployee" action="cpanel-employees-password" />
+  <popup name="popup-employees">
+    <menuitem name="EmployeeProperties" action="cpanel-employees-properties" />
+    <separator />
+    <menuitem name="EmployeePassword" action="cpanel-employees-password" />
+    <menuitem name="EmployeeRemove" action="cpanel-employees-remove" />
+  </popup>
+  <toolbar name="toolbar">
+    <placeholder name="EditSelectedToolbarAdditions">
+      <toolitem name="EmployeeAdd" action="cpanel-employees-add" />
+      <toolitem name="EmployeeRemove" action="cpanel-employees-remove" />
+      <toolitem name="EmployeeProperties" action="cpanel-employees-properties" />
+      <toolitem name="EmployeePassword" action="cpanel-employees-password" />
     </placeholder>
   </toolbar>
 </ui>

@@ -1,32 +1,32 @@
 <ui>
   <menubar name="menubar">
     <menu name="FileMenu" action="file">
-      <placeholder name="FileMenuSaveAdditions">
-          <menuitem name="SaveReport" action="cpanel-report-save" />
+      <placeholder name="FileSaveMenuAdditions">
+          <menuitem name="ReportSave" action="cpanel-report-save" />
       </placeholder>
-      <placeholder name="FileMenuExportAdditions">
-          <menuitem name="PageSetupReport" action="cpanel-report-page-setup" />
-          <menuitem name="PrintReport" action="cpanel-report-print" />
-          <menuitem name="PrintPreviewReport" action="cpanel-report-print-preview" />
+      <placeholder name="FileExportMenuAdditions">
+          <menuitem name="ReportPageSetup" action="cpanel-report-page-setup" />
+          <menuitem name="ReportPrint" action="cpanel-report-print" />
+          <menuitem name="ReportPrintPreview" action="cpanel-report-print-preview" />
       </placeholder>
     </menu>
     <menu name="FormatMenu" action="format">
       <placeholder name="FormatMenuAdditions">
-        <menuitem name="SelectFontReport" action="cpanel-report-select-font" />
+        <menuitem name="ReportSelectFont" action="cpanel-report-select-font" />
       </placeholder>
     </menu>
   </menubar>
-  <toolbar action="toolbar">
+  <toolbar name="toolbar">
     <placeholder name="FormatToolbarAdditions">
-      <toolitem name="SelectFontReport" action="cpanel-report-select-font" />
+      <toolitem name="ReportSelectFont" action="cpanel-report-select-font" />
     </placeholder>
-    <placeholder name="FileToolbarSaveAdditions">
-      <toolitem name="SaveReport" action="cpanel-report-save" />
+    <placeholder name="FileSaveToolbarAdditions">
+      <toolitem name="ReportSave" action="cpanel-report-save" />
     </placeholder>
-    <placeholder name="FileToolbarExportAdditions">
-      <toolitem name="PageSetupReport" action="cpanel-report-page-setup" />
-      <toolitem name="PrintReport" action="cpanel-report-print" />
-      <toolitem name="PrintPreviewReport" action="cpanel-report-print-preview" />
+    <placeholder name="FileExportToolbarAdditions">
+      <toolitem name="ReportPageSetup" action="cpanel-report-page-setup" />
+      <toolitem name="ReportPrint" action="cpanel-report-print" />
+      <toolitem name="ReportPrintPreview" action="cpanel-report-print-preview" />
     </placeholder>
   </toolbar>
 </ui>

@@ -26,20 +26,20 @@ namespace Mobilect {
 
 		public class EmployeeEditWidget : Box {
 
-			public Grid grid { get; private set; }
+			public Grid grid { public get; private set; }
 
-			public Entry lastname_entry { get; private set; }
-			public Entry firstname_entry { get; private set; }
-			public Entry middlename_entry { get; private set; }
-			public Entry tin_entry { get; private set; }
-			public SpinButton rate_spin { get; private set; }
+			public Entry lastname_entry { public get; private set; }
+			public Entry firstname_entry { public get; private set; }
+			public Entry middlename_entry { public get; private set; }
+			public Entry tin_entry { public get; private set; }
+			public SpinButton rate_spin { public get; private set; }
 
 			private Employee _employee;
 			public Employee employee {
-				get {
+				public get {
 					return _employee;
 				}
-				set {
+				public set {
 					_employee = value;
 
 					if (value != null) {

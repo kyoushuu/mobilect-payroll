@@ -18,6 +18,7 @@
 
 
 using Gtk;
+using Gdk;
 
 
 namespace Mobilect {
@@ -26,19 +27,23 @@ namespace Mobilect {
 
 		public class CPanelAdministrators : CPanelTab {
 
-			public TreeView tree_view { get; private set; }
-			public TreeModelSort sort { get; private set; }
-			public AdministratorList list;
-
 			public const string ACTION = "cpanel-administrators";
 			public const string ACTION_ADD = "cpanel-administrators-add";
 			public const string ACTION_REMOVE = "cpanel-administrators-remove";
 			public const string ACTION_PROPERTIES = "cpanel-administrators-properties";
 			public const string ACTION_PASSWORD = "cpanel-administrators-password";
+			public const string ACTION_SELECT_ALL = "cpanel-administrators-select-all";
+			public const string ACTION_DESELECT_ALL = "cpanel-administrators-deselect-all";
+			public const string ACTION_SORT_BY = "cpanel-administrators-sort-by";
+			public const string ACTION_REFRESH = "cpanel-administrators-refresh";
+
+			public TreeView tree_view { get; private set; }
+			public TreeModelSort sort { get; private set; }
+			public AdministratorList list;
 
 
 			public CPanelAdministrators (CPanel cpanel) {
-				base (cpanel, ACTION);
+				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-administrators-ui.xml");
 
 				this.list = this.cpanel.window.app.database.administrator_list;
 
@@ -51,13 +56,34 @@ namespace Mobilect {
 					               administrator2.username);
 				});
 
+
+				push_composite_child ();
+
+
 				tree_view = new TreeView.with_model (sort);
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
-					edit_action ();
+					properties_action ();
+				});
+				tree_view.button_press_event.connect ((w, e) => {
+					/* Is not right-click? */
+					if (e.button != 3) {
+						return false;
+					}
+
+					return show_popup (3, e.time);
+				});
+				tree_view.key_press_event.connect ((w, e) => {
+					/* Has key modifier or not menu key? */
+					if (e.state != 0 || e.keyval != Key.Menu) {
+						return false;
+					}
+
+					return show_popup (0, e.time);
 				});
 				this.add (tree_view);
+				tree_view.show ();
 
 				var column = new TreeViewColumn.with_attributes (_("Username"),
 				                                                 new CellRendererText (),
@@ -67,7 +93,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 
-				ui_resource_path = "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-administrators-ui.xml";
+				pop_composite_child ();
 
 
 				Gtk.ActionEntry[] actions = {
@@ -95,7 +121,7 @@ namespace Mobilect {
 						accelerator = _("<Alt>Return"),
 						tooltip = _("Edit information about the selected administrators"),
 						callback = (a) => {
-							edit_action ();
+							properties_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -105,6 +131,44 @@ namespace Mobilect {
 						tooltip = _("Change password of selected administrators"),
 						callback = (a) => {
 							change_password_action ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_SELECT_ALL,
+						stock_id = Stock.SELECT_ALL,
+						accelerator = _("<Control>A"),
+						tooltip = _("Select all administrators"),
+						callback = (a) => {
+							tree_view.get_selection ().select_all ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_DESELECT_ALL,
+						label = _("_Deselect All"),
+						accelerator = _("<Shift><Control>A"),
+						tooltip = _("Deselects all selected administrators"),
+						callback = (a) => {
+							tree_view.get_selection ().unselect_all ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_SORT_BY,
+						label = _("_Sort By..."),
+						tooltip = _("Sort the view using a column"),
+						callback = (a) => {
+							var dialog = new SortTreeViewDialog (this.cpanel.window,
+							                                     tree_view);
+							dialog.run ();
+							dialog.destroy ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_REFRESH,
+						stock_id = Stock.REFRESH,
+						accelerator = _("<Control>R"),
+						tooltip = _("Reload information from database"),
+						callback = (a) => {
+							this.cpanel.window.app.database.update_administrators ();
 						}
 					}
 				};
@@ -124,14 +188,6 @@ namespace Mobilect {
 
 			private GLib.List<Administrator> get_selected (TreeSelection selection) {
 				var administrators = new GLib.List<Administrator>();
-
-				int selected_count = selection.count_selected_rows ();
-				if (selected_count <= 0) {
-					this.cpanel.window.show_error_dialog (_("No administrator selected"),
-					                                      _("Select at least one administrator first."));
-
-					return administrators;
-				}
 
 				foreach (var p in selection.get_selected_rows (null)) {
 					Administrator administrator;
@@ -159,6 +215,7 @@ namespace Mobilect {
 				password_label.use_underline = true;
 				password_label.xalign = 0.0f;
 				dialog.widget.grid.add (password_label);
+				password_label.show ();
 
 				var password_entry = new Entry ();
 				password_entry.hexpand = true;
@@ -168,6 +225,7 @@ namespace Mobilect {
 				                                   password_label,
 				                                   PositionType.RIGHT,
 				                                   2, 1);
+				password_entry.show ();
 
 				dialog.response.connect ((d, r) => {
 					d.hide ();
@@ -179,7 +237,7 @@ namespace Mobilect {
 
 					d.destroy ();
 				});
-				dialog.show_all ();
+				dialog.show ();
 			}
 
 			private void remove_action () {
@@ -200,29 +258,29 @@ namespace Mobilect {
 					return;
 				}
 
-				var m_dialog = new MessageDialog (this.cpanel.window,
-				                                  DialogFlags.MODAL,
-				                                  MessageType.WARNING,
-				                                  ButtonsType.NONE,
-				                                  ngettext ("Are you sure you want to remove the selected administrator?",
-				                                            "Are you sure you want to remove the %d selected administrators?",
-				                                            selected_count).printf (selected_count));
-				m_dialog.secondary_text = ngettext ("All information about this administrator will be deleted and cannot be restored.",
-				                                    "All information about these administrators will be deleted and cannot be restored.",
-				                                    selected_count);
-				m_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
-				                      Stock.DELETE, ResponseType.ACCEPT);
+				var dialog = new MessageDialog (this.cpanel.window,
+				                                DialogFlags.MODAL,
+				                                MessageType.WARNING,
+				                                ButtonsType.NONE,
+				                                ngettext ("Are you sure you want to remove the selected administrator?",
+				                                          "Are you sure you want to remove the %d selected administrators?",
+				                                          selected_count).printf (selected_count));
+				dialog.secondary_text = ngettext ("All information about this administrator will be deleted and cannot be restored.",
+				                                  "All information about these administrators will be deleted and cannot be restored.",
+				                                  selected_count);
+				dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+				                    Stock.DELETE, ResponseType.ACCEPT);
 
-				if (m_dialog.run () == ResponseType.ACCEPT) {
+				if (dialog.run () == ResponseType.ACCEPT) {
 					foreach (var administrator in administrators) {
 						administrator.remove ();
 					}
 				}
 
-				m_dialog.destroy ();
+				dialog.destroy ();
 			}
 
-			private void edit_action () {
+			private void properties_action () {
 				var selection = tree_view.get_selection ();
 				var administrators = get_selected (selection);
 
@@ -239,7 +297,7 @@ namespace Mobilect {
 
 						d.destroy ();
 					});
-					dialog.show_all ();
+					dialog.show ();
 				}
 			}
 
@@ -258,25 +316,28 @@ namespace Mobilect {
 						d.hide ();
 
 						if (r == ResponseType.ACCEPT) {
-							var password = dialog.widget.get_password ();
-
-							if (password == null) {
-								this.cpanel.window.show_error_dialog (_("Failed to change password"),
-								                                      _("Passwords didn't match."));
-
-								return;
-							}
-
-							administrator.change_password (password);
+							administrator.change_password (dialog.widget.get_password ());
 						}
 
 						d.destroy ();
 					});
-					dialog.show_all ();
+					dialog.show ();
 				}
+			}
+
+			private bool show_popup (uint button, uint32 time) {
+				/* Has any selected rows? */
+				if (tree_view.get_selection ().count_selected_rows () <= 0) {
+					return false;
+				}
+
+				var menu = cpanel.window.ui_manager.get_widget ("/popup-administrators") as Gtk.Menu;
+				menu.popup (null, null, null, button, time);
+				return true;
 			}
 
 		}
 
 	}
+
 }

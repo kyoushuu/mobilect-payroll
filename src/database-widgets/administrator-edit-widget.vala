@@ -26,16 +26,16 @@ namespace Mobilect {
 
 		public class AdministratorEditWidget : Box {
 
-			public Grid grid { get; private set; }
+			public Grid grid { public get; private set; }
 
-			public Entry username_entry { get; private set; }
+			public Entry username_entry { public get; private set; }
 
 			private Administrator _administrator;
 			public Administrator administrator {
-				get {
+				public get {
 					return _administrator;
 				}
-				set {
+				public set {
 					_administrator = value;
 
 					if (value != null) {

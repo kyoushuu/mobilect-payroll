@@ -26,21 +26,21 @@ namespace Mobilect {
 
 		public class TimeRecordEditWidget : Box {
 
-			public Grid grid { get; private set; }
+			public Grid grid { public get; private set; }
 
-			public ComboBox employee_combobox { get; private set; }
+			public ComboBox employee_combobox { public get; private set; }
 
-			public DateTimeSpinButton start_spin { get; private set; }
-			public DateTimeSpinButton end_spin { get; private set; }
+			public DateTimeSpinButton start_spin { public get; private set; }
+			public DateTimeSpinButton end_spin { public get; private set; }
 
-			public CheckButton open_end_check { get; private set; }
+			public CheckButton open_end_check { public get; private set; }
 
 			private TimeRecord _time_record;
 			public TimeRecord time_record {
-				get {
+				public get {
 					return _time_record;
 				}
-				set {
+				public set {
 					_time_record = value;
 
 					if (value != null) {

@@ -24,26 +24,17 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class EmployeeEditDialog : Dialog {
+		public class FindDialog : Dialog {
 
-			public Employee employee {
-				public get {
-					return widget.employee;
-				}
-				public set {
-					widget.employee = value;
-				}
-			}
-
-			public EmployeeEditWidget widget { public get; private set; }
+			public FindWidget widget { get; private set; }
 
 
-			public EmployeeEditDialog (string title, Window parent, Employee employee) {
+			public FindDialog (string title, Window parent) {
 				Object (title: title,
 				        transient_for: parent);
 
 				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,
-				                  Stock.SAVE, ResponseType.ACCEPT);
+				                  Stock.FIND, ResponseType.ACCEPT);
 				this.set_default_response (ResponseType.ACCEPT);
 
 
@@ -57,26 +48,39 @@ namespace Mobilect {
 
 				push_composite_child ();
 
-				widget = new EmployeeEditWidget (employee);
+				widget = new FindWidget ();
 				widget.border_width = 5;
-				widget.lastname_entry.changed.connect ((e) => {
-														set_response_sensitive (ResponseType.ACCEPT,
-														                        widget.lastname_entry.text_length > 0);
-													});
-				widget.lastname_entry.changed ();
+				widget.start_spin.changed.connect (changed);
+				widget.end_spin.changed.connect (changed);
+				changed ();
 				content_area.add (widget);
 
 				widget.show ();
 
 				pop_composite_child ();
-
-
-				response.connect ((response_id) => {
-														if (response_id == ResponseType.ACCEPT) {
-															this.widget.save ();
-														}
-													});
 			}
+
+			public Date get_start_date () {
+				return widget.start_spin.date;
+			}
+
+			public void set_start_dmy (int day, int month, int year) {
+				widget.start_spin.set_dmy (day, month, year);
+			}
+
+			public Date get_end_date () {
+				return widget.end_spin.date;
+			}
+
+			public void set_end_dmy (int day, int month, int year) {
+				widget.end_spin.set_dmy (day, month, year);
+			}
+
+			private void changed () {
+				set_response_sensitive (ResponseType.ACCEPT,
+				                        widget.start_spin.date.compare (widget.end_spin.date) <= 0);
+			}
+
 		}
 
 	}

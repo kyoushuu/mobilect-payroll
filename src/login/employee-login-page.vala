@@ -40,10 +40,15 @@ namespace Mobilect {
 
 				this.list = this.window.app.database.employee_list;
 
+
+				push_composite_child ();
+
+
 				var name_label = new Label (_("_Name:"));
 				name_label.use_underline = true;
 				name_label.xalign = 0.0f;
 				grid.add (name_label);
+				name_label.show ();
 
 				name_combobox = new ComboBox ();
 				name_combobox.hexpand = true;
@@ -52,6 +57,7 @@ namespace Mobilect {
 				                     name_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				name_combobox.show ();
 
 				TreeIter iter;
 				if (this.list.get_iter_first (out iter)) {
@@ -67,6 +73,7 @@ namespace Mobilect {
 				password_label.use_underline = true;
 				password_label.xalign = 0.0f;
 				grid.add (password_label);
+				password_label.show ();
 
 				password_entry = new Entry ();
 				password_entry.hexpand = true;
@@ -76,18 +83,26 @@ namespace Mobilect {
 				                     password_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				password_entry.show ();
 
 				button_login = new Button.with_mnemonic (_("Log _In"));
 				button_login.can_default = true;
 				button_box.add (button_login);
+				button_login.show ();
 
 				button_logout = new Button.with_mnemonic (_("Log _Out"));
 				button_logout.can_default = true;
 				button_box.add (button_logout);
+				button_logout.show ();
 
 				button_admin = new Button.with_mnemonic (_("_Admin"));
 				button_box.add (button_admin);
 				button_box.set_child_secondary (button_admin, true);
+				button_admin.show ();
+
+
+				pop_composite_child ();
+
 
 				this.button_login.clicked.connect ((t) => {
 					Employee employee;
@@ -108,11 +123,11 @@ namespace Mobilect {
 
 						employee.log_employee_in ();
 
-						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-						                                  MessageType.INFO, ButtonsType.OK,
-						                                  _("Logged in successfully."));
-						m_dialog.run ();
-						m_dialog.destroy ();
+						var dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+						                                MessageType.INFO, ButtonsType.OK,
+						                                _("Logged in successfully."));
+						dialog.run ();
+						dialog.destroy ();
 
 						this.password_entry.text = "";
 					} catch (Error e) {
@@ -139,11 +154,11 @@ namespace Mobilect {
 
 						employee.log_employee_out ();
 
-						var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+						var dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 						                                  MessageType.INFO, ButtonsType.OK,
 						                                  _("Logged out successfully."));
-						m_dialog.run ();
-						m_dialog.destroy ();
+						dialog.run ();
+						dialog.destroy ();
 
 						this.password_entry.text = "";
 					} catch (Error e) {

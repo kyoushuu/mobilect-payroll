@@ -38,6 +38,10 @@ namespace Mobilect {
 					this.end == time_period.end;
 			}
 
+			public string to_string () {
+				return start.to_string () + " to " + end.to_string ();
+			}
+
 		}
 
 	}

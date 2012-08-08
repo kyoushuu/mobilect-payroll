@@ -27,15 +27,15 @@ namespace Mobilect {
 		public class TimeRecordEditDialog : Dialog {
 
 			public TimeRecord time_record {
-				get {
+				public get {
 					return widget.time_record;
 				}
-				set {
+				public set {
 					widget.time_record = value;
 				}
 			}
 
-			public TimeRecordEditWidget widget { get; private set; }
+			public TimeRecordEditWidget widget { public get; private set; }
 
 
 			public TimeRecordEditDialog (string title, Window parent, TimeRecord time_record) {

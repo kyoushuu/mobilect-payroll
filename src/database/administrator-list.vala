@@ -152,7 +152,6 @@ namespace Mobilect {
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
-				value = Value (get_column_type (column));
 				var record = iter.user_data as Administrator;
 
 				switch (column) {
@@ -164,6 +163,9 @@ namespace Mobilect {
 						break;
 					case Columns.USERNAME:
 						value = record.username;
+						break;
+					default:
+						value = Value (Type.INVALID);
 						break;
 				}
 			}

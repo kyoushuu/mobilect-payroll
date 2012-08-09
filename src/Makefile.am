@@ -30,10 +30,11 @@ mobilect_payroll_SOURCES = \
 	database/database.vala \
 	database/employee.vala \
 	database/employee-list.vala \
-	database/administrator.vala \
-	database/administrator-list.vala \
 	database/time-record.vala \
 	database/time-record-list.vala \
+	database/deductions.vala \
+	database/administrator.vala \
+	database/administrator-list.vala \
 	database/month-info.vala \
 	database-widgets/administrator-edit-widget.vala \
 	database-widgets/administrator-edit-dialog.vala \
@@ -54,6 +55,7 @@ mobilect_payroll_SOURCES = \
 	cpanel/cpanel-employees.vala \
 	cpanel/cpanel-administrators.vala \
 	cpanel/cpanel-time-records.vala \
+	cpanel/cpanel-deductions.vala \
 	cpanel/cpanel-holidays.vala \
 	cpanel/cpanel-report.vala \
   settings/settings.vala \
@@ -64,6 +66,7 @@ mobilect_payroll_SOURCES = \
 	datetime/time-spin-button.vala \
 	datetime/date-spin-button.vala \
 	datetime/date-time-spin-button.vala \
+	datetime/period-spin-button.vala \
 	filter/filter.vala \
 	filter/pay-group.vala \
 	filter/pay-period.vala \

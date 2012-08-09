@@ -35,8 +35,6 @@ namespace Mobilect {
 
 		public class RegularReport : Report {
 
-			public ListStore deductions { get; set; }
-
 			private int lines_per_page;
 			private int lines_first_page;
 			private int num_lines;
@@ -54,6 +52,8 @@ namespace Mobilect {
 
 			private int pages_payroll;
 			private int pages_payslip;
+
+			private double[] earnings;
 
 
 			public RegularReport (Date start, Date end) throws ReportError, RegularReportError {
@@ -134,6 +134,9 @@ namespace Mobilect {
 				pages_payroll = (int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 10) / lines_per_page);
 				pages_payslip = (int) Math.ceil ((double) employees.size / payslip_per_page);
 				set_n_pages (pages_payroll + pages_payslip);
+
+
+				earnings = new double[employees.size];
 			}
 
 			public override void draw_page (PrintContext context, int page_nr) {
@@ -145,6 +148,8 @@ namespace Mobilect {
 
 				width = context.get_width ();
 				double column_width = width / 15;
+
+				var deductions = new Deductions.with_date (this.employees.database, this.start);
 
 				if (page_nr < pages_payroll) {
 					int id = (((page_nr-1) * lines_per_page) + lines_first_page)/2;
@@ -320,15 +325,11 @@ namespace Mobilect {
 						if (salary < 0) {
 							salary = 0;
 						}
+						earnings[i + id] = salary;
 
 						/* Iter */
 						double value = 0;
 						double deduction = 0;
-						var iter = TreeIter ();
-						if (deductions != null) {
-							var p = new TreePath.from_indices (i + id);
-							deductions.get_iter (out iter, p);
-						}
 
 						layout.set_height (units_from_double (text_font_height));
 
@@ -363,49 +364,49 @@ namespace Mobilect {
 						cairo_show_layout (cr, layout);
 
 						/* Tax */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.TAX, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.TAX);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
 						cairo_show_layout (cr, layout);
 
 						/* Loan */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.LOAN, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.LOAN);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
 						cairo_show_layout (cr, layout);
 
 						/* PAG-IBIG */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.PAG_IBIG, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.PAG_IBIG);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
 						cairo_show_layout (cr, layout);
 
 						/* SSS Loan */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.SSS_LOAN, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.SSS_LOAN);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
 						cairo_show_layout (cr, layout);
 
 						/* Vale */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.VALE, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.VALE);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
 						cairo_show_layout (cr, layout);
 
 						/* Moesala Loan */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.MOESALA_LOAN, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.MOESALA_LOAN);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
 						cairo_show_layout (cr, layout);
 
 						/* Moesala Savings */
-						if (deductions != null) deductions.get (iter, CPanelReport.Columns.MOESALA_SAVINGS, out value);
+						value = deductions.get_deduction_with_category (employee, Deductions.Category.MOESALA_SAVINGS);
 						deduction += value;
 						cr.rel_move_to (column_width, 0);
 						layout.set_markup ("%.2lf".printf (value), -1);
@@ -437,8 +438,8 @@ namespace Mobilect {
 
 					double y = 0;
 					var size = employees.size;
-					for (int i = 0; i < payslip_per_page && id + i < size; i++) {
-						draw_payslip (context, y, (employees as ArrayList<Employee>).get (id + i));
+					for (int i = 0; i < payslip_per_page && i + id < size; i++) {
+						draw_payslip (context, y, (employees as ArrayList<Employee>).get (i + id), earnings[i + id], deductions);
 						y += get_payslip_height ();
 					}
 				}

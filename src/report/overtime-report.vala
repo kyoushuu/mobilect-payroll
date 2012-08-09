@@ -56,6 +56,7 @@ namespace Mobilect {
 			private int pages_payslip;
 
 			private Surface[] surfaces;
+			private double[] earnings;
 			public PayGroup[] pay_groups { get; set; }
 
 
@@ -129,6 +130,9 @@ namespace Mobilect {
 
 
 				double table_x, table_y;
+
+
+				earnings = new double[employees.size];
 
 
 				surfaces = new Surface[pages_v];
@@ -380,7 +384,6 @@ namespace Mobilect {
 
 					for (int i = 0; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++) {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
-						/* Half-month salary - (salary per day times days without pay) */
 						double salary = 0, subtotal, hours, pay, rate, deduction;
 
 						layout.set_height (units_from_double (text_font_height));
@@ -465,6 +468,8 @@ namespace Mobilect {
 						layout.set_markup (employee.tin, -1);
 						cairo_show_layout (cr, layout);
 						cr.rel_move_to (0, (text_font_height + (padding * 2)));
+
+						earnings[i + id] = salary;
 					}
 				}
 			}
@@ -481,9 +486,14 @@ namespace Mobilect {
 					cr.set_source_surface (surfaces[page_v], page_h * -payroll_width, 0);
 					cr.paint ();
 				} else {
-					var layout = context.create_pango_layout ();
-					layout.set_wrap (Pango.WrapMode.WORD_CHAR);
-					layout.set_ellipsize (EllipsizeMode.END);
+					int id = (page_nr - pages_payroll) * payslip_per_page;
+
+					double y = 0;
+					var size = employees.size;
+					for (int i = 0; i < payslip_per_page && i + id < size; i++) {
+						draw_payslip (context, y, (employees as ArrayList<Employee>).get (i + id), earnings[i + id]);
+						y += get_payslip_height ();
+					}
 				}
 			}
 

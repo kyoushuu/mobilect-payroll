@@ -36,7 +36,6 @@ namespace Mobilect {
 				OBJECT,
 				ID,
 				EMPLOYEE,
-				EMPLOYEE_ID,
 				START,
 				END,
 				NUM
@@ -122,8 +121,6 @@ namespace Mobilect {
 						return typeof (int);
 					case Columns.EMPLOYEE:
 						return typeof (Employee);
-					case Columns.EMPLOYEE_ID:
-						return typeof (int);
 					case Columns.START:
 						return typeof (DateTime);
 					case Columns.END:
@@ -169,9 +166,6 @@ namespace Mobilect {
 						break;
 					case Columns.EMPLOYEE:
 						value = time_record.employee;
-						break;
-					case Columns.EMPLOYEE_ID:
-						value = time_record.employee_id;
 						break;
 					case Columns.START:
 						value = time_record.start;

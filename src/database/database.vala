@@ -70,6 +70,20 @@ namespace Mobilect {
 					             "  end timestamp" +
 					             ")");
 
+					/* Create deductions table if doesn't exists */
+					execute_sql ("CREATE TABLE IF NOT EXISTS deductions (" +
+					             "  id integer primary key autoincrement," +
+					             "  employee_id integer," +
+					             "  period integer," +
+					             "  tax double," +
+					             "  loan double," +
+					             "  pagibig double," +
+					             "  sssloan double," +
+					             "  vale double," +
+					             "  moesala_loan double," +
+					             "  moesala_savings double" +
+					             ")");
+
 					/* Create administrators table if doesn't exists */
 					execute_sql ("CREATE TABLE IF NOT EXISTS administrators (" +
 					             "  id integer primary key autoincrement," +
@@ -183,8 +197,7 @@ namespace Mobilect {
 			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate) {
 				Set stmt_params, last_insert_row;
 
-				var value_rate = Value (typeof (int));
-				value_rate.set_int (rate);
+				Value value_rate = rate;
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate)" +
@@ -234,7 +247,7 @@ namespace Mobilect {
 					Set stmt_params;
 					var stmt = cnc.parse_sql_string (stmt_str, out stmt_params);
 
-					var value = Value (typeof (int));
+					Value value;
 					Holder holder;
 
 					holder = stmt_params.get_holder ("start_year");
@@ -292,15 +305,10 @@ namespace Mobilect {
 
 			public void add_time_record (int employee_id, DateTime start, DateTime? end) {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-				var value_year = Value (typeof (int));
-				var value_month = Value (typeof (int));
-				var value_day = Value (typeof (int));
-
-				value_id.set_int (employee_id);
-				value_year.set_int (start.get_year ());
-				value_month.set_int (start.get_month ());
-				value_day.set_int (start.get_day_of_month ());
+				Value value_id = employee_id;
+				Value value_year = (int) start.get_year ();
+				Value value_month = (int) start.get_month ();
+				Value value_day = (int) start.get_day_of_month ();
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end)" +

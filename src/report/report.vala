@@ -358,7 +358,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.LEFT);
 					layout.set_width (units_from_double ((width/12) - (padding * 2)));
 					cr.move_to (x + padding + (width*5/12), y + padding);
-					layout.set_markup (_("%02d").printf ((int)((deduction - Math.floor (deduction)) * 100)), -1);
+					layout.set_markup (_("%02d").printf ((int) Math.round ((deduction - Math.floor (deduction)) * 100)), -1);
 					cairo_show_layout (cr, layout);
 				}
 
@@ -392,7 +392,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.LEFT);
 					layout.set_width (units_from_double ((width/12) - (padding * 2)));
 					cr.move_to (x + padding + (width*5/12), y + padding);
-					layout.set_markup (_("%02d").printf ((int)((deduction - Math.floor (deduction)) * 100)), -1);
+					layout.set_markup (_("%02d").printf ((int) Math.round ((deduction - Math.floor (deduction)) * 100)), -1);
 					cairo_show_layout (cr, layout);
 				}
 
@@ -426,7 +426,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.LEFT);
 					layout.set_width (units_from_double ((width/12) - (padding * 2)));
 					cr.move_to (x + padding + (width*5/12), y + padding);
-					layout.set_markup (_("%02d").printf ((int)((deduction - Math.floor (deduction)) * 100)), -1);
+					layout.set_markup (_("%02d").printf ((int) Math.round ((deduction - Math.floor (deduction)) * 100)), -1);
 					cairo_show_layout (cr, layout);
 				}
 
@@ -461,7 +461,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.LEFT);
 					layout.set_width (units_from_double ((width/12) - (padding * 2)));
 					cr.move_to (x + padding + (width*5/12), y + padding);
-					layout.set_markup (_("%02d").printf ((int)((deduction - Math.floor (deduction)) * 100)), -1);
+					layout.set_markup (_("%02d").printf ((int) Math.round ((deduction - Math.floor (deduction)) * 100)), -1);
 					cairo_show_layout (cr, layout);
 				}
 
@@ -496,7 +496,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.LEFT);
 					layout.set_width (units_from_double ((width/12) - (padding * 2)));
 					cr.move_to (x + padding + (width*5/12), y + padding);
-					layout.set_markup (_("%02d").printf ((int)((deduction - Math.floor (deduction)) * 100)), -1);
+					layout.set_markup (_("%02d").printf ((int) Math.round ((deduction - Math.floor (deduction)) * 100)), -1);
 					cairo_show_layout (cr, layout);
 				}
 
@@ -519,11 +519,14 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.LEFT);
 					layout.set_width (units_from_double ((width/12) - (padding * 2)));
 					cr.move_to (x + padding + (width*5/12), y + padding);
-					layout.set_markup (_("%02d").printf ((int)((total_deductions - Math.floor (total_deductions)) * 100)), -1);
+					layout.set_markup (_("%02d").printf ((int) Math.round ((total_deductions - Math.floor (total_deductions)) * 100)), -1);
 					cairo_show_layout (cr, layout);
 				}
 
 				y += text_font_height + (padding * 2);
+
+				layout.set_font_description (text_font);
+				layout.set_width (units_from_double ((width / 4) - (padding * 2)));
 
 				cr.move_to (x + (width*4/6), total_y);
 				layout.set_alignment (Pango.Alignment.LEFT);

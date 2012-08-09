@@ -85,8 +85,9 @@ namespace Mobilect {
 				}
 
 				this.add_page (new CPanelEmployees (this), _("Employees"));
-				this.add_page (new CPanelAdministrators (this), _("Administrators"));
 				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
+				this.add_page (new CPanelDeductions (this), _("Deductions"));
+				this.add_page (new CPanelAdministrators (this), _("Administrators"));
 				this.add_page (new CPanelHolidays (this), _("Holidays"));
 				this.add_page (new CPanelReport (this), _("Report"));
 			}

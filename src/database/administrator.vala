@@ -39,9 +39,7 @@ namespace Mobilect {
 
 
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				time_records = new TimeRecordList ();
 				time_records.database = database;
@@ -67,9 +65,7 @@ namespace Mobilect {
 
 			public void update () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE administrators" +
@@ -86,9 +82,7 @@ namespace Mobilect {
 
 			public void remove () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				if (list != null) {
 					list.remove (this);
@@ -106,9 +100,7 @@ namespace Mobilect {
 
 			public string? get_password_checksum () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("SELECT password" +
@@ -128,9 +120,7 @@ namespace Mobilect {
 
 			public void change_password (string password) {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE administrators" +

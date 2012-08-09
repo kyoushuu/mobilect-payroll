@@ -67,9 +67,7 @@ namespace Mobilect {
 				var time_val = TimeVal ();
 
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				if (id != 0) {
 					/* Get data from database */
@@ -85,7 +83,7 @@ namespace Mobilect {
 							this.employee = employee;
 						} else {
 							cell_data = data_model.get_value_at (0, 0);
-							this.employee_id = cell_data.get_int ();
+							this.employee_id = (int) cell_data;
 						}
 
 						cell_data = data_model.get_value_at (1, 0);
@@ -105,17 +103,11 @@ namespace Mobilect {
 
 			public void update () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-				var value_employee_id = Value (typeof (int));
-				var value_year = Value (typeof (int));
-				var value_month = Value (typeof (int));
-				var value_day = Value (typeof (int));
-
-				value_id.set_int (this.id);
-				value_employee_id.set_int (this.employee_id);
-				value_year.set_int (start.get_year ());
-				value_month.set_int (start.get_month ());
-				value_day.set_int (start.get_day_of_month ());
+				Value value_id = this.id;
+				Value value_employee_id = this.employee_id;
+				Value value_year = (int) start.get_year ();
+				Value value_month = (int) start.get_month ();
+				Value value_day = (int) start.get_day_of_month ();
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE time_records" +
@@ -144,9 +136,7 @@ namespace Mobilect {
 
 			public void remove () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				if (list != null) {
 					list.remove (this);

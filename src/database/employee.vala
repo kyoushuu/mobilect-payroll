@@ -44,9 +44,7 @@ namespace Mobilect {
 
 
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				if (id != 0) {
 					try {
@@ -71,7 +69,7 @@ namespace Mobilect {
 						this.tin = database.dh_string.get_str_from_value (cell_data_tin);
 
 						var cell_data_rate = data_model.get_value_at (4, 0);
-						this.rate = cell_data_rate.get_int ();
+						this.rate = (int) cell_data_rate;
 					} catch (Error e) {
 						critical ("Failed to get employee data from database: %s", e.message);
 					}
@@ -84,9 +82,7 @@ namespace Mobilect {
 
 			public int get_open_time_records_num () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("SELECT id FROM time_records" +
@@ -110,9 +106,7 @@ namespace Mobilect {
 
 			public void log_employee_out () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("SELECT id FROM time_records" +
@@ -146,8 +140,7 @@ namespace Mobilect {
 				DateTime span_start, span_end;
 
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					/* Get time records */
@@ -224,11 +217,8 @@ namespace Mobilect {
 
 			public void update () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-				var value_rate = Value (typeof (int));
-
-				value_id.set_int (this.id);
-				value_rate.set_int (this.rate);
+				Value value_id = this.id;
+				Value value_rate = this.rate;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
@@ -253,9 +243,7 @@ namespace Mobilect {
 
 			public void remove () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				if (list != null) {
 					list.remove (this);
@@ -278,9 +266,7 @@ namespace Mobilect {
 
 			public string? get_password_checksum () {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("SELECT password" +
@@ -300,9 +286,7 @@ namespace Mobilect {
 
 			public void change_password (string password) {
 				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
+				Value value_id = this.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +

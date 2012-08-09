@@ -80,15 +80,12 @@ namespace Mobilect {
 
 				Set stmt_params;
 
-				var value_year = Value (typeof (int));
-				var value_month = Value (typeof (int));
-				var value_day = Value (typeof (int));
-
-				value_year.set_int (year);
-				value_month.set_int (month);
+				Value value_year = this.year;
+				Value value_month = this.month;
+				Value value_day;
 
 				for (int i = 0; i < days; i++) {
-					value_day.set_int (i+1);
+					value_day = i+1;
 
 					/* Check if in database */
 					try {
@@ -127,15 +124,10 @@ namespace Mobilect {
 
 				this.is_holiday[day-1] = type;
 
-				var value_year = Value (typeof (int));
-				var value_month = Value (typeof (int));
-				var value_day = Value (typeof (int));
-				var value_type = Value (typeof (int));
-
-				value_year.set_int (year);
-				value_month.set_int (month);
-				value_day.set_int (day);
-				value_type.set_int (is_holiday[day-1]);
+				Value value_year = this.year;
+				Value value_month = this.month;
+				Value value_day = day;
+				Value value_type = (int) is_holiday[day-1];
 
 				/* Check if in database */
 				try {
@@ -226,7 +218,6 @@ namespace Mobilect {
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter.stamp == this.stamp) {
-				value = Value (get_column_type (column));
 				var id = (int) iter.user_data;
 
 				switch (column) {
@@ -241,6 +232,9 @@ namespace Mobilect {
 						break;
 					case Columns.HOLIDAY_TYPE:
 						value = is_holiday[id];
+						break;
+					default:
+						value = Value (Type.INVALID);
 						break;
 				}
 			}

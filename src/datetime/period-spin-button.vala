@@ -24,57 +24,56 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class DateSpinButton : SpinButton {
+		public class PeriodSpinButton : SpinButton {
 
-			public Date date {
+			public int period {
 				public get {
-					var date = Date ();
-					date.set_julian ((uint) this.value);
-					return date;
+					return (int) this.value;
 				}
 				protected set {
-					if (value.valid ()) {
-						this.value = value.get_julian ();
+					if (value >= 0 && value < 10000*12*2) {
+						this.value = value;
 					}
 				}
 			}
 
 
-			public DateSpinButton () {
+			public PeriodSpinButton () {
 				var dt = new DateTime.now_local ();
 
-				var curr_date = Date ();
-				curr_date.set_dmy ((DateDay) dt.get_day_of_month (),
-				                   (DateMonth) dt.get_month (),
-				                   (DateYear) dt.get_year ());
-
-				var lower_date = Date ();
-				lower_date.set_dmy (1, 1, 1);
-
-				var upper_date = Date ();
-				upper_date.set_dmy (1, 1, 10000);
-
-				adjustment = new Adjustment (curr_date.get_julian (),
-				                             lower_date.get_julian (),
-				                             upper_date.get_julian (),
-				                             1, 7,
+				adjustment = new Adjustment ((dt.get_year () * 12 * 2) +
+				                             ((dt.get_month () - 1) * 2) +
+				                             (dt.get_day_of_month () <= 15? 0 : 1),
+				                             1*12*2,
+				                             10000*12*2-1,
+				                             1, 12*2,
 				                             0);
-				digits = 10;
+				digits = 20;
 			}
 
 			public void set_dmy (int day, int month, int year) {
-				var date = Date ();
-				date.set_dmy ((DateDay) day, (DateMonth) month, (DateYear) year);
-				this.date = date;
+				this.period = (year * 12 * 2) +
+					((month-1) * 2) +
+					(day <= 15? 0 : 1);
 				value_changed ();
 			}
 
 			public override int input (out double new_value) {
+				var input_text = text;
+
+				if (input_text.has_prefix (_("First Half of"))) {
+					input_text = input_text.replace (_("First Half of"), "01");
+				} else if (input_text.has_prefix (_("Second Half of"))) {
+					input_text = input_text.replace (_("Second Half of"), "16");
+				}
+
 				var date = Date ();
-				date.set_parse (text);
+				date.set_parse (input_text);
 
 				if (date.valid ()) {
-					new_value = date.get_julian ();
+					new_value = (date.get_year () * 12 * 2) +
+						((date.get_month ()-1) * 2) +
+						(date.get_day () <= 15? 0 : 1);
 					return (int) true;
 				} else {
 					new_value = 0;
@@ -85,7 +84,14 @@ namespace Mobilect {
 			public override bool output () {
 				char s[64];
 
-				date.strftime (s, _("%a, %d %B, %Y"));
+				var date = Date ();
+				date.set_dmy (1, ((period / 2) % 12) + 1, (DateYear) period / (12 * 2));
+
+				if (period % 2 == 0) {
+					date.strftime (s, _("First Half of %B, %Y"));
+				} else {
+					date.strftime (s, _("Second Half of %B, %Y"));
+				}
 				text = (string) s;
 
 				return true;

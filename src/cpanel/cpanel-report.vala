@@ -41,13 +41,6 @@ namespace Mobilect {
 			public DateSpinButton start_spin { get; private set; }
 			public DateSpinButton end_spin { get; private set; }
 
-			private FontDescription title_font;
-			private FontDescription company_name_font;
-			private FontDescription header_font;
-			private FontDescription text_font;
-			private FontDescription number_font;
-			private FontDescription emp_number_font;
-
 			private PageSetup page_setup;
 			private PrintSettings print_settings;
 			private GLib.Settings report_settings;
@@ -60,45 +53,6 @@ namespace Mobilect {
 			public CPanelReport (CPanel cpanel) {
 				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-report-ui.xml");
 
-				page_setup = new PageSetup ();
-				page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
-
-				report_settings = this.cpanel.window.app.settings.report;
-				title_font = FontDescription.from_string (report_settings.get_string ("title-font"));
-				company_name_font = FontDescription.from_string (report_settings.get_string ("company-name-font"));
-				header_font = FontDescription.from_string (report_settings.get_string ("header-font"));
-				text_font = FontDescription.from_string (report_settings.get_string ("text-font"));
-				number_font = FontDescription.from_string (report_settings.get_string ("number-font"));
-				emp_number_font = FontDescription.from_string (report_settings.get_string ("emphasized-number-font"));
-				report_settings.changed.connect ((s, k) => {
-					if (!k.has_suffix ("-font")) {
-						return;
-					}
-
-					var font = FontDescription.from_string (report_settings.get_string (k));
-
-					switch (k) {
-						case "title-font":
-							title_font = font;
-							break;
-						case "company-name-font":
-							company_name_font = font;
-							break;
-						case "header-font":
-							header_font = font;
-							break;
-						case "text-font":
-							text_font = font;
-							break;
-						case "number-font":
-							number_font = font;
-							break;
-						case "emphasized-number-font":
-							emp_number_font = font;
-							break;
-					}
-				});
-
 				/* Load page setup */
 				if (FileUtils.test (this.cpanel.window.app.settings.page_setup, FileTest.IS_REGULAR)) {
 					try {
@@ -107,6 +61,9 @@ namespace Mobilect {
 						this.cpanel.window.show_error_dialog (_("Failed to load page setup"),
 						                                      e.message);
 					}
+				} else {
+					page_setup = new PageSetup ();
+					page_setup.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 				}
 
 				/* Load print settings */
@@ -117,7 +74,12 @@ namespace Mobilect {
 						this.cpanel.window.show_error_dialog (_("Failed to load print settings"),
 						                                      e.message);
 					}
+				} else {
+					print_settings = new PrintSettings ();
+					print_settings.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
 				}
+
+				report_settings = this.cpanel.window.app.settings.report;
 
 
 				push_composite_child ();
@@ -204,11 +166,6 @@ namespace Mobilect {
 						stock_id = Stock.PAGE_SETUP,
 						tooltip = _("Customize the page size, orientation and margins"),
 						callback = (a) => {
-							if (this.print_settings == null) {
-								print_settings = new PrintSettings ();
-								print_settings.set_paper_size (new PaperSize (PAPER_NAME_FANFOLD_GERMAN_LEGAL));
-							}
-
 							var new_page_setup = print_run_page_setup_dialog (this.cpanel.window, page_setup, print_settings);
 
 							try {
@@ -421,19 +378,19 @@ namespace Mobilect {
 				}
 
 				pr.employees = this.cpanel.window.app.database.employee_list;
-				pr.default_page_setup = page_setup;
 				pr.show_progress = true;
 
-				pr.title_font = title_font;
-				pr.company_name_font = company_name_font;
-				pr.header_font = header_font;
-				pr.text_font = text_font;
-				pr.number_font = number_font;
-				pr.emp_number_font = emp_number_font;
+				pr.default_page_setup = page_setup;
+				pr.print_settings = print_settings;
 
-				if (print_settings != null) {
-					pr.print_settings = print_settings;
-				}
+				pr.title_font = FontDescription.from_string (report_settings.get_string ("title-font"));
+				pr.company_name_font = FontDescription.from_string (report_settings.get_string ("company-name-font"));
+				pr.header_font = FontDescription.from_string (report_settings.get_string ("header-font"));
+				pr.text_font = FontDescription.from_string (report_settings.get_string ("text-font"));
+				pr.number_font = FontDescription.from_string (report_settings.get_string ("number-font"));
+				pr.emp_number_font = FontDescription.from_string (report_settings.get_string ("emphasized-number-font"));
+
+				pr.padding = report_settings.get_double ("padding");
 
 				return pr;
 			}

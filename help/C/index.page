@@ -1,0 +1,42 @@
+<page xmlns="http://projectmallard.org/1.0/" type="guide" style="2column task" id="index">
+
+  <info>
+    <title type="link">Mobilect Payroll</title>
+    <title type="text">Mobilect Payroll</title>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>  
+
+  <title>
+    <media type="image" mime="image/png" src="figures/mobilect-payroll-logo.png"/> Mobilect Payroll
+  </title>
+  <p>Welcome to the <app>Mobilect Payroll</app> help guide.  For a quick introduction into <app>Mobilect Payroll's</app> most basic features, visit the <link xref="quickstart">Get started with Mobilect Payroll</link> page.</p>
+
+  <p>Other help topics are grouped together into sections below.</p>
+
+  <section id="control-panel-section" style="2column" groups="first second">
+    <title>Using the Control Panel</title>
+  </section>
+
+  <section id="employees-section" style="2column" groups="first second">
+    <title>Managing Employees</title>
+  </section>
+
+  <section id="time-records-section" style="2column" groups="first second">
+    <title>Managing Time Records</title>
+  </section>
+
+  <section id="administrators-section" style="2column" groups="first second">
+    <title>Managing Administrators</title>
+  </section>
+
+  <section id="reports-section" style="2column" groups="first second">
+    <title>Creating Reports</title>
+  </section>
+
+</page>

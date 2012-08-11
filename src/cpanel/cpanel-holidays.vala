@@ -27,6 +27,8 @@ namespace Mobilect {
 		public class CPanelHolidays : CPanelTab {
 
 			public const string ACTION = "cpanel-holidays";
+			public const string ACTION_SORT_BY = "cpanel-holidays-sort-by";
+			public const string ACTION_REFRESH = "cpanel-holidays-refresh";
 
 			public SpinButton year_spin { get; private set; }
 			public ComboBoxText month_combo { get; private set; }
@@ -37,7 +39,7 @@ namespace Mobilect {
 
 
 			public CPanelHolidays (CPanel cpanel) {
-				base (cpanel);
+				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-holidays-ui.xml");
 
 				var dt = new DateTime.now_local ();
 
@@ -184,6 +186,34 @@ namespace Mobilect {
 
 
 				pop_composite_child ();
+
+
+				Gtk.ActionEntry[] actions = {
+					Gtk.ActionEntry () {
+						name = ACTION_SORT_BY,
+						label = _("_Sort By..."),
+						tooltip = _("Sort the view using a column"),
+						callback = (a) => {
+							var dialog = new SortTreeViewDialog (this.cpanel.window,
+							                                     tree_view);
+							dialog.response.connect ((d, r) => {
+																										 d.destroy ();
+																									 });
+							dialog.show ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_REFRESH,
+						stock_id = Stock.REFRESH,
+						accelerator = _("<Control>R"),
+						tooltip = _("Reload information from database"),
+						callback = (a) => {
+							update ();
+						}
+					}
+				};
+
+				this.action_group.add_actions (actions, this);
 			}
 
 			public void update () {

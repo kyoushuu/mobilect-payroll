@@ -27,6 +27,8 @@ namespace Mobilect {
 		public class CPanelDeductions : CPanelTab {
 
 			public const string ACTION = "cpanel-deductions";
+			public const string ACTION_SORT_BY = "cpanel-deductions-sort-by";
+			public const string ACTION_REFRESH = "cpanel-deductions-refresh";
 
 			public PeriodSpinButton period_spin { get; private set; }
 			public TreeView tree_view { get; private set; }
@@ -36,7 +38,7 @@ namespace Mobilect {
 
 
 			public CPanelDeductions (CPanel cpanel) {
-				base (cpanel);
+				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-deductions-ui.xml");
 
 
 				push_composite_child ();
@@ -264,6 +266,34 @@ namespace Mobilect {
 
 
 				pop_composite_child ();
+
+
+				Gtk.ActionEntry[] actions = {
+					Gtk.ActionEntry () {
+						name = ACTION_SORT_BY,
+						label = _("_Sort By..."),
+						tooltip = _("Sort the view using a column"),
+						callback = (a) => {
+							var dialog = new SortTreeViewDialog (this.cpanel.window,
+							                                     tree_view);
+							dialog.response.connect ((d, r) => {
+								d.destroy ();
+							});
+							dialog.show ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_REFRESH,
+						stock_id = Stock.REFRESH,
+						accelerator = _("<Control>R"),
+						tooltip = _("Reload information from database"),
+						callback = (a) => {
+							update ();
+						}
+					}
+				};
+
+				this.action_group.add_actions (actions, this);
 
 
 				var dt = new DateTime.now_local ().add_days (-15);

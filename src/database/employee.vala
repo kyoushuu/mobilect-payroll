@@ -259,6 +259,11 @@ namespace Mobilect {
 					                                      out stmt_params);
 					stmt_params.get_holder ("employee_id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
+
+					stmt = database.cnc.parse_sql_string ("DELETE FROM deductions WHERE employee_id=##employee_id::int",
+					                                      out stmt_params);
+					stmt_params.get_holder ("employee_id").set_value (value_id);
+					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					critical ("Failed to remove employee from database: %s", e.message);
 				}

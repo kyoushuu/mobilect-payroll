@@ -1,0 +1,35 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="employees-remove">
+
+  <info>
+    <link type="guide" xref="index#employees-section" group="first"/>
+
+    <desc>Remove an employee to the database</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Remove an Employee</title>
+
+  <note style="warning">
+    <p>Any information related to the deleted employee will be deleted and cannot be restored.</p>
+  </note>
+
+  <p>To remove employees:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Employees</gui> tab.</p></item>
+    <item><p>Select the employees you want to remove from the list.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Remove</gui></guiseq>, or press <key>Delete</key>, or click <gui style="button">Remove</gui> in the toolbar.</p></item>
+  </steps>
+
+  <note style="tip">
+    <p>You may select multiple employees by dragging, or clicking each one while pressing <key>Ctrl</key>.</p>
+    <p>You may also right-click on the list to show the context menu instead, where you could select <gui style="menuitem">Remove</gui> to remove the currently selected employees.</p>
+  </note>
+
+</page>

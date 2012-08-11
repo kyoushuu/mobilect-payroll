@@ -1,0 +1,32 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="employees-set-deductions">
+
+  <info>
+    <link type="guide" xref="index#employees-section" group="second"/>
+
+    <desc>Set the salary deductions of an employee</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Set Employee Deductions</title>
+
+  <p>To set the deductions of an employee:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Deductions</gui> tab.</p></item>
+    <item><p>Select the period in the <gui style="input">Period</gui> spin button.</p></item>
+    <item><p>Select the employee you want to set the deduction with from the list.</p></item>
+    <item><p>Click the column of the category of the deduction you want to set in the row of the selected employee.</p></item>
+    <item><p>Select the amount you want to deduct, then press <key>Return</key>.</p></item>
+  </steps>
+
+  <note style="important">
+    <p>Deductions only affect regular reports.</p>
+  </note>
+
+</page>

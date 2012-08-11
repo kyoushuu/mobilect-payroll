@@ -1,0 +1,33 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="quickstart">
+
+  <info>
+    <link type="guide" xref="index"/>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Get started with Mobilect Payroll</title>
+
+  <p><app>Mobilect Payroll</app> is an application for generating payroll and payslips.</p>
+
+  <p>Time records of employees are recorded into a database.  Payroll and payslips are then generated based on these records.</p>
+
+  <figure>
+    <media type="image" mime="image/png" src="figures/mobilect-payroll-screenshot.png"/>
+    <desc>The <app>Mobilect Payroll</app> window showing the <gui stye="tab">Employees</gui> Control Panel tab.</desc>
+  </figure>
+
+  <p>Use the Control Panel to manage employees and time records.</p>
+
+  <p>After adding an account for an employee to the database, the employee can log in using the <gui style="group">Employee Log In</gui> page shown by <app>Mobilect Payroll</app> on startup.</p>
+
+  <p>To start using <app>Mobilect Payroll</app>, log in to the Control Panel using the default administrator account (username and password is "admin") then change its password.  Add employees to the database afterwards.</p>
+
+  <p>To learn about additional <app>Mobilect Payroll</app> features and to get assistance with performing additional tasks, explore <link xref="index"> the other portions</link> of the <app>Mobilect Payroll</app> help.</p>
+
+</page>

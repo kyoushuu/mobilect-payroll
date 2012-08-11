@@ -66,6 +66,7 @@ namespace Mobilect {
 
 
 			public override void request_page_setup (PrintContext context, int page_nr, PageSetup setup) {
+				/* Print payroll in landscape */
 				if (page_nr < pages_payroll) {
 					setup.set_orientation (PageOrientation.LANDSCAPE);
 				}
@@ -85,7 +86,7 @@ namespace Mobilect {
 				height = context.get_height ();
 				width = context.get_width ();
 
-				/* Landscape */
+				/* Landscape for payroll */
 				payroll_height = width;
 				payroll_width = height;
 
@@ -107,9 +108,11 @@ namespace Mobilect {
 				table_width += signature_column_width;
 
 
+				/* Compute number of lines possible at first page of payroll */
 				lines_first_page = (int) Math.floor ((payroll_height - header_height) / (text_font_height + (padding * 2)));
 				lines_first_page -= lines_first_page % 2;
 
+				/* Compute number of lines per page */
 				lines_per_page = (int) Math.floor (payroll_height / (text_font_height + (padding * 2)));
 				lines_per_page -= lines_per_page % 2;
 
@@ -284,18 +287,22 @@ namespace Mobilect {
 						/* Vertical */
 						x = 0;
 						x0 = 0;
+
 						/* Name */
 						x += name_column_width;
 						cr.move_to (x, table_top);
 						cr.rel_line_to (0, table_header_height);
+
 						/* Rate */
 						x += number_column_width;
 						cr.move_to (x, table_top);
 						cr.rel_line_to (0, table_header_height);
+
 						/* Hourly Rate */
 						x += number_column_width;
 						cr.move_to (x, table_top);
 						cr.rel_line_to (0, table_header_height);
+
 						foreach (var pay_group in pay_groups) {
 							foreach (var pay_period in pay_group.periods) {
 								/* Hour and Subtotal */
@@ -308,11 +315,13 @@ namespace Mobilect {
 								cr.move_to (x, table_top + table_header_line_height);
 								cr.rel_line_to (0, table_header_line_height * 2);
 							}
+
 							/* Subtotal each group */
 							x += number_column_width;
 							cr.move_to (x, table_top);
 							cr.rel_line_to (0, table_header_height);
 						}
+
 						/* Total */
 						x += number_column_width;
 						cr.move_to (x, table_top);
@@ -345,34 +354,41 @@ namespace Mobilect {
 
 					/* Vertical */
 					double x = 0;
+
 					/* Name */
 					x += name_column_width;
 					cr.move_to (x, table_y);
 					cr.rel_line_to (0, table_content_height);
+
 					/* Rate */
 					x += number_column_width;
 					cr.move_to (x, table_y);
 					cr.rel_line_to (0, table_content_height);
+
 					/* Hourly Rate */
 					x += number_column_width;
 					cr.move_to (x, table_y);
 					cr.rel_line_to (0, table_content_height);
+
 					foreach (var pay_group in pay_groups) {
 						foreach (var pay_period in pay_group.periods) {
 							/* Hour */
 							x += hour_column_width;
 							cr.move_to (x, table_y);
 							cr.rel_line_to (0, table_content_height);
+
 							/* Subtotal */
 							x += number_column_width;
 							cr.move_to (x, table_y);
 							cr.rel_line_to (0, table_content_height);
 						}
+
 						/* Subtotal each group */
 						x += number_column_width;
 						cr.move_to (x, table_y);
 						cr.rel_line_to (0, table_content_height);
 					}
+
 					/* Total */
 					x += number_column_width;
 					cr.move_to (x, table_y);
@@ -478,9 +494,11 @@ namespace Mobilect {
 				var cr = context.get_cairo_context ();
 
 				if (page_nr < pages_payroll) {
+					/* Compute position of page in surface */
 					int page_h = page_nr % pages_h;
 					int page_v = page_nr / pages_h;
 
+					/* Copy surface created before into page surface */
 					cr.rectangle (0, 0, payroll_width, payroll_height);
 					cr.clip ();
 					cr.set_source_surface (surfaces[page_v], page_h * -payroll_width, 0);
@@ -488,6 +506,7 @@ namespace Mobilect {
 				} else {
 					int id = (page_nr - pages_payroll) * payslip_per_page;
 
+					/* Draw payslip */
 					double y = 0;
 					var size = employees.size;
 					for (int i = 0; i < payslip_per_page && i + id < size; i++) {

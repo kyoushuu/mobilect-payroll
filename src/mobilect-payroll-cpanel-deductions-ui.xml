@@ -1,0 +1,11 @@
+<ui>
+  <menubar name="menubar">
+    <menu name="ViewMenu" action="view">
+      <placeholder name="ViewMenuAdditions">
+        <menuitem name="DeductionSortBy" action="cpanel-deductions-sort-by" />
+        <separator />
+        <menuitem name="DeductionRefresh" action="cpanel-deductions-refresh" />
+      </placeholder>
+    </menu>
+  </menubar>
+</ui>

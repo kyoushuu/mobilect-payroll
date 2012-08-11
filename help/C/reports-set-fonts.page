@@ -1,0 +1,25 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="reports-set-fonts">
+
+  <info>
+    <link type="guide" xref="index#reports-section" group="second"/>
+
+    <desc>Select the fonts to be used for creating reports</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Set Report Fonts</title>
+
+  <p>To set the fonts to use for the reports:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Preferences</gui></guiseq>.</p></item>
+    <item><p>Change the fonts as desired, then click <gui style="button">Close</gui>.</p></item>
+  </steps>
+
+</page>

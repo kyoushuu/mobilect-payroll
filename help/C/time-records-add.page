@@ -1,0 +1,30 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="time-records-add">
+
+  <info>
+    <link type="guide" xref="index#time-records-section" group="first"/>
+
+    <desc>Add a time record of an employee to the database</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Add a Time Record</title>
+
+  <p>To add a new time record:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Time Records</gui> tab.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Add</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>I</key></keyseq>, or click <gui style="button">Add</gui> in the toolbar.</p></item>
+    <item><p>Select an employee and set other information, then click <gui style="button">Save</gui>.</p></item>
+  </steps>
+
+  <note style="important">
+    <p>A time record should always have an employee owner. Also, unless it has an open end, the end date and time should be after the start date and time.</p>
+  </note>
+
+</page>

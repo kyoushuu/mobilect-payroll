@@ -1,0 +1,20 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="control-panel-logout">
+
+  <info>
+    <link type="guide" xref="index#control-panel-section" group="first"/>
+
+    <desc>Close the Control Panel</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Log out from the Control Panel</title>
+
+  <p>To log out from the Control Panel, select <guiseq><gui style="menu">File</gui><gui style="menuitem">Close</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>W</key></keyseq>.</p>
+
+</page>

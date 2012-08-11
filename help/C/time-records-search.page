@@ -1,0 +1,28 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="time-records-search">
+
+  <info>
+    <link type="guide" xref="index#time-records-section" group="second"/>
+
+    <desc>Search for time records in the database</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Find a Time Record</title>
+
+  <p>The <gui style="tab">Time Records</gui> tab will not show all time records, to make viewing easier and faster.  Instead, you have to search for time records using a start and end date as criteria.</p>
+
+  <p>To search for time records:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Time Records</gui> tab.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Find</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>F</key></keyseq>, or click <gui style="button">Find</gui> in the toolbar.</p></item>
+    <item><p>Set the start and end dates, then click <gui style="button">Find</gui>.</p></item>
+  </steps>
+
+</page>

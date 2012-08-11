@@ -12,6 +12,7 @@ src/main/window.c
 
 # Vala sources
 src/cpanel/cpanel-administrators.vala
+src/cpanel/cpanel-deductions.vala
 src/cpanel/cpanel-employees.vala
 src/cpanel/cpanel-holidays.vala
 src/cpanel/cpanel-report.vala
@@ -21,6 +22,7 @@ src/cpanel/cpanel.vala
 src/database/administrator-list.vala
 src/database/administrator.vala
 src/database/database.vala
+src/database/deductions.vala
 src/database/employee-list.vala
 src/database/employee.vala
 src/database/month-info.vala
@@ -34,6 +36,7 @@ src/database-widgets/time-record-edit-dialog.vala
 src/database-widgets/time-record-edit-widget.vala
 src/datetime/date-spin-button.vala
 src/datetime/date-time-spin-button.vala
+src/datetime/period-spin-button.vala
 src/datetime/time-spin-button.vala
 src/datetime/time.vala
 src/filter/filter.vala
@@ -49,7 +52,6 @@ src/main/preferences-dialog.vala
 # src/main/window.vala
 src/report/overtime-report.vala
 src/report/regular-report.vala
-src/report/report-font-settings.vala
 src/report/report.vala
 src/settings/settings.vala
 src/widgets/find-dialog.vala

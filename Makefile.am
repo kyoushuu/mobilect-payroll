@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src vapi data po
+SUBDIRS = src vapi data help po
 
 dist_doc_DATA = \
 	README \

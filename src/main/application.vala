@@ -49,15 +49,21 @@ namespace Mobilect {
 				settings = new Settings ();
 			}
 
-			public override void activate () {
+			public override void startup () {
+				base.startup ();
+
 				if (database == null) {
-					var e_dialog = new MessageDialog (this.window, DialogFlags.MODAL,
+					var e_dialog = new MessageDialog (window, DialogFlags.MODAL,
 					                                  MessageType.ERROR, ButtonsType.OK,
 					                                  _("Failed to load database."));
 					e_dialog.secondary_text = _("Check error logs for more information about this error.");
 					e_dialog.run ();
 					e_dialog.destroy ();
+				}
+			}
 
+			public override void activate () {
+				if (database == null) {
 					return;
 				}
 
@@ -69,7 +75,7 @@ namespace Mobilect {
 			}
 
 			internal string help_link_uri (string name, string? link_id) {
-				return link_id != null? "help:%s".printf (name) : "help:%s/%s".printf (name, link_id);
+				return link_id != null? "help:%s/%s".printf (name, link_id) : "help:%s".printf (name);
 			}
 
 			public void show_help (string? name, string? link_id) {

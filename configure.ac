@@ -86,6 +86,13 @@ GLIB_GSETTINGS
 
 
 dnl ***************************************************************************
+dnl User manual
+dnl ***************************************************************************
+
+YELP_HELP_INIT
+
+
+dnl ***************************************************************************
 dnl Check packages
 dnl ***************************************************************************
 
@@ -120,6 +127,7 @@ data/Makefile
 data/mobilect-payroll.desktop.in
 data/com.mobilectpower.payroll.gschema.xml.in
 data/icons/Makefile
+help/Makefile
 po/Makefile.in
 ])
 

@@ -4,8 +4,10 @@
     <file preprocess="xml-stripblanks">mobilect-payroll-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-employees-ui.xml</file>
-    <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-administrators-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-time-records-ui.xml</file>
+    <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-deductions-ui.xml</file>
+    <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-administrators-ui.xml</file>
+    <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-holidays-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-report-ui.xml</file>
   </gresource>
 </gresources>

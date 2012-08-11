@@ -1,0 +1,11 @@
+<ui>
+  <menubar name="menubar">
+    <menu name="ViewMenu" action="view">
+      <placeholder name="ViewMenuAdditions">
+        <menuitem name="HolidaySortBy" action="cpanel-holidays-sort-by" />
+        <separator />
+        <menuitem name="HolidayRefresh" action="cpanel-holidays-refresh" />
+      </placeholder>
+    </menu>
+  </menubar>
+</ui>

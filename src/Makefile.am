@@ -109,8 +109,10 @@ ui_files = \
 	mobilect-payroll-ui.xml \
 	mobilect-payroll-cpanel-ui.xml \
 	mobilect-payroll-cpanel-employees-ui.xml \
-	mobilect-payroll-cpanel-administrators-ui.xml \
 	mobilect-payroll-cpanel-time-records-ui.xml \
+	mobilect-payroll-cpanel-deductions-ui.xml \
+	mobilect-payroll-cpanel-administrators-ui.xml \
+	mobilect-payroll-cpanel-holidays-ui.xml \
 	mobilect-payroll-cpanel-report-ui.xml
 
 

@@ -1,0 +1,33 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="control-panel-login">
+
+  <info>
+    <link type="guide" xref="index#control-panel-section" group="first"/>
+    <link type="seealso" xref="control-panel-logout"/>
+
+    <desc>Log in to the Control Panel to manage the database</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Log in to the Control Panel</title>
+
+  <p>You have to log in to the Control Panel to manage employees, and to do other administrative tasks.</p>
+
+  <note style="important">
+    <p>The default administrator account has the username and password "admin".</p>
+    <p>You should replace the default password with a more secure one the first time you log in.</p>
+  </note>
+
+  <p>To log in to the Control Panel:</p>
+  <steps>
+    <item><p>Start <app>Mobilect Payroll</app>. It should show the <gui style="group">Employee Log In</gui> page on startup.</p></item>
+    <item><p>Click <gui style="button">Admin</gui>.</p></item>
+    <item><p>Put your administrator username and password, then click <gui style="button">Log In</gui>.</p></item>
+  </steps>
+
+</page>

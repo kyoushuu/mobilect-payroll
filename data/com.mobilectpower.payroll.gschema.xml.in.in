@@ -14,6 +14,12 @@
 
   <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.report" path="/com/mobilectpower/payroll/report/">
 
+    <key type="d" name="padding">
+      <default>1.0</default>
+      <_summary>Report Padding</_summary>
+      <_description>The padding used for tables and lines in reports, in pixels.</_description>
+    </key>
+
     <key type="s" name="title-font">
       <default l10n="messages">'Sans Bold 14'</default>
       <_summary>Title Font</_summary>

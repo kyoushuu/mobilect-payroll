@@ -48,14 +48,14 @@ namespace Mobilect {
 			public FontDescription number_font = FontDescription.from_string ("Monospace 9");
 			public FontDescription emp_number_font = FontDescription.from_string ("Monospace Bold 9");
 
+			public double padding = 1.0;
+
 			internal double title_font_height;
 			internal double company_name_font_height;
 			internal double header_font_height;
 			internal double text_font_height;
 			internal double number_font_height;
 			internal double number_emp_font_height;
-
-			internal double padding = 1.0;
 
 			internal int payslip_per_page;
 

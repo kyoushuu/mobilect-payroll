@@ -30,7 +30,7 @@ namespace Mobilect {
 
 
 			public PreferencesDialog (Window parent) {
-				Object (title: _("Mobilect Power Preferences"),
+				Object (title: _("Mobilect Payroll Preferences"),
 				        transient_for: parent);
 
 				this.add_buttons (Stock.CLOSE, ResponseType.CLOSE);

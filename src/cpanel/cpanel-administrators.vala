@@ -60,7 +60,12 @@ namespace Mobilect {
 				push_composite_child ();
 
 
+				var sw = new ScrolledWindow (null, null);
+				this.add (sw);
+				sw.show ();
+
 				tree_view = new TreeView.with_model (sort);
+				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
@@ -74,15 +79,10 @@ namespace Mobilect {
 
 					return show_popup (3, e.time);
 				});
-				tree_view.key_press_event.connect ((w, e) => {
-					/* Has key modifier or not menu key? */
-					if (e.state != 0 || e.keyval != Key.Menu) {
-						return false;
-					}
-
-					return show_popup (0, e.time);
+				tree_view.popup_menu.connect ((w) => {
+					return show_popup (0, get_current_event_time ());
 				});
-				this.add (tree_view);
+				sw.add (tree_view);
 				tree_view.show ();
 
 				var column = new TreeViewColumn.with_attributes (_("Username"),
@@ -90,6 +90,8 @@ namespace Mobilect {
 				                                                 "text", AdministratorList.Columns.USERNAME);
 				column.sort_column_id = AdministratorList.Columns.USERNAME;
 				column.expand = true;
+				column.reorderable = true;
+				column.resizable = true;
 				tree_view.append_column (column);
 
 
@@ -193,14 +195,12 @@ namespace Mobilect {
 				var administrators = new GLib.List<Administrator>();
 
 				foreach (var p in selection.get_selected_rows (null)) {
-					Administrator administrator;
 					TreePath path;
 					TreeIter iter;
 
 					path = sort.convert_path_to_child_path (p);
 					list.get_iter (out iter, path);
-					this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
-					administrators.append (administrator);
+					administrators.append (this.list.get_from_iter (iter));
 				}
 
 				return administrators;
@@ -215,7 +215,6 @@ namespace Mobilect {
 				                                          administrator);
 
 				var password_label = new Label (_("_Password:"));
-				password_label.use_underline = true;
 				password_label.xalign = 0.0f;
 				dialog.widget.grid.add (password_label);
 				password_label.show ();

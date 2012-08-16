@@ -67,8 +67,7 @@ namespace Mobilect {
 				fonts_grid.show ();
 
 
-				var title_label = new Label (_("_Title:"));
-				title_label.use_underline = true;
+				var title_label = new Label.with_mnemonic (_("_Title:"));
 				title_label.xalign = 0.0f;
 				fonts_grid.add (title_label);
 				title_label.show ();
@@ -86,8 +85,7 @@ namespace Mobilect {
 				title_font_button.show ();
 
 
-				var company_name_label = new Label (_("_Company Name:"));
-				company_name_label.use_underline = true;
+				var company_name_label = new Label.with_mnemonic (_("_Company Name:"));
 				company_name_label.xalign = 0.0f;
 				fonts_grid.add (company_name_label);
 				company_name_label.show ();
@@ -105,8 +103,7 @@ namespace Mobilect {
 				company_name_font_button.show ();
 
 
-				var header_label = new Label (_("_Header:"));
-				header_label.use_underline = true;
+				var header_label = new Label.with_mnemonic (_("_Header:"));
 				header_label.xalign = 0.0f;
 				fonts_grid.add (header_label);
 				header_label.show ();
@@ -124,8 +121,7 @@ namespace Mobilect {
 				header_font_button.show ();
 
 
-				var text_label = new Label (_("_Text:"));
-				text_label.use_underline = true;
+				var text_label = new Label.with_mnemonic (_("_Text:"));
 				text_label.xalign = 0.0f;
 				fonts_grid.add (text_label);
 				text_label.show ();
@@ -143,8 +139,7 @@ namespace Mobilect {
 				text_font_button.show ();
 
 
-				var number_label = new Label (_("_Number:"));
-				number_label.use_underline = true;
+				var number_label = new Label.with_mnemonic (_("_Number:"));
 				number_label.xalign = 0.0f;
 				fonts_grid.add (number_label);
 				number_label.show ();
@@ -162,8 +157,7 @@ namespace Mobilect {
 				number_font_button.show ();
 
 
-				var emp_number_label = new Label (_("_Emphasized Number:"));
-				emp_number_label.use_underline = true;
+				var emp_number_label = new Label.with_mnemonic (_("_Emphasized Number:"));
 				emp_number_label.xalign = 0.0f;
 				fonts_grid.add (emp_number_label);
 				emp_number_label.show ();

@@ -53,6 +53,8 @@ namespace Mobilect {
 			public CPanelReport (CPanel cpanel) {
 				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-report-ui.xml");
 
+				this.border_width = 6;
+
 				/* Load page setup */
 				if (FileUtils.test (this.cpanel.window.app.settings.page_setup, FileTest.IS_REGULAR)) {
 					try {
@@ -89,16 +91,15 @@ namespace Mobilect {
 				grid.orientation = Orientation.VERTICAL;
 				grid.row_spacing = 3;
 				grid.column_spacing = 6;
-				this.add_with_viewport (grid);
+				this.add (grid);
 				grid.show ();
 
-				var type_label = new Label (_("_Type:"));
-				type_label.use_underline = true;
+				var type_label = new Label (_("Type:"));
 				type_label.xalign = 0.0f;
 				grid.add (type_label);
 				type_label.show ();
 
-				regular_radio = new RadioButton.with_mnemonic (null, _("Re_gular"));
+				regular_radio = new RadioButton.with_mnemonic (null, _("_Regular"));
 				grid.attach_next_to (regular_radio,
 				                     type_label,
 				                     PositionType.RIGHT,
@@ -112,8 +113,7 @@ namespace Mobilect {
 				                     1, 1);
 				overtime_radio.show ();
 
-				var period_label = new Label (_("_Period:"));
-				period_label.use_underline = true;
+				var period_label = new Label (_("Period:"));
 				period_label.xalign = 0.0f;
 				grid.add (period_label);
 				period_label.show ();

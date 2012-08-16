@@ -48,7 +48,12 @@ namespace Mobilect {
 				push_composite_child ();
 
 
+				var sw = new ScrolledWindow (null, null);
+				this.add (sw);
+				sw.show ();
+
 				tree_view = new TreeView ();
+				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
@@ -62,15 +67,10 @@ namespace Mobilect {
 
 					return show_popup (3, e.time);
 				});
-				tree_view.key_press_event.connect ((w, e) => {
-					/* Has key modifier or not menu key? */
-					if (e.state != 0 || e.keyval != Key.Menu) {
-						return false;
-					}
-
-					return show_popup (0, e.time);
+				tree_view.popup_menu.connect ((w) => {
+					return show_popup (0, get_current_event_time ());
 				});
-				this.add (tree_view);
+				sw.add (tree_view);
 				tree_view.show ();
 
 				TreeViewColumn column;
@@ -80,30 +80,36 @@ namespace Mobilect {
 				column = new TreeViewColumn.with_attributes (_("Employee"), renderer);
 				column.sort_column_id = TimeRecordList.Columns.EMPLOYEE;
 				column.expand = true;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value;
-					m.get_value (i, TimeRecordList.Columns.EMPLOYEE, out value);
-					(r as CellRendererText).text = (value as Employee).get_name ();
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					(r as CellRendererText).text = list.get_from_iter (iter).employee.get_name ();
 				});
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
 				column = new TreeViewColumn.with_attributes (_("Start Date"), renderer);
 				column.sort_column_id = TimeRecordList.Columns.START;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value;
-					m.get_value (i, TimeRecordList.Columns.START, out value);
-					(r as CellRendererText).text = ((DateTime) value).format (_("%a, %d %B, %Y %I:%M %p"));
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					(r as CellRendererText).text = list.get_from_iter (iter).start.format (_("%a, %d %B, %Y %I:%M %p"));
 				});
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
 				column = new TreeViewColumn.with_attributes (_("End Date"), renderer);
 				column.sort_column_id = TimeRecordList.Columns.END;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value;
-					m.get_value (i, TimeRecordList.Columns.END, out value);
-					var dt = ((DateTime) value);
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					var dt = list.get_from_iter (iter).end;
 					if (dt != null) {
 						(r as CellRendererText).text = dt.format (_("%a, %d %B, %Y %I:%M %p"));
 					} else {
@@ -192,37 +198,7 @@ namespace Mobilect {
 								if (r == ResponseType.ACCEPT) {
 									d.hide ();
 
-									this.list = this.cpanel.window.app.database.get_time_records_within_date (dialog.get_start_date (), dialog.get_end_date ());
-
-									this.sort = new TreeModelSort.with_model (this.list);
-									sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
-										var time_record1 = a.user_data as TimeRecord;
-										var time_record2 = b.user_data as TimeRecord;
-
-										return strcmp (time_record1.employee.get_name (),
-											             time_record2.employee.get_name ());
-									});
-									sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
-										var time_record1 = a.user_data as TimeRecord;
-										var time_record2 = b.user_data as TimeRecord;
-
-										return time_record1.start.compare (time_record2.start);
-									});
-									sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
-										var time_record1 = a.user_data as TimeRecord;
-										var time_record2 = b.user_data as TimeRecord;
-
-										if (time_record1.end != null && time_record2.end != null) {
-											return time_record1.end.compare (time_record2.end);
-										} else if (time_record1.end != null) {
-											return 1;
-										} else if (time_record2.end != null) {
-											return -1;
-										} else {
-											return 0;
-										}
-									});
-									this.tree_view.model = sort;
+									update (dialog.get_start_date (), dialog.get_end_date ());
 								}
 
 								d.destroy ();
@@ -254,6 +230,29 @@ namespace Mobilect {
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_PROPERTIES).sensitive = selected;
 				});
+
+
+				/* Set period */
+				var date = new DateTime.now_local ().add_days (-15);
+				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
+
+				DateDay last_day;
+				if (period == 0) {
+					last_day = 15;
+				} else {
+					last_day = 31;
+					while (!Date.valid_dmy (last_day,
+					                        (DateMonth) date.get_month (),
+					                        (DateYear) date.get_year ())) {
+						last_day--;
+					}
+				}
+
+
+				Date start = Date (), end = Date ();
+				start.set_dmy ((15 * period) + 1, date.get_month (), (DateYear) date.get_year ());
+				end.set_dmy (last_day, date.get_month (), (DateYear) date.get_year ());
+				update (start, end);
 			}
 
 
@@ -261,14 +260,12 @@ namespace Mobilect {
 				var time_records = new GLib.List<TimeRecord>();
 
 				foreach (var p in selection.get_selected_rows (null)) {
-					TimeRecord time_record;
 					TreePath path;
 					TreeIter iter;
 
 					path = sort.convert_path_to_child_path (p);
 					list.get_iter (out iter, path);
-					this.list.get (iter, TimeRecordList.Columns.OBJECT, out time_record);
-					time_records.append (time_record);
+					time_records.append (this.list.get_from_iter (iter));
 				}
 
 				return time_records;
@@ -365,6 +362,40 @@ namespace Mobilect {
 				var menu = cpanel.window.ui_manager.get_widget ("/popup-time-records") as Gtk.Menu;
 				menu.popup (null, null, null, button, time);
 				return true;
+			}
+
+			public void update (Date start, Date end) {
+				this.list = this.cpanel.window.app.database.get_time_records_within_date (start, end);
+
+				this.sort = new TreeModelSort.with_model (this.list);
+				sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {
+					var time_record1 = a.user_data as TimeRecord;
+					var time_record2 = b.user_data as TimeRecord;
+
+					return strcmp (time_record1.employee.get_name (),
+					               time_record2.employee.get_name ());
+				});
+				sort.set_sort_func (TimeRecordList.Columns.START, (model, a, b) => {
+					var time_record1 = a.user_data as TimeRecord;
+					var time_record2 = b.user_data as TimeRecord;
+
+					return time_record1.start.compare (time_record2.start);
+				});
+				sort.set_sort_func (TimeRecordList.Columns.END, (model, a, b) => {
+					var time_record1 = a.user_data as TimeRecord;
+					var time_record2 = b.user_data as TimeRecord;
+
+					if (time_record1.end != null && time_record2.end != null) {
+						return time_record1.end.compare (time_record2.end);
+					} else if (time_record1.end != null) {
+						return 1;
+					} else if (time_record2.end != null) {
+						return -1;
+					} else {
+						return 0;
+					}
+				});
+				this.tree_view.model = sort;
 			}
 
 		}

@@ -48,18 +48,20 @@ namespace Mobilect {
 
 
 				var vbox = new Box (Orientation.VERTICAL, 3);
-				this.add_with_viewport (vbox);
+				this.add (vbox);
 				vbox.show ();
 
 				var hbox = new Box (Orientation.HORIZONTAL, 3);
+				hbox.border_width = 6;
 				vbox.add (hbox);
 				hbox.show ();
 
 				var sw = new ScrolledWindow (null, null);
-				vbox.pack_start (sw, true, true, 0);
+				vbox.add (sw);
 				sw.show ();
 
 				tree_view = new TreeView ();
+				tree_view.expand = true;
 				sw.add (tree_view);
 				tree_view.show ();
 
@@ -70,6 +72,8 @@ namespace Mobilect {
 				renderer.xalign = 1;
 				column = new TreeViewColumn.with_attributes (_("Day"), renderer);
 				column.sort_column_id = MonthInfo.Columns.DAY;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, MonthInfo.Columns.DAY, out value);
@@ -80,6 +84,8 @@ namespace Mobilect {
 				renderer = new CellRendererText ();
 				column = new TreeViewColumn.with_attributes (_("Weekday"), renderer);
 				column.sort_column_id = MonthInfo.Columns.WEEKDAY;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					string markup;
@@ -134,6 +140,8 @@ namespace Mobilect {
 				});
 				column = new TreeViewColumn.with_attributes (_("Holiday Type"), renderer_combo);
 				column.sort_column_id = MonthInfo.Columns.HOLIDAY_TYPE;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer_combo, (c, r, m, i) => {
 					Value value;
 					TreeIter iter;
@@ -147,8 +155,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 
-				var date_label = new Label (_("_Date:"));
-				date_label.use_underline = true;
+				var date_label = new Label (_("Date:"));
 				hbox.add (date_label);
 				date_label.show ();
 

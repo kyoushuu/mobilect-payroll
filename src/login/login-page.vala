@@ -24,7 +24,7 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class LoginPage : Frame {
+		public abstract class LoginPage : Frame {
 
 			public weak Window window { get; internal set; }
 

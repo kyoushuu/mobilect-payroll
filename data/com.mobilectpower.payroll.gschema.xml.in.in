@@ -10,6 +10,12 @@
       <_description>Whether the toolbar should be visible.</_description>
     </key>
 
+    <key type="s" name="database-provider">
+      <default>'SQLite'</default>
+      <_summary>Database Provider</_summary>
+      <_description>GNOME Data Access provider to use for the database. Usually SQLite or SQLCipher.</_description>
+    </key>
+
   </schema>
 
   <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.report" path="/com/mobilectpower/payroll/report/">

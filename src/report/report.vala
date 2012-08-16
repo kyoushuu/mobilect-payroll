@@ -32,7 +32,7 @@ namespace Mobilect {
 		}
 
 
-		public class Report : PrintOperation {
+		public abstract class Report : PrintOperation {
 
 			public string title { get; set; }
 

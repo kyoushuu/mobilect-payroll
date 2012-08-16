@@ -33,5 +33,8 @@
       <toolitem name="EmployeeProperties" action="cpanel-employees-properties" />
       <toolitem name="EmployeePassword" action="cpanel-employees-password" />
     </placeholder>
+    <placeholder name="ViewToolbarAdditions">
+      <toolitem name="EmployeeRefresh" action="cpanel-employees-refresh" />
+    </placeholder>
   </toolbar>
 </ui>

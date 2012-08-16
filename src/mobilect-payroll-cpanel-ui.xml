@@ -5,5 +5,10 @@
         <menuitem name="Close" action="cpanel-close" />
       </placeholder>
     </menu>
+    <menu name="EditMenu" action="edit">
+      <placeholder name="EditPreferencesMenuAdditions">
+        <menuitem name="Preferences" action="cpanel-preferences" />
+      </placeholder>
+    </menu>
   </menubar>
 </ui>

@@ -58,8 +58,7 @@ namespace Mobilect {
 				grid.show ();
 
 
-				var username_label = new Label (_("_Username:"));
-				username_label.use_underline = true;
+				var username_label = new Label.with_mnemonic (_("_Username:"));
 				username_label.xalign = 0.0f;
 				grid.add (username_label);
 				username_label.show ();

@@ -74,18 +74,6 @@ namespace Mobilect {
 						label = _("_Edit")
 					},
 					Gtk.ActionEntry () {
-						name = "edit-preferences",
-						stock_id = Stock.PREFERENCES,
-						tooltip = _("Preferences"),
-						callback = (a) => {
-							var dialog = new PreferencesDialog (this);
-							dialog.response.connect ((d, r) => {
-								d.destroy ();
-							});
-							dialog.show ();
-						}
-					},
-					Gtk.ActionEntry () {
 						name = "view",
 						label = _("_View")
 					},
@@ -141,7 +129,7 @@ namespace Mobilect {
 				Gtk.ToggleActionEntry[] toggle_actions = {
 					Gtk.ToggleActionEntry () {
 						name = "view-toolbar",
-						label = _("Toolbar"),
+						label = _("_Toolbar"),
 						tooltip = _("Show or hide the toolbar"),
 						callback = (a) => {
 							var visible = (a as ToggleAction).active;
@@ -220,33 +208,6 @@ namespace Mobilect {
 
 				emp_login_page.name_combobox.grab_focus ();
 				emp_login_page.button_login.grab_default ();
-
-				Log.set_handler ("Mobilect-Payroll",
-				                 LogLevelFlags.LEVEL_CRITICAL |
-				                 LogLevelFlags.LEVEL_WARNING |
-				                 LogLevelFlags.LEVEL_MESSAGE,
-				                 (d, l, m) => {
-													 var text = m;
-													 MessageType type = MessageType.INFO;
-													 if (l == LogLevelFlags.LEVEL_CRITICAL) {
-														 text = _("Critical Error");
-														 type = MessageType.ERROR;
-													 } else if (l == LogLevelFlags.LEVEL_WARNING) {
-														 text = _("Warning");
-														 type = MessageType.WARNING;
-													 }
-
-													 var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT,
-													                                 type, ButtonsType.OK,
-													                                 text);
-
-													 if (l != LogLevelFlags.LEVEL_MESSAGE) {
-														 dialog.secondary_text = m;
-													 }
-
-													 dialog.run ();
-													 dialog.destroy ();
-												 });
 			}
 
 			public void show_error_dialog (string primary, string secondary) {

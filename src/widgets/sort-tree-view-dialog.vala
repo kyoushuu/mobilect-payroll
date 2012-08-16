@@ -60,8 +60,7 @@ namespace Mobilect {
 				content_area.add (grid);
 				grid.show ();
 
-				var column_label = new Label (_("_Column:"));
-				column_label.use_underline = true;
+				var column_label = new Label.with_mnemonic (_("_Column:"));
 				column_label.xalign = 0.0f;
 				grid.add (column_label);
 				column_label.show ();
@@ -80,8 +79,7 @@ namespace Mobilect {
 				column_combo.hexpand = true;
 				column_combo.show ();
 
-				ascending_check = new CheckButton.with_label (_("_Ascending"));
-				ascending_check.use_underline = true;
+				ascending_check = new CheckButton.with_mnemonic (_("_Ascending"));
 				ascending_check.active = true;
 				grid.attach_next_to (ascending_check,
 				                     column_label,

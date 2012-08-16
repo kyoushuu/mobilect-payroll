@@ -45,8 +45,7 @@ namespace Mobilect {
 				grid.show ();
 
 
-				var password_label = new Label (_("_Password:"));
-				password_label.use_underline = true;
+				var password_label = new Label.with_mnemonic (_("_Password:"));
 				password_label.xalign = 0.0f;
 				grid.add (password_label);
 				password_label.show ();
@@ -64,8 +63,7 @@ namespace Mobilect {
 				password_entry.show ();
 
 
-				var verify_label = new Label (_("_Verify:"));
-				verify_label.use_underline = true;
+				var verify_label = new Label.with_mnemonic (_("_Verify:"));
 				verify_label.xalign = 0.0f;
 				grid.add (verify_label);
 				verify_label.show ();

@@ -2,6 +2,7 @@
 
   <info>
     <link type="guide" xref="index#time-records-section" group="first"/>
+    <link type="seealso" xref="time-records-search"/>
 
     <desc>Remove a time record from the database</desc>
 
@@ -21,8 +22,7 @@
 
   <p>To remove time records:</p>
   <steps>
-    <item><p>Log in to the Control Panel.</p></item>
-    <item><p>Click the <gui style="tab">Time Records</gui> tab.</p></item>
+    <item><p>Search for the time record you want to remove.</p></item>
     <item><p>Select the time records you want to remove from the list.</p></item>
     <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Remove</gui></guiseq>, or press <key>Delete</key>, or click <gui style="button">Remove</gui> in the toolbar.</p></item>
   </steps>

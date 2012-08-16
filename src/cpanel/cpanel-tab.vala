@@ -24,7 +24,7 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class CPanelTab : ScrolledWindow {
+		public abstract class CPanelTab : Box {
 
 			public weak CPanel cpanel { get; internal set; }
 
@@ -48,6 +48,7 @@ namespace Mobilect {
 
 			public CPanelTab (CPanel cpanel, string? action_name = null, string? ui_resource_path = null) {
 				this.cpanel = cpanel;
+				this.orientation = Orientation.VERTICAL;
 
 				if (action_name != null) {
 					this.action_group = new Gtk.ActionGroup (action_name);

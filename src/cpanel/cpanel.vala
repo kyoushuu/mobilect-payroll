@@ -33,7 +33,7 @@ namespace Mobilect {
 
 			public CPanel (Window window) {
 				this.window = window;
-				this.tab_pos = PositionType.LEFT;
+				this.tab_pos = PositionType.TOP;
 
 				window.notebook.switch_page.connect ((t, p, n) => {
 					if (current_page != null) {
@@ -61,6 +61,18 @@ namespace Mobilect {
 						tooltip = _("Close control panel"),
 						callback = (a) => {
 							this.window.notebook.page = this.window.PAGE_LOGIN_EMPLOYEE;
+						}
+					},
+					Gtk.ActionEntry () {
+						name = "cpanel-preferences",
+						stock_id = Stock.PREFERENCES,
+						tooltip = _("Preferences"),
+						callback = (a) => {
+							var dialog = new PreferencesDialog (this.window);
+							dialog.response.connect ((d, r) => {
+								d.destroy ();
+							});
+							dialog.show ();
 						}
 					}
 				};
@@ -93,7 +105,7 @@ namespace Mobilect {
 			}
 
 			public void add_page (CPanelTab tab, string title) {
-				this.append_page (tab, new Label.with_mnemonic (title));
+				this.append_page (tab, new Label (title));
 				tab.show ();
 			}
 

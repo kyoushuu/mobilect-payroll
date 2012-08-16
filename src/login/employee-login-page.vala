@@ -44,8 +44,7 @@ namespace Mobilect {
 				push_composite_child ();
 
 
-				var name_label = new Label (_("_Name:"));
-				name_label.use_underline = true;
+				var name_label = new Label.with_mnemonic (_("_Name:"));
 				name_label.xalign = 0.0f;
 				grid.add (name_label);
 				name_label.show ();
@@ -69,8 +68,7 @@ namespace Mobilect {
 				name_combobox.add_attribute (name_cell_renderer,
 				                             "text", EmployeeList.Columns.NAME);
 
-				var password_label = new Label (_("_Password:"));
-				password_label.use_underline = true;
+				var password_label = new Label.with_mnemonic (_("_Password:"));
 				password_label.xalign = 0.0f;
 				grid.add (password_label);
 				password_label.show ();
@@ -105,14 +103,12 @@ namespace Mobilect {
 
 
 				this.button_login.clicked.connect ((t) => {
-					Employee employee;
-
 					try {
 						if (this.name_combobox.get_active_iter (out iter) == false) {
 							return;
 						}
 
-						this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
+						var employee = this.list.get_from_iter (iter);
 
 						if (employee.get_password_checksum () !=
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
@@ -136,14 +132,12 @@ namespace Mobilect {
 				});
 
 				this.button_logout.clicked.connect ((t) => {
-					Employee employee;
-
 					try {
 						if (this.name_combobox.get_active_iter (out iter) == false) {
 							return;
 						}
 
-						this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
+						var employee = this.list.get_from_iter (iter);
 
 						if (employee.get_password_checksum () !=
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))

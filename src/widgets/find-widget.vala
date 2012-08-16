@@ -45,8 +45,7 @@ namespace Mobilect {
 				grid.show ();
 
 
-				var start_date_label = new Label (_("_Start:"));
-				start_date_label.use_underline = true;
+				var start_date_label = new Label.with_mnemonic (_("_Start:"));
 				start_date_label.xalign = 0.0f;
 				grid.add (start_date_label);
 				start_date_label.show ();
@@ -60,8 +59,7 @@ namespace Mobilect {
 				start_spin.show ();
 
 
-				var end_date_label = new Label (_("_End:"));
-				end_date_label.use_underline = true;
+				var end_date_label = new Label.with_mnemonic (_("_End:"));
 				end_date_label.xalign = 0.0f;
 				grid.add (end_date_label);
 				end_date_label.show ();

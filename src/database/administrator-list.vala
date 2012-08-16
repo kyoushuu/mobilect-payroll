@@ -144,15 +144,15 @@ namespace Mobilect {
 				return this.Columns.NUM;
 			}
 
-			public TreePath? get_path (TreeIter iter) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
+			public TreePath? get_path (TreeIter iter) requires (iter_valid (iter)) {
 				var path = new TreePath ();
-				path.append_index (this.index_of (iter.user_data as Administrator));
+				path.append_index (this.index_of (get_from_iter (iter)));
 
 				return path;
 			}
 
-			public void get_value (TreeIter iter, int column, out Value value) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
-				var record = iter.user_data as Administrator;
+			public void get_value (TreeIter iter, int column, out Value value) requires (iter_valid (iter)) {
+				var record = get_from_iter (iter);
 
 				switch (column) {
 					case Columns.OBJECT:
@@ -176,7 +176,7 @@ namespace Mobilect {
 					return false;
 				}
 
-				return get_iter_administrator (out iter, this.first ());
+				return get_iter_from_administrator (out iter, this.first ());
 			}
 
 			public bool iter_has_child (TreeIter iter) {
@@ -191,8 +191,8 @@ namespace Mobilect {
 				return this.size;
 			}
 
-			public bool iter_next (ref TreeIter iter) requires (iter.stamp == this.stamp) {
-				return get_iter_with_index (out iter, this.index_of (iter.user_data as Administrator) + 1);
+			public bool iter_next (ref TreeIter iter) requires (iter_valid (iter)) {
+				return get_iter_with_index (out iter, this.index_of (get_from_iter (iter)) + 1);
 			}
 
 			public bool iter_nth_child (out TreeIter iter, TreeIter? parent, int n) {
@@ -210,7 +210,15 @@ namespace Mobilect {
 			}
 
 			/* Additional TreeModel implementation */
-			public bool get_iter_administrator (out TreeIter iter, Administrator administrator) {
+			public Administrator get_from_iter (TreeIter iter) requires (iter_valid (iter)) {
+				return iter.user_data as Administrator;
+			}
+
+			public bool iter_valid (TreeIter iter) {
+				return iter.stamp == this.stamp && iter.user_data != null;
+			}
+
+			public bool get_iter_from_administrator (out TreeIter iter, Administrator administrator) {
 				if (administrator in this) {
 					create_iter (out iter, administrator);
 					return true;

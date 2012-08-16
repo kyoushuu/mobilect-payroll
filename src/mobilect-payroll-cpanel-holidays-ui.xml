@@ -8,4 +8,9 @@
       </placeholder>
     </menu>
   </menubar>
+  <toolbar name="toolbar">
+    <placeholder name="ViewToolbarAdditions">
+      <toolitem name="HolidayRefresh" action="cpanel-holidays-refresh" />
+    </placeholder>
+  </toolbar>
 </ui>

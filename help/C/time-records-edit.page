@@ -2,6 +2,7 @@
 
   <info>
     <link type="guide" xref="index#time-records-section" group="second"/>
+    <link type="seealso" xref="time-records-search"/>
 
     <desc>Change the properties of a time record</desc>
 
@@ -17,8 +18,7 @@
 
   <p>To edit an time record:</p>
   <steps>
-    <item><p>Log in to the Control Panel.</p></item>
-    <item><p>Click the <gui style="tab">Time Records</gui> tab.</p></item>
+    <item><p>Search for the time record you want to edit.</p></item>
     <item><p>Select the time record you want to change the properties from the list.</p></item>
     <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Properties</gui></guiseq>, or press <key>Return</key>, or click <gui style="button">Properties</gui> in the toolbar.</p></item>
     <item><p>Edit the properties you want to change, then click <gui style="button">Save</gui>.</p></item>

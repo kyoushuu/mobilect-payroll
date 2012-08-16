@@ -67,6 +67,12 @@ namespace Mobilect {
 
 					return employee1.rate - employee2.rate;
 				});
+				sort.set_sort_func (EmployeeList.Columns.DAYRATE, (model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					return (int) Math.round(employee1.rate_per_day - employee2.rate_per_day);
+				});
 				sort.set_sort_func (EmployeeList.Columns.HOURRATE, (model, a, b) => {
 					var employee1 = a.user_data as Employee;
 					var employee2 = b.user_data as Employee;
@@ -78,7 +84,12 @@ namespace Mobilect {
 				push_composite_child ();
 
 
+				var sw = new ScrolledWindow (null, null);
+				this.add (sw);
+				sw.show ();
+
 				tree_view = new TreeView.with_model (sort);
+				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
@@ -92,15 +103,10 @@ namespace Mobilect {
 
 					return show_popup (3, e.time);
 				});
-				tree_view.key_press_event.connect ((w, e) => {
-					/* Has key modifier or not menu key? */
-					if (e.state != 0 || e.keyval != Key.Menu) {
-						return false;
-					}
-
-					return show_popup (0, e.time);
+				tree_view.popup_menu.connect ((w) => {
+					return show_popup (0, get_current_event_time ());
 				});
-				this.add (tree_view);
+				sw.add (tree_view);
 				tree_view.show ();
 
 				TreeViewColumn column;
@@ -111,31 +117,51 @@ namespace Mobilect {
 				                                             "text", EmployeeList.Columns.NAME);
 				column.sort_column_id = EmployeeList.Columns.NAME;
 				column.expand = true;
+				column.reorderable = true;
+				column.resizable = true;
 				tree_view.append_column (column);
 
 				column = new TreeViewColumn.with_attributes (_("TIN Number"),
 				                                             new CellRendererText (),
 				                                             "text", EmployeeList.Columns.TIN);
 				column.sort_column_id = EmployeeList.Columns.TIN;
+				column.reorderable = true;
+				column.resizable = true;
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
 				column = new TreeViewColumn.with_attributes (_("Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.RATE;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value;
-					m.get_value (i, EmployeeList.Columns.RATE, out value);
-					(r as CellRendererText).text = ((int) value).to_string ();
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					(r as CellRendererText).text = list.get_from_iter (iter).rate.to_string ();
+				});
+				tree_view.append_column (column);
+
+				renderer = new CellRendererText ();
+				column = new TreeViewColumn.with_attributes (_("Rate per Day"), renderer);
+				column.sort_column_id = EmployeeList.Columns.DAYRATE;
+				column.reorderable = true;
+				column.resizable = true;
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					(r as CellRendererText).text = "%.2lf".printf (list.get_from_iter (iter).rate_per_day);
 				});
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
 				column = new TreeViewColumn.with_attributes (_("Rate per Hour"), renderer);
 				column.sort_column_id = EmployeeList.Columns.HOURRATE;
+				column.reorderable = true;
+				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
-					Value value;
-					m.get_value (i, EmployeeList.Columns.HOURRATE, out value);
-					(r as CellRendererText).text = "%.2lf".printf ((double) value);
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					(r as CellRendererText).text = "%.2lf".printf (list.get_from_iter (iter).rate_per_hour);
 				});
 				tree_view.append_column (column);
 
@@ -240,14 +266,12 @@ namespace Mobilect {
 				var employees = new GLib.List<Employee>();
 
 				foreach (var p in selection.get_selected_rows (null)) {
-					Employee employee;
 					TreePath path;
 					TreeIter iter;
 
 					path = sort.convert_path_to_child_path (p);
 					list.get_iter (out iter, path);
-					this.list.get (iter, EmployeeList.Columns.OBJECT, out employee);
-					employees.append (employee);
+					employees.append (this.list.get_from_iter (iter));
 				}
 
 				return employees;
@@ -261,8 +285,7 @@ namespace Mobilect {
 				                                     this.cpanel.window,
 				                                     employee);
 
-				var password_label = new Label (_("_Password:"));
-				password_label.use_underline = true;
+				var password_label = new Label.with_mnemonic (_("_Password:"));
 				password_label.xalign = 0.0f;
 				dialog.widget.grid.add (password_label);
 				password_label.show ();

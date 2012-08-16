@@ -34,100 +34,94 @@ namespace Mobilect {
 			public AdministratorList administrator_list { get; private set; }
 
 
-			public Database () {
-				try {
-					/* Create config directory with permission 0754 */
-					var db_dir = Path.build_filename (Environment.get_user_config_dir (), PACKAGE);
-					DirUtils.create_with_parents (db_dir, 0754);
+			public Database (Application app) throws Error {
+				/* Create config directory with permission 0754 */
+				var db_dir = Path.build_filename (Environment.get_user_config_dir (), PACKAGE);
+				DirUtils.create_with_parents (db_dir, 0754);
 
-					/* Connect to database */
-					cnc = Connection.open_from_string ("SQLite",
-					                                   "DB_DIR=%s;DB_NAME=%s".printf (db_dir, PACKAGE),
-					                                   null,
-					                                   ConnectionOptions.NONE);
+				/* Connect to database */
+				cnc = Connection.open_from_string (app.settings.main.get_string ("database-provider"),
+				                                   "DB_DIR=%s;DB_NAME=%s".printf (db_dir, PACKAGE),
+				                                   null,
+				                                   ConnectionOptions.NONE);
 
-					dh_string = cnc.get_provider ().get_data_handler_g_type (cnc, typeof (string));
+				dh_string = cnc.get_provider ().get_data_handler_g_type (cnc, typeof (string));
 
-					/* Create employees table if doesn't exists */
-					execute_sql ("CREATE TABLE IF NOT EXISTS employees (" +
-					             "  id integer primary key autoincrement," +
-					             "  lastname string not null," +
-					             "  firstname string not null," +
-					             "  middlename string not null," +
-					             "  tin string not null," +
-					             "  password string not null," +
-					             "  rate integer" +
-					             ")");
+				/* Create employees table if doesn't exists */
+				execute_sql ("CREATE TABLE IF NOT EXISTS employees (" +
+				             "  id integer primary key autoincrement," +
+				             "  lastname string not null," +
+				             "  firstname string not null," +
+				             "  middlename string not null," +
+				             "  tin string not null," +
+				             "  password string not null," +
+				             "  rate integer" +
+				             ")");
 
-					/* Create time_records table if doesn't exists */
-					execute_sql ("CREATE TABLE IF NOT EXISTS time_records (" +
-					             "  id integer primary key autoincrement," +
-					             "  employee_id integer," +
-					             "  year integer," +
-					             "  month integer," +
-					             "  day integer," +
-					             "  start timestamp not null," +
-					             "  end timestamp" +
-					             ")");
+				/* Create time_records table if doesn't exists */
+				execute_sql ("CREATE TABLE IF NOT EXISTS time_records (" +
+				             "  id integer primary key autoincrement," +
+				             "  employee_id integer," +
+				             "  year integer," +
+				             "  month integer," +
+				             "  day integer," +
+				             "  start timestamp not null," +
+				             "  end timestamp" +
+				             ")");
 
-					/* Create deductions table if doesn't exists */
-					execute_sql ("CREATE TABLE IF NOT EXISTS deductions (" +
-					             "  id integer primary key autoincrement," +
-					             "  employee_id integer," +
-					             "  period integer," +
-					             "  tax double," +
-					             "  loan double," +
-					             "  pagibig double," +
-					             "  sssloan double," +
-					             "  vale double," +
-					             "  moesala_loan double," +
-					             "  moesala_savings double" +
-					             ")");
+				/* Create deductions table if doesn't exists */
+				execute_sql ("CREATE TABLE IF NOT EXISTS deductions (" +
+				             "  id integer primary key autoincrement," +
+				             "  employee_id integer," +
+				             "  period integer," +
+				             "  tax double," +
+				             "  loan double," +
+				             "  pagibig double," +
+				             "  sssloan double," +
+				             "  vale double," +
+				             "  moesala_loan double," +
+				             "  moesala_savings double" +
+				             ")");
 
-					/* Create administrators table if doesn't exists */
-					execute_sql ("CREATE TABLE IF NOT EXISTS administrators (" +
-					             "  id integer primary key autoincrement," +
-					             "  username string not null," +
-					             "  password string not null" +
-					             ")");
+				/* Create administrators table if doesn't exists */
+				execute_sql ("CREATE TABLE IF NOT EXISTS administrators (" +
+				             "  id integer primary key autoincrement," +
+				             "  username string not null," +
+				             "  password string not null" +
+				             ")");
 
-					/* Create holidays table if doesn't exists */
-					execute_sql ("CREATE TABLE IF NOT EXISTS holidays (" +
-					             "  id integer primary key autoincrement," +
-					             "  year integer," +
-					             "  month integer," +
-					             "  day integer," +
-					             "  type integer" +
-					             ")");
+				/* Create holidays table if doesn't exists */
+				execute_sql ("CREATE TABLE IF NOT EXISTS holidays (" +
+				             "  id integer primary key autoincrement," +
+				             "  year integer," +
+				             "  month integer," +
+				             "  day integer," +
+				             "  type integer" +
+				             ")");
 
-					/* Create a default administrator if nothing exists */
-					Set stmt_params;
-					var stmt = cnc.parse_sql_string ("SELECT id" +
-					                                 "  FROM administrators",
-					                                 null);
-					var data_model = cnc.statement_execute_select (stmt, null);
-					if (data_model.get_n_rows () < 1) {
-						stmt = cnc.parse_sql_string ("INSERT INTO administrators (id, username, password)" +
-						                             "  VALUES (1, ##username::string, ##password::string)",
-						                             out stmt_params);
-						stmt_params.get_holder ("username")
-							.set_value_str (null, "admin");
-						stmt_params.get_holder ("password")
-							.set_value_str (null,
-							                Checksum.compute_for_string (ChecksumType.SHA256,
-							                                             "admin", -1));
-						cnc.statement_execute_non_select (stmt, stmt_params, null);
-					}
-				} catch (Error e) {
-					critical ("Failed to initialize database contents: %s", e.message);
+				/* Create a default administrator if nothing exists */
+				Set stmt_params;
+				var stmt = cnc.parse_sql_string ("SELECT id" +
+				                                 "  FROM administrators",
+				                                 null);
+				var data_model = cnc.statement_execute_select (stmt, null);
+				if (data_model.get_n_rows () < 1) {
+					stmt = cnc.parse_sql_string ("INSERT INTO administrators (id, username, password)" +
+					                             "  VALUES (1, ##username::string, ##password::string)",
+					                             out stmt_params);
+					stmt_params.get_holder ("username")
+						.set_value_str (null, "admin");
+					stmt_params.get_holder ("password")
+						.set_value_str (null,
+						                Checksum.compute_for_string (ChecksumType.SHA256,
+						                                             "admin", -1));
+					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				}
 
 				employee_list = new EmployeeList ();
-				employee_list.database = this;
 				update_employees ();
 
 				administrator_list = new AdministratorList ();
-				administrator_list.database = this;
 				update_administrators ();
 			}
 
@@ -222,7 +216,6 @@ namespace Mobilect {
 
 			public TimeRecordList get_time_records_within_date (Date start, Date end) {
 				var list = new TimeRecordList ();
-				list.database = this;
 
 				if (start.compare (end) > 0) {
 					end = start;
@@ -296,7 +289,6 @@ namespace Mobilect {
 					}
 				} catch (Error e) {
 					list = new TimeRecordList ();
-					list.database = this;
 					critical ("Failed to get time records fro database: %s", e.message);
 				}
 

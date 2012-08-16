@@ -45,18 +45,20 @@ namespace Mobilect {
 
 
 				var vbox = new Box (Orientation.VERTICAL, 3);
-				this.add_with_viewport (vbox);
+				this.add (vbox);
 				vbox.show ();
 
 				var hbox = new Box (Orientation.HORIZONTAL, 3);
+				hbox.border_width = 6;
 				vbox.add (hbox);
 				hbox.show ();
 
 				var sw = new ScrolledWindow (null, null);
-				vbox.pack_start (sw, true, true, 0);
+				vbox.add (sw);
 				sw.show ();
 
 				tree_view = new TreeView ();
+				tree_view.expand = true;
 				sw.add (tree_view);
 				tree_view.show ();
 
@@ -64,9 +66,14 @@ namespace Mobilect {
 				CellRendererText renderer;
 				CellRendererSpin renderer_spin;
 
+				var adjustment = new Adjustment (0, 0, 999999,
+				                                 1, 10, 0);
+
 				renderer = new CellRendererText ();
 				column = new TreeViewColumn.with_attributes (_("Employee"), renderer);
 				column.expand = true;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.EMPLOYEE;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
@@ -76,22 +83,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.TAX, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.TAX);
 				});
 				column = new TreeViewColumn.with_attributes (_("Tax"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.TAX;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -101,22 +104,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.LOAN, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.LOAN);
 				});
 				column = new TreeViewColumn.with_attributes (_("Loan"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.LOAN;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -126,22 +125,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.PAG_IBIG, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.PAG_IBIG);
 				});
 				column = new TreeViewColumn.with_attributes (_("PAG-IBIG"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.PAG_IBIG;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -151,22 +146,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.SSS_LOAN, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.SSS_LOAN);
 				});
 				column = new TreeViewColumn.with_attributes (_("SSS Loan"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.SSS_LOAN;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -176,22 +167,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.VALE, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.VALE);
 				});
 				column = new TreeViewColumn.with_attributes (_("Vale"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.VALE;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -201,22 +188,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.MOESALA_LOAN, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.MOESALA_LOAN);
 				});
 				column = new TreeViewColumn.with_attributes (_("Moesala Loan"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.MOESALA_LOAN;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -226,22 +209,18 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer_spin = new CellRendererSpin ();
-				renderer_spin.adjustment = new Adjustment (0, 0, 999999,
-				                                           1, 10, 0);
+				renderer_spin.adjustment = adjustment;
 				renderer_spin.editable = true;
 				renderer_spin.climb_rate = 10;
 				renderer_spin.digits = 2;
 				renderer_spin.xalign = 1;
 				renderer_spin.edited.connect ((r, p, n) => {
-					TreeIter iter, iterSort;
-					Value value;
-					sort.get_iter_from_string (out iterSort, p);
-					sort.convert_iter_to_child_iter (out iter, iterSort);
-					deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
-					deduction.set_deduction_with_category (value as Employee, Deductions.Category.MOESALA_SAVINGS, double.parse (n));
+					render_spin_edited (p, n, Deductions.Category.MOESALA_SAVINGS);
 				});
 				column = new TreeViewColumn.with_attributes (_("Moesala Savings"), renderer_spin);
 				column.min_width = 100;
+				column.reorderable = true;
+				column.resizable = true;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.MOESALA_SAVINGS;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -251,8 +230,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 
-				var period_label = new Label (_("_Period:"));
-				period_label.use_underline = true;
+				var period_label = new Label (_("Period:"));
 				hbox.add (period_label);
 				period_label.show ();
 
@@ -298,6 +276,15 @@ namespace Mobilect {
 
 				var dt = new DateTime.now_local ().add_days (-15);
 				period_spin.set_dmy (dt.get_day_of_month (), dt.get_month (), dt.get_year ());
+			}
+
+			private void render_spin_edited (string path, string new_text, Deductions.Category category) {
+				TreeIter iter, iterSort;
+				Value value;
+				sort.get_iter_from_string (out iterSort, path);
+				sort.convert_iter_to_child_iter (out iter, iterSort);
+				deduction.get_value (iter, Deductions.Columns.EMPLOYEE, out value);
+				deduction.set_deduction_with_category (value as Employee, category, double.parse (new_text));
 			}
 
 			public void update () {

@@ -40,8 +40,7 @@ namespace Mobilect {
 				push_composite_child ();
 
 
-				var username_label = new Label (_("_Username:"));
-				username_label.use_underline = true;
+				var username_label = new Label.with_mnemonic (_("_Username:"));
 				username_label.xalign = 0.0f;
 				grid.add (username_label);
 				username_label.show ();
@@ -55,8 +54,7 @@ namespace Mobilect {
 				                     2, 1);
 				username_entry.show ();
 
-				var password_label = new Label (_("_Password:"));
-				password_label.use_underline = true;
+				var password_label = new Label.with_mnemonic (_("_Password:"));
 				password_label.xalign = 0.0f;
 				grid.add (password_label);
 				password_label.show ();

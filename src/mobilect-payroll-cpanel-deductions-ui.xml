@@ -8,4 +8,9 @@
       </placeholder>
     </menu>
   </menubar>
+  <toolbar name="toolbar">
+    <placeholder name="ViewToolbarAdditions">
+      <toolitem name="DeductionRefresh" action="cpanel-deductions-refresh" />
+    </placeholder>
+  </toolbar>
 </ui>

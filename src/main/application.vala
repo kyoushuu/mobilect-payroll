@@ -37,7 +37,6 @@ namespace Mobilect {
 
 			private const string db_name = "mobilect-payroll";
 
-			public Window window { get; private set; }
 			public Database database { get; private set; }
 			public Settings settings { get; private set; }
 
@@ -45,21 +44,49 @@ namespace Mobilect {
 			public Application () {
 				Object (application_id: "com.mobilectpower.payroll");
 
-				database = new Database ();
 				settings = new Settings ();
 			}
 
 			public override void startup () {
 				base.startup ();
 
-				if (database == null) {
-					var e_dialog = new MessageDialog (window, DialogFlags.MODAL,
+				try {
+					database = new Database (this);
+				} catch (Error e) {
+					var e_dialog = new MessageDialog (this.get_window (), DialogFlags.MODAL,
 					                                  MessageType.ERROR, ButtonsType.OK,
 					                                  _("Failed to load database."));
-					e_dialog.secondary_text = _("Check error logs for more information about this error.");
+					e_dialog.secondary_text = e.message;
 					e_dialog.run ();
 					e_dialog.destroy ();
 				}
+
+				Log.set_handler ("Mobilect-Payroll",
+				                 LogLevelFlags.LEVEL_CRITICAL |
+				                 LogLevelFlags.LEVEL_WARNING |
+				                 LogLevelFlags.LEVEL_MESSAGE,
+				                 (d, l, m) => {
+													 var text = m;
+													 MessageType type = MessageType.INFO;
+													 if (l == LogLevelFlags.LEVEL_CRITICAL) {
+														 text = _("Critical Error");
+														 type = MessageType.ERROR;
+													 } else if (l == LogLevelFlags.LEVEL_WARNING) {
+														 text = _("Warning");
+														 type = MessageType.WARNING;
+													 }
+
+													 var dialog = new MessageDialog (this.get_window (), DialogFlags.DESTROY_WITH_PARENT,
+													                                 type, ButtonsType.OK,
+													                                 text);
+
+													 if (l != LogLevelFlags.LEVEL_MESSAGE) {
+														 dialog.secondary_text = m;
+													 }
+
+													 dialog.run ();
+													 dialog.destroy ();
+												 });
 			}
 
 			public override void activate () {
@@ -67,10 +94,7 @@ namespace Mobilect {
 					return;
 				}
 
-				if (window == null) {
-					window = new Window (this);
-				}
-
+				var window = new Window (this);
 				window.present ();
 			}
 
@@ -79,13 +103,24 @@ namespace Mobilect {
 			}
 
 			public void show_help (string? name, string? link_id) {
+				var window = this.get_window ();
+
 				try {
-					show_uri ((window as Widget).get_screen (),
+					show_uri (window != null? (window as Widget).get_screen () : null,
 					          help_link_uri (name?? PACKAGE, link_id),
 					          CURRENT_TIME);
 				} catch (Error e) {
-					warning ("Failed to display the help: %s", e.message);
+					if (window != null) {
+						window.show_error_dialog (_("Failed to display the help"), e.message);
+					} else {
+						warning ("Failed to display the help: %s", e.message);
+					}
 				}
+			}
+
+			private Window? get_window () {
+				var windows = this.get_windows ().copy ();
+				return windows != null? windows.data as Window : null;
 			}
 
 		}

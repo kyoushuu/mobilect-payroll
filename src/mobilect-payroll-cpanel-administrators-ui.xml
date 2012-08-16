@@ -33,5 +33,8 @@
       <toolitem name="AdministratorProperties" action="cpanel-administrators-properties" />
       <toolitem name="AdministratorPassword" action="cpanel-administrators-password" />
     </placeholder>
+    <placeholder name="ViewToolbarAdditions">
+      <toolitem name="AdministratorRefresh" action="cpanel-administrators-refresh" />
+    </placeholder>
   </toolbar>
 </ui>

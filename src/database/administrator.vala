@@ -28,7 +28,6 @@ namespace Mobilect {
 
 			public int id { get; set; }
 			public string username { get; set; }
-			public TimeRecordList time_records { get; private set; }
 
 			internal weak Database database { get; private set; }
 			internal weak AdministratorList list { get; set; }
@@ -40,9 +39,6 @@ namespace Mobilect {
 
 				Set stmt_params;
 				Value value_id = this.id;
-
-				time_records = new TimeRecordList ();
-				time_records.database = database;
 
 
 				if (id != 0) {

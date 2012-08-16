@@ -17,7 +17,7 @@
       <separator/>
       <placeholder name="EditSearchMenuAdditions" />
       <separator/>
-      <menuitem name="Preferences" action="edit-preferences" />
+      <placeholder name="EditPreferencesMenuAdditions" />
     </menu>
     <menu name="ViewMenu" action="view">
       <menuitem name="Toolbar" action="view-toolbar" />
@@ -38,7 +38,7 @@
     <separator/>
     <placeholder name="EditSearchToolbarAdditions" />
     <separator/>
-    <placeholder name="FormatToolbarAdditions" />
+    <placeholder name="ViewToolbarAdditions" />
     <separator/>
     <placeholder name="ToolbarAdditions" />
     <separator/>

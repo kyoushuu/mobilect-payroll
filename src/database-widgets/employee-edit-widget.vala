@@ -66,8 +66,7 @@ namespace Mobilect {
 				grid.show ();
 
 
-				var lastname_label = new Label (_("_Last Name:"));
-				lastname_label.use_underline = true;
+				var lastname_label = new Label.with_mnemonic (_("_Last Name:"));
 				lastname_label.xalign = 0.0f;
 				grid.add (lastname_label);
 				lastname_label.show ();
@@ -90,8 +89,7 @@ namespace Mobilect {
 				lastname_entry.show ();
 
 
-				var firstname_label = new Label (_("_First Name:"));
-				firstname_label.use_underline = true;
+				var firstname_label = new Label.with_mnemonic (_("_First Name:"));
 				firstname_label.xalign = 0.0f;
 				grid.add (firstname_label);
 				firstname_label.show ();
@@ -106,8 +104,7 @@ namespace Mobilect {
 				firstname_entry.show ();
 
 
-				var middlename_label = new Label (_("_Middle Name:"));
-				middlename_label.use_underline = true;
+				var middlename_label = new Label.with_mnemonic (_("_Middle Name:"));
 				middlename_label.xalign = 0.0f;
 				grid.add (middlename_label);
 				middlename_label.show ();
@@ -122,8 +119,7 @@ namespace Mobilect {
 				middlename_entry.show ();
 
 
-				var tin_label = new Label (_("_TIN Number:"));
-				tin_label.use_underline = true;
+				var tin_label = new Label.with_mnemonic (_("_TIN Number:"));
 				tin_label.xalign = 0.0f;
 				grid.add (tin_label);
 				tin_label.show ();
@@ -138,8 +134,7 @@ namespace Mobilect {
 				tin_entry.show ();
 
 
-				var rate_label = new Label (_("_Rate:"));
-				rate_label.use_underline = true;
+				var rate_label = new Label.with_mnemonic (_("_Rate:"));
 				rate_label.xalign = 0.0f;
 				grid.add (rate_label);
 				rate_label.show ();

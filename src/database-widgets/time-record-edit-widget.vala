@@ -80,8 +80,7 @@ namespace Mobilect {
 				grid.show ();
 
 
-				var employee_label = new Label (_("_Employee:"));
-				employee_label.use_underline = true;
+				var employee_label = new Label.with_mnemonic (_("_Employee:"));
 				employee_label.xalign = 0.0f;
 				grid.add (employee_label);
 				employee_label.show ();
@@ -100,8 +99,7 @@ namespace Mobilect {
 				                                 "text", EmployeeList.Columns.NAME);
 
 
-				var start_label = new Label (_("_Start:"));
-				start_label.use_underline = true;
+				var start_label = new Label.with_mnemonic (_("_Start:"));
 				start_label.xalign = 0.0f;
 				grid.add (start_label);
 				start_label.show ();
@@ -115,8 +113,7 @@ namespace Mobilect {
 				start_spin.show ();
 
 
-				var end_label = new Label (_("_End:"));
-				end_label.use_underline = true;
+				var end_label = new Label.with_mnemonic (_("_End:"));
 				end_label.xalign = 0.0f;
 				grid.add (end_label);
 				end_label.show ();

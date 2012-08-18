@@ -3,7 +3,7 @@
   <info>
     <link type="guide" xref="index#administrators-section" group="second"/>
 
-    <desc>Change properties of an administrator account</desc>
+    <desc>Change the properties of an administrator account</desc>
 
     <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
     <credit type="author copyright">
@@ -13,7 +13,7 @@
     </credit>
   </info>
 
-  <title>Edit Administrator</title>
+  <title>Edit an Administrator</title>
 
   <p>To edit the properties of an administrator account:</p>
   <steps>

@@ -90,7 +90,8 @@ namespace Mobilect {
 				grid.attach_next_to (employee_combobox,
 				                     employee_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				employee_label.mnemonic_widget = employee_combobox;
 				employee_combobox.show ();
 
 				var employee_cell_renderer = new CellRendererText ();
@@ -99,7 +100,7 @@ namespace Mobilect {
 				                                 "text", EmployeeList.Columns.NAME);
 
 
-				var start_label = new Label.with_mnemonic (_("_Start:"));
+				var start_label = new Label.with_mnemonic (_("S_tart:"));
 				start_label.xalign = 0.0f;
 				grid.add (start_label);
 				start_label.show ();
@@ -109,11 +110,12 @@ namespace Mobilect {
 				grid.attach_next_to (start_spin,
 				                     start_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				start_label.mnemonic_widget = start_spin.date_spin;
 				start_spin.show ();
 
 
-				var end_label = new Label.with_mnemonic (_("_End:"));
+				var end_label = new Label.with_mnemonic (_("E_nd:"));
 				end_label.xalign = 0.0f;
 				grid.add (end_label);
 				end_label.show ();
@@ -123,7 +125,8 @@ namespace Mobilect {
 				grid.attach_next_to (end_spin,
 				                     end_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				end_label.mnemonic_widget = end_spin.date_spin;
 				end_spin.show ();
 
 
@@ -135,7 +138,7 @@ namespace Mobilect {
 				grid.attach_next_to (open_end_check,
 				                     end_label,
 				                     PositionType.BOTTOM,
-				                     3, 1);
+				                     2, 1);
 				open_end_check.show ();
 
 

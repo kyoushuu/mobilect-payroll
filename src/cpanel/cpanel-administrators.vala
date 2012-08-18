@@ -68,6 +68,7 @@ namespace Mobilect {
 				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
+				tree_view.search_column = (int) AdministratorList.Columns.USERNAME;
 				tree_view.row_activated.connect ((t, p, c) => {
 					properties_action ();
 				});
@@ -161,7 +162,10 @@ namespace Mobilect {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
 							dialog.response.connect ((d, r) => {
-								d.destroy ();
+								if (r == ResponseType.ACCEPT ||
+								    r == ResponseType.REJECT) {
+									d.destroy ();
+								}
 							});
 							dialog.show ();
 						}
@@ -213,8 +217,10 @@ namespace Mobilect {
 				var dialog = new AdministratorEditDialog (_("Add Administrator"),
 				                                          this.cpanel.window,
 				                                          administrator);
+				dialog.help_link_id = "administrators-add";
+				dialog.action = Stock.ADD;
 
-				var password_label = new Label (_("_Password:"));
+				var password_label = new Label.with_mnemonic (_("_Password:"));
 				password_label.xalign = 0.0f;
 				dialog.widget.grid.add (password_label);
 				password_label.show ();
@@ -226,18 +232,19 @@ namespace Mobilect {
 				dialog.widget.grid.attach_next_to (password_entry,
 				                                   password_label,
 				                                   PositionType.RIGHT,
-				                                   2, 1);
+				                                   1, 1);
+				password_label.mnemonic_widget = password_entry;
 				password_entry.show ();
 
 				dialog.response.connect ((d, r) => {
-					d.hide ();
-
 					if (r == ResponseType.ACCEPT) {
+						dialog.hide ();
 						database.add_administrator (administrator.username,
 						                            password_entry.text);
+						dialog.destroy ();
+					} else if (r == ResponseType.REJECT) {
+						dialog.destroy ();
 					}
-
-					d.destroy ();
 				});
 				dialog.show ();
 			}
@@ -291,14 +298,16 @@ namespace Mobilect {
 					var dialog = new AdministratorEditDialog (_("Administrator Properties"),
 					                                          this.cpanel.window,
 					                                          administrator);
+					dialog.help_link_id = "administrators-edit";
+					dialog.action = Stock.SAVE;
 					dialog.response.connect ((d, r) => {
-						d.hide ();
-
 						if (r == ResponseType.ACCEPT) {
+							dialog.hide ();
 							dialog.administrator.update ();
+							dialog.destroy ();
+						} else if (r == ResponseType.REJECT) {
+							dialog.destroy ();
 						}
-
-						d.destroy ();
 					});
 					dialog.show ();
 				}
@@ -314,15 +323,16 @@ namespace Mobilect {
 
 					var dialog = new PasswordDialog (_("Change Password"),
 					                                 this.cpanel.window);
+					dialog.help_link_id = "administrators-change-password";
 
 					dialog.response.connect ((d, r) => {
-						d.hide ();
-
 						if (r == ResponseType.ACCEPT) {
+							dialog.hide ();
 							administrator.change_password (dialog.widget.get_password ());
+							dialog.destroy ();
+						} else if (r == ResponseType.REJECT) {
+							dialog.destroy ();
 						}
-
-						d.destroy ();
 					});
 					dialog.show ();
 				}

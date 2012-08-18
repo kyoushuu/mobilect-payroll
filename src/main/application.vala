@@ -99,7 +99,7 @@ namespace Mobilect {
 			}
 
 			internal string help_link_uri (string name, string? link_id) {
-				return link_id != null? "help:%s/%s".printf (name, link_id) : "help:%s".printf (name);
+				return "help:%s/%s".printf (name, link_id?? "index");
 			}
 
 			public void show_help (string? name, string? link_id) {

@@ -52,6 +52,7 @@ namespace Mobilect {
 				                     username_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				username_label.mnemonic_widget = username_entry;
 				username_entry.show ();
 
 				var password_label = new Label.with_mnemonic (_("_Password:"));
@@ -67,6 +68,7 @@ namespace Mobilect {
 				                     password_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
+				password_label.mnemonic_widget = password_entry;
 				password_entry.show ();
 
 				button_login = new Button.with_mnemonic (_("Log _In"));

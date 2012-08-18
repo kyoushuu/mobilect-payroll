@@ -59,7 +59,7 @@ namespace Mobilect {
 				grid.attach_next_to (password_entry,
 				                     password_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
 				password_entry.show ();
 
 
@@ -77,7 +77,7 @@ namespace Mobilect {
 				grid.attach_next_to (verify_entry,
 				                     verify_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
 				verify_entry.show ();
 
 

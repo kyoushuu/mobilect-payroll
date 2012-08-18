@@ -40,8 +40,10 @@ namespace Mobilect {
 			}
 
 
-			public AdministratorList () {
+			public AdministratorList (Database database) {
 				stamp = (int) Random.next_int ();
+
+				this.database = database;
 			}
 
 			public new void add (Administrator administrator) {

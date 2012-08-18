@@ -92,6 +92,7 @@ namespace Mobilect {
 				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
+				tree_view.search_column = (int) EmployeeList.Columns.NAME;
 				tree_view.row_activated.connect ((t, p, c) => {
 					properties_action ();
 				});
@@ -232,7 +233,10 @@ namespace Mobilect {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
 							dialog.response.connect ((d, r) => {
-								d.destroy ();
+								if (r == ResponseType.ACCEPT ||
+								    r == ResponseType.REJECT) {
+									d.destroy ();
+								}
 							});
 							dialog.show ();
 						}
@@ -284,6 +288,8 @@ namespace Mobilect {
 				var dialog = new EmployeeEditDialog (_("Add Employee"),
 				                                     this.cpanel.window,
 				                                     employee);
+				dialog.help_link_id = "employees-add";
+				dialog.action = Stock.ADD;
 
 				var password_label = new Label.with_mnemonic (_("_Password:"));
 				password_label.xalign = 0.0f;
@@ -297,22 +303,23 @@ namespace Mobilect {
 				dialog.widget.grid.attach_next_to (password_entry,
 				                                   password_label,
 				                                   PositionType.RIGHT,
-				                                   2, 1);
+				                                   1, 1);
+				password_label.mnemonic_widget = password_entry;
 				password_entry.show ();
 
 				dialog.response.connect ((d, r) => {
-					d.hide ();
-
 					if (r == ResponseType.ACCEPT) {
+						dialog.hide ();
 						database.add_employee (employee.lastname,
 						                       employee.firstname,
 						                       employee.middlename,
 						                       employee.tin,
 						                       password_entry.text,
 						                       employee.rate);
+						dialog.destroy ();
+					} else if (r == ResponseType.REJECT) {
+						dialog.destroy ();
 					}
-
-					d.destroy ();
 				});
 				dialog.show ();
 			}
@@ -357,14 +364,16 @@ namespace Mobilect {
 					var dialog = new EmployeeEditDialog (_("Employee Properties"),
 					                                     this.cpanel.window,
 					                                     employee);
+					dialog.help_link_id = "employees-edit";
+					dialog.action = Stock.SAVE;
 					dialog.response.connect ((d, r) => {
-						d.hide ();
-
 						if (r == ResponseType.ACCEPT) {
+							dialog.hide ();
 							dialog.employee.update ();
+							dialog.destroy ();
+						} else if (r == ResponseType.REJECT) {
+							dialog.destroy ();
 						}
-
-						d.destroy ();
 					});
 					dialog.show ();
 				}
@@ -379,15 +388,16 @@ namespace Mobilect {
 					employee = e;
 					var dialog = new PasswordDialog (_("Change Password"),
 					                                 this.cpanel.window);
+					dialog.help_link_id = "employees-change-password";
 
 					dialog.response.connect ((d, r) => {
-						d.hide ();
-
 						if (r == ResponseType.ACCEPT) {
+							dialog.hide ();
 							employee.change_password (dialog.widget.get_password ());
+							dialog.destroy ();
+						} else if (r == ResponseType.REJECT) {
+							dialog.destroy ();
 						}
-
-						d.destroy ();
 					});
 					dialog.show ();
 				}

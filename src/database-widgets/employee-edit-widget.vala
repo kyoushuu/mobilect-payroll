@@ -85,7 +85,8 @@ namespace Mobilect {
 				grid.attach_next_to (lastname_entry,
 				                     lastname_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				lastname_label.mnemonic_widget = lastname_entry;
 				lastname_entry.show ();
 
 
@@ -100,7 +101,8 @@ namespace Mobilect {
 				grid.attach_next_to (firstname_entry,
 				                     firstname_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				firstname_label.mnemonic_widget = firstname_entry;
 				firstname_entry.show ();
 
 
@@ -115,7 +117,8 @@ namespace Mobilect {
 				grid.attach_next_to (middlename_entry,
 				                     middlename_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				middlename_label.mnemonic_widget = middlename_entry;
 				middlename_entry.show ();
 
 
@@ -130,7 +133,8 @@ namespace Mobilect {
 				grid.attach_next_to (tin_entry,
 				                     tin_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				tin_label.mnemonic_widget = tin_entry;
 				tin_entry.show ();
 
 
@@ -147,7 +151,8 @@ namespace Mobilect {
 				grid.attach_next_to (rate_spin,
 				                     rate_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				rate_label.mnemonic_widget = rate_spin;
 				rate_spin.show ();
 
 

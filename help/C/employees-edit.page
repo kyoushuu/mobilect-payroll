@@ -3,7 +3,7 @@
   <info>
     <link type="guide" xref="index#employees-section" group="second"/>
 
-    <desc>Change properties of an employee</desc>
+    <desc>Change the properties of an employee</desc>
 
     <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
     <credit type="author copyright">

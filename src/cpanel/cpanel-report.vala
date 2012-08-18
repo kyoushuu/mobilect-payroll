@@ -113,7 +113,7 @@ namespace Mobilect {
 				                     1, 1);
 				overtime_radio.show ();
 
-				var period_label = new Label (_("Period:"));
+				var period_label = new Label.with_mnemonic (_("_Period:"));
 				period_label.xalign = 0.0f;
 				grid.add (period_label);
 				period_label.show ();
@@ -123,6 +123,7 @@ namespace Mobilect {
 				                     period_label,
 				                     PositionType.RIGHT,
 				                     1, 1);
+				period_label.mnemonic_widget = start_spin;
 				start_spin.show ();
 
 				end_spin = new DateSpinButton ();

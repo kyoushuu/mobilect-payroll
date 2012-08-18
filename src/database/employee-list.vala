@@ -48,8 +48,10 @@ namespace Mobilect {
 			}
 
 
-			public EmployeeList () {
+			public EmployeeList (Database database) {
 				stamp = (int) Random.next_int ();
+
+				this.database = database;
 			}
 
 			public new void add (Employee employee) {

@@ -118,10 +118,10 @@ namespace Mobilect {
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				}
 
-				employee_list = new EmployeeList ();
+				employee_list = new EmployeeList (this);
 				update_employees ();
 
-				administrator_list = new AdministratorList ();
+				administrator_list = new AdministratorList (this);
 				update_administrators ();
 			}
 
@@ -215,7 +215,7 @@ namespace Mobilect {
 			}
 
 			public TimeRecordList get_time_records_within_date (Date start, Date end) {
-				var list = new TimeRecordList ();
+				var list = new TimeRecordList (this);
 
 				if (start.compare (end) > 0) {
 					end = start;
@@ -288,7 +288,7 @@ namespace Mobilect {
 						list.add (time_record);
 					}
 				} catch (Error e) {
-					list = new TimeRecordList ();
+					list = new TimeRecordList (this);
 					critical ("Failed to get time records fro database: %s", e.message);
 				}
 

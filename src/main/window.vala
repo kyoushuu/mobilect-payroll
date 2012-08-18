@@ -41,10 +41,11 @@ namespace Mobilect {
 
 			public Window (Application app) {
 				this.title = _("Mobilect Payroll");
-				this.default_width = 600;
-				this.default_height = 400;
 				this.application = app;
 				this.app = app;
+				this.default_width = 600;
+				this.default_height = 400;
+				this.icon_name = PACKAGE;
 
 
 				push_composite_child ();
@@ -116,7 +117,7 @@ namespace Mobilect {
 							                   "title", _("About Mobilect Payroll"),
 							                   "comments", _("Payroll application of Mobilect Power Corp."),
 							                   "website", PACKAGE_URL,
-							                   "copyright", _("Copyright (c) 2012  Mobilect Power Corp."),
+							                   "copyright", _("Copyright © 2012 Mobilect Power Corp."),
 							                   "license-type", License.GPL_3_0,
 							                   "license", license,
 							                   "wrap-license", true,

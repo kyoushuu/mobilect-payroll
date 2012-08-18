@@ -77,7 +77,8 @@ namespace Mobilect {
 				grid.attach_next_to (username_entry,
 				                     username_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				username_label.mnemonic_widget = username_entry;
 				username_entry.show ();
 
 

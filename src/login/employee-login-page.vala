@@ -49,13 +49,13 @@ namespace Mobilect {
 				grid.add (name_label);
 				name_label.show ();
 
-				name_combobox = new ComboBox ();
+				name_combobox = new ComboBox.with_model (this.list);
 				name_combobox.hexpand = true;
-				name_combobox.model = this.list;
 				grid.attach_next_to (name_combobox,
 				                     name_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				name_label.mnemonic_widget = name_combobox;
 				name_combobox.show ();
 
 				TreeIter iter;
@@ -80,7 +80,8 @@ namespace Mobilect {
 				grid.attach_next_to (password_entry,
 				                     password_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				password_label.mnemonic_widget = password_entry;
 				password_entry.show ();
 
 				button_login = new Button.with_mnemonic (_("Log _In"));

@@ -1,0 +1,25 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="control-panel-change-preferences">
+
+  <info>
+    <link type="guide" xref="index#control-panel-section" group="second"/>
+
+    <desc>Configure settings and preferences</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-18" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Change Preferences</title>
+
+  <p>To change preferences:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Preferences</gui></guiseq>.</p></item>
+    <item><p>Configure the settings as desired, then click <gui style="button">Close</gui>.</p></item>
+  </steps>
+
+</page>

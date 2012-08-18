@@ -30,20 +30,12 @@ namespace Mobilect {
 
 
 			public FindDialog (string title, Window parent) {
-				Object (title: title,
-				        transient_for: parent);
+				base (title, parent);
 
-				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,
-				                  Stock.FIND, ResponseType.ACCEPT);
-				this.set_default_response (ResponseType.ACCEPT);
-
+				this.action = Stock.FIND;
+				this.help_link_id = "time-records-search";
 
 				var content_area = this.get_content_area ();
-				var action_area = this.get_action_area ();
-
-				this.border_width = 5;
-				content_area.spacing = 2; /* 2 * 5 + 2 = 12 */
-				(action_area as Container).border_width = 5;
 
 
 				push_composite_child ();

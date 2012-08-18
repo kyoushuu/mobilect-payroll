@@ -77,7 +77,7 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, MonthInfo.Columns.DAY, out value);
-					(r as CellRendererText).text = value.get_int ().to_string ();
+					(r as CellRendererText).text = ((int) value).to_string ();
 				});
 				tree_view.append_column (column);
 
@@ -145,17 +145,16 @@ namespace Mobilect {
 				column.set_cell_data_func (renderer_combo, (c, r, m, i) => {
 					Value value;
 					TreeIter iter;
-					string text;
 
 					m.get_value (i, MonthInfo.Columns.HOLIDAY_TYPE, out value);
 					holiday_type_model.iter_nth_child (out iter, null, (MonthInfo.HolidayType) value);
-					holiday_type_model.get (iter, 0, out text);
-					(r as CellRendererText).text = text;
+					holiday_type_model.get_value (iter, 0, out value);
+					(r as CellRendererText).text = (string) value;
 				});
 				tree_view.append_column (column);
 
 
-				var date_label = new Label (_("Date:"));
+				var date_label = new Label.with_mnemonic (_("_Date:"));
 				hbox.add (date_label);
 				date_label.show ();
 
@@ -169,6 +168,7 @@ namespace Mobilect {
 					update ();
 				});
 				hbox.add (year_spin);
+				date_label.mnemonic_widget = year_spin;
 				year_spin.show ();
 
 				month_combo = new ComboBoxText ();
@@ -204,8 +204,11 @@ namespace Mobilect {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
 							dialog.response.connect ((d, r) => {
-																										 d.destroy ();
-																									 });
+								if (r == ResponseType.ACCEPT ||
+										r == ResponseType.REJECT) {
+									d.destroy ();
+								}
+							});
 							dialog.show ();
 						}
 					},
@@ -250,6 +253,7 @@ namespace Mobilect {
 					return (MonthInfo.HolidayType) day1 - (MonthInfo.HolidayType) day2;
 				});
 				tree_view.model = sort;
+				tree_view.search_column = (int) MonthInfo.Columns.DAY;
 			}
 
 		}

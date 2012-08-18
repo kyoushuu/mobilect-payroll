@@ -70,7 +70,9 @@ namespace Mobilect {
 						callback = (a) => {
 							var dialog = new PreferencesDialog (this.window);
 							dialog.response.connect ((d, r) => {
-								d.destroy ();
+								if (r == ResponseType.ACCEPT) {
+									d.destroy ();
+								}
 							});
 							dialog.show ();
 						}

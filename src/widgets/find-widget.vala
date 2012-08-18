@@ -55,7 +55,8 @@ namespace Mobilect {
 				grid.attach_next_to (start_spin,
 				                     start_date_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				start_date_label.mnemonic_widget = start_spin;
 				start_spin.show ();
 
 
@@ -69,7 +70,8 @@ namespace Mobilect {
 				grid.attach_next_to (end_spin,
 				                     end_date_label,
 				                     PositionType.RIGHT,
-				                     2, 1);
+				                     1, 1);
+				end_date_label.mnemonic_widget = end_spin;
 				end_spin.show ();
 
 

@@ -32,20 +32,12 @@ namespace Mobilect {
 
 
 			public SortTreeViewDialog (Window parent, TreeView tree_view) {
-				Object (title: _("Sort By..."),
-				        transient_for: parent);
+				base (_("Sort By"), parent);
 
-				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,
-				                  Stock.OK, ResponseType.ACCEPT);
-				this.set_default_response (ResponseType.ACCEPT);
-
+				this.action = _("_Sort");
+				this.help_link_id = "control-panel-sort-view";
 
 				var content_area = this.get_content_area ();
-				var action_area = this.get_action_area ();
-
-				this.border_width = 5;
-				content_area.spacing = 2; /* 2 * 5 + 2 = 12 */
-				(action_area as Container).border_width = 5;
 
 
 				push_composite_child ();
@@ -60,12 +52,13 @@ namespace Mobilect {
 				content_area.add (grid);
 				grid.show ();
 
-				var column_label = new Label.with_mnemonic (_("_Column:"));
+				var column_label = new Label.with_mnemonic (_("Co_lumn:"));
 				column_label.xalign = 0.0f;
 				grid.add (column_label);
 				column_label.show ();
 
 				column_combo = new ComboBoxText ();
+				column_combo.hexpand = true;
 				if (tree_view.get_n_columns () > 0) {
 					foreach (var column in tree_view.get_columns ()) {
 						column_combo.append_text (column.title);
@@ -76,7 +69,7 @@ namespace Mobilect {
 				                     column_label,
 				                     PositionType.RIGHT,
 				                     1, 1);
-				column_combo.hexpand = true;
+				column_label.mnemonic_widget = column_combo;
 				column_combo.show ();
 
 				ascending_check = new CheckButton.with_mnemonic (_("_Ascending"));

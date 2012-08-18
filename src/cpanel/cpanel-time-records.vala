@@ -59,6 +59,11 @@ namespace Mobilect {
 				tree_view.row_activated.connect ((t, p, c) => {
 					properties_action ();
 				});
+				tree_view.set_search_equal_func ((m, c, k, i) => {
+					Value value;
+					m.get_value (i, c, out value);
+					return (value as Employee).get_name ().has_prefix (k) == false;
+				});
 				tree_view.button_press_event.connect ((w, e) => {
 					/* Is not right-click? */
 					if (e.button != 3) {
@@ -197,11 +202,11 @@ namespace Mobilect {
 							dialog.response.connect ((d, r) => {
 								if (r == ResponseType.ACCEPT) {
 									d.hide ();
-
 									update (dialog.get_start_date (), dialog.get_end_date ());
+									d.destroy ();
+								} else if (r == ResponseType.REJECT) {
+									d.destroy ();
 								}
-
-								d.destroy ();
 							});
 							dialog.show ();
 						}
@@ -214,7 +219,10 @@ namespace Mobilect {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
 							dialog.response.connect ((d, r) => {
-								d.destroy ();
+								if (r == ResponseType.ACCEPT ||
+								    r == ResponseType.REJECT) {
+									d.destroy ();
+								}
 							});
 							dialog.show ();
 						}
@@ -278,10 +286,12 @@ namespace Mobilect {
 				var dialog = new TimeRecordEditDialog (_("Add Time Record"),
 				                                       this.cpanel.window,
 				                                       time_record);
+				dialog.help_link_id = "time-records-add";
+				dialog.action = Stock.ADD;
 				dialog.response.connect ((d, r) => {
-					d.hide ();
-
 					if (r == ResponseType.ACCEPT) {
+						dialog.hide ();
+
 						if (time_record.employee == null) {
 							this.cpanel.window.show_error_dialog (_("No employee selected"),
 							                                      _("Select at least one employee first."));
@@ -289,12 +299,10 @@ namespace Mobilect {
 							return;
 						}
 
-						database.add_time_record (time_record.employee_id,
-						                          time_record.start,
-						                          time_record.end);
+						dialog.destroy ();
+					} else if (r == ResponseType.REJECT) {
+						dialog.destroy ();
 					}
-
-					d.destroy ();
 				});
 				dialog.show ();
 			}
@@ -339,14 +347,16 @@ namespace Mobilect {
 					var dialog = new TimeRecordEditDialog (_("Time Record Properties"),
 					                                       this.cpanel.window,
 					                                       time_record);
+					dialog.help_link_id = "time-records-edit";
+					dialog.action = Stock.SAVE;
 					dialog.response.connect ((d, r) => {
-						d.hide ();
-
 						if (r == ResponseType.ACCEPT) {
+							dialog.hide ();
 							dialog.time_record.update ();
+							dialog.destroy ();
+						} else if (r == ResponseType.REJECT) {
+							dialog.destroy ();
 						}
-
-						d.destroy ();
 					});
 
 					dialog.show ();
@@ -396,6 +406,7 @@ namespace Mobilect {
 					}
 				});
 				this.tree_view.model = sort;
+				tree_view.search_column = (int) TimeRecordList.Columns.EMPLOYEE;
 			}
 
 		}

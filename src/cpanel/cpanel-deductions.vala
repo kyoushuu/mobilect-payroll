@@ -59,6 +59,11 @@ namespace Mobilect {
 
 				tree_view = new TreeView ();
 				tree_view.expand = true;
+				tree_view.set_search_equal_func ((m, c, k, i) => {
+					Value value;
+					m.get_value (i, c, out value);
+					return (value as Employee).get_name ().has_prefix (k) == false;
+				});
 				sw.add (tree_view);
 				tree_view.show ();
 
@@ -230,7 +235,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 
-				var period_label = new Label (_("Period:"));
+				var period_label = new Label.with_mnemonic (_("_Period:"));
 				hbox.add (period_label);
 				period_label.show ();
 
@@ -240,6 +245,7 @@ namespace Mobilect {
 					update ();
 				});
 				hbox.add (period_spin);
+				period_label.mnemonic_widget = period_spin;
 				period_spin.show ();
 
 
@@ -255,7 +261,10 @@ namespace Mobilect {
 							var dialog = new SortTreeViewDialog (this.cpanel.window,
 							                                     tree_view);
 							dialog.response.connect ((d, r) => {
-								d.destroy ();
+								if (r == ResponseType.ACCEPT ||
+								    r == ResponseType.REJECT) {
+									d.destroy ();
+								}
 							});
 							dialog.show ();
 						}
@@ -358,6 +367,7 @@ namespace Mobilect {
 				});
 
 				tree_view.model = sort;
+				tree_view.search_column = (int) Deductions.Columns.EMPLOYEE;
 			}
 
 		}

@@ -42,6 +42,7 @@ mobilect_payroll_SOURCES = \
 	database-widgets/employee-edit-dialog.vala \
 	database-widgets/time-record-edit-widget.vala \
 	database-widgets/time-record-edit-dialog.vala \
+	widgets/dialog.vala \
 	widgets/find-widget.vala \
 	widgets/find-dialog.vala \
 	widgets/password-widget.vala \

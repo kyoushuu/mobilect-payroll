@@ -11,6 +11,8 @@ HELP_FILES = \
 	quickstart.page \
 	control-panel-login.page \
 	control-panel-logout.page \
+	control-panel-change-preferences.page \
+	control-panel-sort-view.page \
 	employees-add.page \
 	employees-remove.page \
 	employees-edit.page \

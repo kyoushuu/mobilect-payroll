@@ -30,19 +30,13 @@ namespace Mobilect {
 
 
 			public PreferencesDialog (Window parent) {
-				Object (title: _("Mobilect Payroll Preferences"),
-				        transient_for: parent);
+				base (_("Mobilect Payroll Preferences"), parent);
 
-				this.add_buttons (Stock.CLOSE, ResponseType.CLOSE);
-				this.set_default_response (ResponseType.ACCEPT);
-
+				this.action = Stock.CLOSE;
+				this.help_link_id = "control-panel-change-preferences";
+				this.reject_button.hide ();
 
 				var content_area = this.get_content_area ();
-				var action_area = this.get_action_area ();
-
-				this.border_width = 5;
-				content_area.spacing = 2; /* 2 * 5 + 2 = 12 */
-				(action_area as Container).border_width = 5;
 
 
 				report_settings = parent.app.settings.report;
@@ -82,10 +76,11 @@ namespace Mobilect {
 				                        title_label,
 				                        PositionType.RIGHT,
 				                        2, 1);
+				title_label.mnemonic_widget = title_font_button;
 				title_font_button.show ();
 
 
-				var company_name_label = new Label.with_mnemonic (_("_Company Name:"));
+				var company_name_label = new Label.with_mnemonic (_("Co_mpany Name:"));
 				company_name_label.xalign = 0.0f;
 				fonts_grid.add (company_name_label);
 				company_name_label.show ();
@@ -100,6 +95,7 @@ namespace Mobilect {
 				                        company_name_label,
 				                        PositionType.RIGHT,
 				                        2, 1);
+				company_name_label.mnemonic_widget = company_name_font_button;
 				company_name_font_button.show ();
 
 
@@ -118,10 +114,11 @@ namespace Mobilect {
 				                        header_label,
 				                        PositionType.RIGHT,
 				                        2, 1);
+				header_label.mnemonic_widget = header_font_button;
 				header_font_button.show ();
 
 
-				var text_label = new Label.with_mnemonic (_("_Text:"));
+				var text_label = new Label.with_mnemonic (_("Te_xt:"));
 				text_label.xalign = 0.0f;
 				fonts_grid.add (text_label);
 				text_label.show ();
@@ -136,6 +133,7 @@ namespace Mobilect {
 				                        text_label,
 				                        PositionType.RIGHT,
 				                        2, 1);
+				text_label.mnemonic_widget = text_font_button;
 				text_font_button.show ();
 
 
@@ -154,6 +152,7 @@ namespace Mobilect {
 				                        number_label,
 				                        PositionType.RIGHT,
 				                        2, 1);
+				number_label.mnemonic_widget = number_font_button;
 				number_font_button.show ();
 
 
@@ -172,6 +171,7 @@ namespace Mobilect {
 				                        emp_number_label,
 				                        PositionType.RIGHT,
 				                        2, 1);
+				emp_number_label.mnemonic_widget = emp_number_font_button;
 				emp_number_font_button.show ();
 
 

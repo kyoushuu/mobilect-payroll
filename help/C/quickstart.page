@@ -18,6 +18,7 @@
   <p>Time records of employees are recorded into a database.  Payroll and payslips are then generated based on these records.</p>
 
   <figure>
+    <title><app>Mobilect Payroll</app> in action</title>
     <media type="image" mime="image/png" src="figures/mobilect-payroll-screenshot.png"/>
     <desc>The <app>Mobilect Payroll</app> window showing the <gui stye="tab">Employees</gui> Control Panel tab.</desc>
   </figure>

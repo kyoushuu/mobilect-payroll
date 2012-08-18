@@ -1,6 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CPPFLAGS = \
+	-DPREFIX=\""$(prefix)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
@@ -71,6 +72,7 @@ mobilect_payroll_SOURCES = \
 	filter/pay-period.vala \
 	filter/time-period.vala \
 	config.vapi \
+  mobilect-payroll-os-compat.c \
   mobilect-payroll-resources.c
 
 mobilect_payroll_VALAFLAGS = \
@@ -98,7 +100,7 @@ mobilect_payroll_LDADD = \
 
 
 if NATIVE_WIN32
-mobilect_payroll_LDFLAGS = -mwindows
+mobilect_payroll_LDFLAGS = -mwindows -lshlwapi
 mobilect_payroll_LDADD += mobilect-payroll-win32-res.o
 endif
 
@@ -123,6 +125,7 @@ mobilect-payroll-resources.c: mobilect-payroll.gresource.xml $(ui_files)
 
 
 EXTRA_DIST = \
+  mobilect-payroll-os-compat.h \
 	mobilect-payroll.rc.in \
 	mobilect-payroll.gresource.xml \
 	$(ui_files)

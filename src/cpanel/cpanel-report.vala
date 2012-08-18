@@ -230,6 +230,7 @@ namespace Mobilect {
 								                                    FileChooserAction.SAVE,
 								                                    Stock.CANCEL, ResponseType.REJECT,
 								                                    Stock.SAVE, ResponseType.ACCEPT);
+								dialog.set_alternative_button_order (ResponseType.ACCEPT, ResponseType.REJECT);
 								dialog.do_overwrite_confirmation = true;
 
 								string current_name;

@@ -19,23 +19,23 @@
 
   <p>Other help topics are grouped together into sections below.</p>
 
-  <section id="control-panel-section" style="2column" groups="first second">
+  <section id="control-panel-section" style="2column" groups="login logout others">
     <title>Using the Control Panel</title>
   </section>
 
-  <section id="employees-section" style="2column" groups="first second">
+  <section id="employees-section" style="2column" groups="add remove edit change-password others">
     <title>Managing Employees</title>
   </section>
 
-  <section id="time-records-section" style="2column" groups="first second">
+  <section id="time-records-section" style="2column" groups="add remove edit others">
     <title>Managing Time Records</title>
   </section>
 
-  <section id="administrators-section" style="2column" groups="first second">
+  <section id="administrators-section" style="2column" groups="add remove edit change-password others">
     <title>Managing Administrators</title>
   </section>
 
-  <section id="reports-section" style="2column" groups="first second">
+  <section id="reports-section" style="2column" groups="regular overtime others">
     <title>Creating Reports</title>
   </section>
 

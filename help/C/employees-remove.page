@@ -1,7 +1,7 @@
 <page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="employees-remove">
 
   <info>
-    <link type="guide" xref="index#employees-section" group="first"/>
+    <link type="guide" xref="index#employees-section" group="remove"/>
 
     <desc>Remove an employee to the database</desc>
 

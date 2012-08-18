@@ -71,17 +71,23 @@ namespace Mobilect {
 				password_label.mnemonic_widget = password_entry;
 				password_entry.show ();
 
+				button_cancel = new Button.from_stock (Stock.CANCEL);
+				button_box.add (button_cancel);
+				button_cancel.show ();
+
 				button_login = new Button.with_mnemonic (_("Log _In"));
 				button_login.can_default = true;
 				button_box.add (button_login);
 				button_login.show ();
 
-				button_cancel = new Button.from_stock (Stock.CANCEL);
-				button_box.add (button_cancel);
-				button_cancel.show ();
-
 
 				pop_composite_child ();
+
+
+				if (alternative_dialog_button_order (window.screen)) {
+					button_box.reorder_child (button_login, 0);
+					button_box.reorder_child (button_cancel, 1);
+				}
 
 
 				button_login.clicked.connect ((t) => {

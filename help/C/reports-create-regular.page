@@ -1,7 +1,7 @@
 <page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="reports-create-regular">
 
   <info>
-    <link type="guide" xref="index#reports-section" group="first"/>
+    <link type="guide" xref="index#reports-section" group="regular"/>
 
     <desc>Create payroll and payslips for regular salary</desc>
 

@@ -279,6 +279,7 @@ namespace Mobilect {
 				                                  selected_count);
 				dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
 				                    Stock.DELETE, ResponseType.ACCEPT);
+				dialog.set_alternative_button_order (ResponseType.ACCEPT, ResponseType.REJECT);
 
 				if (dialog.run () == ResponseType.ACCEPT) {
 					dialog.hide ();

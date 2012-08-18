@@ -94,17 +94,23 @@ namespace Mobilect {
 				window.present ();
 			}
 
-			internal string help_link_uri (string name, string? link_id) {
-				return "help:%s/%s".printf (name, link_id?? "index");
-			}
-
 			public void show_help (string? name, string? link_id) {
 				var window = this.get_window ();
 
 				try {
-					show_uri (window != null? (window as Widget).get_screen () : null,
-					          help_link_uri (name?? PACKAGE, link_id),
-					          CURRENT_TIME);
+					var page = "%s/share/help/C/%s/%s.html"
+						.printf (get_prefix (), name?? PACKAGE, link_id?? "index");
+
+					if (AppInfo.get_default_for_uri_scheme ("help") == null &&
+					    FileUtils.test (page, FileTest.IS_REGULAR)) {
+						if (!show_file (window, page)) {
+							warning ("Failed to display the help");
+						}
+					} else {
+						show_uri (window != null? (window as Widget).get_screen () : null,
+						          "help:%s/%s".printf (name?? PACKAGE, link_id?? "index"),
+						          CURRENT_TIME);
+					}
 				} catch (Error e) {
 					if (window != null) {
 						window.show_error_dialog (_("Failed to display the help"), e.message);

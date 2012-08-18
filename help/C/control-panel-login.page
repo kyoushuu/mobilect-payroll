@@ -1,7 +1,7 @@
 <page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="control-panel-login">
 
   <info>
-    <link type="guide" xref="index#control-panel-section" group="first"/>
+    <link type="guide" xref="index#control-panel-section" group="login"/>
     <link type="seealso" xref="control-panel-logout"/>
 
     <desc>Log in to the Control Panel to manage the database</desc>

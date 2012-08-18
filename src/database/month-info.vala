@@ -110,7 +110,7 @@ namespace Mobilect {
 					} catch (Error e) {
 						/* Set as non-holiday on error */
 						is_holiday[i] = HolidayType.NON_HOLIDAY;
-						critical ("Failed to get day types from database: %s", e.message);
+						warning ("Failed to get day types from database: %s", e.message);
 					}
 				}
 			}
@@ -168,7 +168,7 @@ namespace Mobilect {
 						database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 					}
 				} catch (Error e) {
-					critical ("Failed to set day type in database: %s", e.message);
+					warning ("Failed to set day type in database: %s", e.message);
 				}
 			}
 

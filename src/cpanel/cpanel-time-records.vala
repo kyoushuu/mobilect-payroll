@@ -196,7 +196,7 @@ namespace Mobilect {
 							}
 
 
-							var dialog = new FindDialog (_("Find"), this.cpanel.window);
+							var dialog = new FindDialog (this.cpanel.window);
 							dialog.set_start_dmy ((15 * period) + 1, date.get_month (), date.get_year ());
 							dialog.set_end_dmy (last_day, date.get_month (), date.get_year ());
 							dialog.response.connect ((d, r) => {

@@ -54,7 +54,7 @@ namespace Mobilect {
 						var cell_data_username = data_model.get_value_at (0, 0);
 						this.username = database.dh_string.get_str_from_value (cell_data_username);
 					} catch (Error e) {
-						critical ("Failed to get administrator data from database: %s", e.message);
+						warning ("Failed to get administrator data from database: %s", e.message);
 					}
 				}
 			}
@@ -72,7 +72,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("username").set_value_str (database.dh_string, this.username);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to update administrator in database: %s", e.message);
+					warning ("Failed to update administrator in database: %s", e.message);
 				}
 			}
 
@@ -90,7 +90,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to remove administrator from database: %s", e.message);
+					warning ("Failed to remove administrator from database: %s", e.message);
 				}
 			}
 
@@ -109,7 +109,7 @@ namespace Mobilect {
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
 				} catch (Error e) {
-					critical ("Failed to get administrator password from database: %s", e.message);
+					warning ("Failed to get administrator password from database: %s", e.message);
 					return null;
 				}
 			}
@@ -128,7 +128,7 @@ namespace Mobilect {
 					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to update administrator password in database: %s", e.message);
+					warning ("Failed to update administrator password in database: %s", e.message);
 				}
 			}
 

@@ -26,11 +26,14 @@ namespace Mobilect {
 
 		public class FindDialog : Dialog {
 
-			public FindWidget widget { get; private set; }
+			public Grid grid { get; private set; }
+
+			public DateSpinButton start_spin { get; private set; }
+			public DateSpinButton end_spin { get; private set; }
 
 
-			public FindDialog (string title, Window parent) {
-				base (title, parent);
+			public FindDialog (Window parent) {
+				base (_("Find"), parent);
 
 				this.action = Stock.FIND;
 				this.help_link_id = "time-records-search";
@@ -40,37 +43,74 @@ namespace Mobilect {
 
 				push_composite_child ();
 
-				widget = new FindWidget ();
-				widget.border_width = 5;
-				widget.start_spin.changed.connect (changed);
-				widget.end_spin.changed.connect (changed);
-				changed ();
-				content_area.add (widget);
 
-				widget.show ();
+				grid = new Grid ();
+				grid.orientation = Orientation.VERTICAL;
+				grid.row_homogeneous = true;
+				grid.row_spacing = 3;
+				grid.column_spacing = 12;
+				grid.border_width = 5;
+				content_area.add (grid);
+				grid.show ();
+
+
+				var start_date_label = new Label.with_mnemonic (_("_Start:"));
+				start_date_label.xalign = 0.0f;
+				grid.add (start_date_label);
+				start_date_label.show ();
+
+				start_spin = new DateSpinButton ();
+				start_spin.hexpand = true;
+				grid.attach_next_to (start_spin,
+				                     start_date_label,
+				                     PositionType.RIGHT,
+				                     1, 1);
+				start_date_label.mnemonic_widget = start_spin;
+				start_spin.changed.connect (changed);
+				start_spin.show ();
+
+
+				var end_date_label = new Label.with_mnemonic (_("_End:"));
+				end_date_label.xalign = 0.0f;
+				grid.add (end_date_label);
+				end_date_label.show ();
+
+				end_spin = new DateSpinButton ();
+				end_spin.hexpand = true;
+				grid.attach_next_to (end_spin,
+				                     end_date_label,
+				                     PositionType.RIGHT,
+				                     1, 1);
+				end_date_label.mnemonic_widget = end_spin;
+				end_spin.changed.connect (changed);
+				end_spin.show ();
+
 
 				pop_composite_child ();
+
+
+				changed ();
 			}
 
 			public Date get_start_date () {
-				return widget.start_spin.date;
+				return start_spin.date;
 			}
 
 			public void set_start_dmy (int day, int month, int year) {
-				widget.start_spin.set_dmy (day, month, year);
+				start_spin.set_dmy (day, month, year);
 			}
 
 			public Date get_end_date () {
-				return widget.end_spin.date;
+				return end_spin.date;
 			}
 
 			public void set_end_dmy (int day, int month, int year) {
-				widget.end_spin.set_dmy (day, month, year);
+				end_spin.set_dmy (day, month, year);
 			}
 
 			private void changed () {
 				set_response_sensitive (ResponseType.ACCEPT,
-				                        widget.start_spin.date.compare (widget.end_spin.date) <= 0);
+				                        start_spin.date.compare (end_spin.date) <= 0);
 			}
 
 		}

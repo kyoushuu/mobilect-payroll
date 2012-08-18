@@ -131,7 +131,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
-				column = new TreeViewColumn.with_attributes (_("Rate"), renderer);
+				column = new TreeViewColumn.with_attributes (_("Monthly Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.RATE;
 				column.reorderable = true;
 				column.resizable = true;
@@ -143,7 +143,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
-				column = new TreeViewColumn.with_attributes (_("Rate per Day"), renderer);
+				column = new TreeViewColumn.with_attributes (_("Daily Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.DAYRATE;
 				column.reorderable = true;
 				column.resizable = true;
@@ -155,7 +155,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
-				column = new TreeViewColumn.with_attributes (_("Rate per Hour"), renderer);
+				column = new TreeViewColumn.with_attributes (_("Hourly Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.HOURRATE;
 				column.reorderable = true;
 				column.resizable = true;
@@ -386,14 +386,13 @@ namespace Mobilect {
 
 				foreach (var e in employees) {
 					employee = e;
-					var dialog = new PasswordDialog (_("Change Password"),
-					                                 this.cpanel.window);
+					var dialog = new PasswordDialog (this.cpanel.window, employee.get_name ());
 					dialog.help_link_id = "employees-change-password";
 
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
 							dialog.hide ();
-							employee.change_password (dialog.widget.get_password ());
+							employee.change_password (dialog.get_password ());
 							dialog.destroy ();
 						} else if (r == ResponseType.REJECT) {
 							dialog.destroy ();

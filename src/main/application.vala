@@ -62,16 +62,12 @@ namespace Mobilect {
 				}
 
 				Log.set_handler ("Mobilect-Payroll",
-				                 LogLevelFlags.LEVEL_CRITICAL |
 				                 LogLevelFlags.LEVEL_WARNING |
 				                 LogLevelFlags.LEVEL_MESSAGE,
 				                 (d, l, m) => {
 													 var text = m;
 													 MessageType type = MessageType.INFO;
-													 if (l == LogLevelFlags.LEVEL_CRITICAL) {
-														 text = _("Critical Error");
-														 type = MessageType.ERROR;
-													 } else if (l == LogLevelFlags.LEVEL_WARNING) {
+													 if (l == LogLevelFlags.LEVEL_WARNING) {
 														 text = _("Warning");
 														 type = MessageType.WARNING;
 													 }

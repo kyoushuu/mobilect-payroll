@@ -321,14 +321,13 @@ namespace Mobilect {
 				foreach (var a in administrators) {
 					administrator = a;
 
-					var dialog = new PasswordDialog (_("Change Password"),
-					                                 this.cpanel.window);
+					var dialog = new PasswordDialog (this.cpanel.window, administrator.username);
 					dialog.help_link_id = "administrators-change-password";
 
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
 							dialog.hide ();
-							administrator.change_password (dialog.widget.get_password ());
+							administrator.change_password (dialog.get_password ());
 							dialog.destroy ();
 						} else if (r == ResponseType.REJECT) {
 							dialog.destroy ();

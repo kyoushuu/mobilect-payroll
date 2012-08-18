@@ -130,7 +130,7 @@ namespace Mobilect {
 					var stmt = cnc.parse_sql_string (sql, null);
 					cnc.statement_execute_non_select (stmt, null, null);
 				} catch (Error e) {
-					critical ("Failed to execute SQL: %s", e.message);
+					warning ("Failed to execute SQL: %s", e.message);
 				}
 			}
 
@@ -147,7 +147,7 @@ namespace Mobilect {
 						administrator_list.add (new Administrator (data_model.get_value_at (0, i).get_int (), this));
 					}
 				} catch (Error e) {
-					critical ("Failed to update administrator list: %s", e.message);
+					warning ("Failed to update administrator list: %s", e.message);
 				}
 			}
 
@@ -167,7 +167,7 @@ namespace Mobilect {
 						update_administrators ();
 					}
 				} catch (Error e) {
-					critical ("Failed to add administrator to database: %s", e.message);
+					warning ("Failed to add administrator to database: %s", e.message);
 				}
 			}
 
@@ -184,7 +184,7 @@ namespace Mobilect {
 						employee_list.add (new Employee (data_model.get_value_at (0, i).get_int (), this));
 					}
 				} catch (Error e) {
-					critical ("Failed to update employee list: %s", e.message);
+					warning ("Failed to update employee list: %s", e.message);
 				}
 			}
 
@@ -210,7 +210,7 @@ namespace Mobilect {
 						update_employees ();
 					}
 				} catch (Error e) {
-					critical ("Failed to add employee to database: %s", e.message);
+					warning ("Failed to add employee to database: %s", e.message);
 				}
 			}
 
@@ -289,7 +289,7 @@ namespace Mobilect {
 					}
 				} catch (Error e) {
 					list = new TimeRecordList (this);
-					critical ("Failed to get time records fro database: %s", e.message);
+					warning ("Failed to get time records fro database: %s", e.message);
 				}
 
 				return list;
@@ -314,7 +314,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to add time record to database: %s", e.message);
+					warning ("Failed to add time record to database: %s", e.message);
 				}
 			}
 

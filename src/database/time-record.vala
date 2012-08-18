@@ -96,7 +96,7 @@ namespace Mobilect {
 							this.end = new DateTime.from_timeval_local (time_val);
 						}
 					} catch (Error e) {
-						critical ("Failed to get time record data from database: %s", e.message);
+						warning ("Failed to get time record data from database: %s", e.message);
 					}
 				}
 			}
@@ -130,7 +130,7 @@ namespace Mobilect {
 					                                              this.end.format ("%F %T") : null);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to update time record in database: %s", e.message);
+					warning ("Failed to update time record in database: %s", e.message);
 				}
 			}
 
@@ -149,7 +149,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to remove time record from database: %s", e.message);
+					warning ("Failed to remove time record from database: %s", e.message);
 				}
 			}
 

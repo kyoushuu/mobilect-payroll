@@ -71,7 +71,7 @@ namespace Mobilect {
 						var cell_data_rate = data_model.get_value_at (4, 0);
 						this.rate = (int) cell_data_rate;
 					} catch (Error e) {
-						critical ("Failed to get employee data from database: %s", e.message);
+						warning ("Failed to get employee data from database: %s", e.message);
 					}
 				}
 			}
@@ -95,7 +95,7 @@ namespace Mobilect {
 
 					return data_model.get_n_rows ();
 				} catch (Error e) {
-					critical ("Failed to get open time records of employee from database: %s", e.message);
+					warning ("Failed to get open time records of employee from database: %s", e.message);
 					return -1;
 				}
 			}
@@ -127,7 +127,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_local ().format ("%F %T"));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to update time record in database for employee logout: %s", e.message);
+					warning ("Failed to update time record in database for employee logout: %s", e.message);
 				}
 			}
 
@@ -209,7 +209,7 @@ namespace Mobilect {
 						}
 					}
 				} catch (Error e) {
-					critical ("Failed to get time record of employee from database: %s", e.message);
+					warning ("Failed to get time record of employee from database: %s", e.message);
 				}
 
 				return hours_span;
@@ -237,7 +237,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("rate").set_value (value_rate);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to update employee in database: %s", e.message);
+					warning ("Failed to update employee in database: %s", e.message);
 				}
 			}
 
@@ -265,7 +265,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("employee_id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to remove employee from database: %s", e.message);
+					warning ("Failed to remove employee from database: %s", e.message);
 				}
 			}
 
@@ -284,7 +284,7 @@ namespace Mobilect {
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
 				} catch (Error e) {
-					critical ("Failed to get employee password from database: %s", e.message);
+					warning ("Failed to get employee password from database: %s", e.message);
 					return null;
 				}
 			}
@@ -303,7 +303,7 @@ namespace Mobilect {
 					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to update employee password in database: %s", e.message);
+					warning ("Failed to update employee password in database: %s", e.message);
 				}
 			}
 

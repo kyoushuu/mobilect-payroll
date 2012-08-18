@@ -106,7 +106,7 @@ namespace Mobilect {
 							}
 						}
 					} catch (Error e) {
-						critical ("Failed to get deduction from database: %s", e.message);
+						warning ("Failed to get deduction from database: %s", e.message);
 					}
 				}
 			}
@@ -184,7 +184,7 @@ namespace Mobilect {
 					/* Execute */
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					critical ("Failed to set deduction from database: %s", e.message);
+					warning ("Failed to set deduction from database: %s", e.message);
 				}
 			}
 

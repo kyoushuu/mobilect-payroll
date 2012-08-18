@@ -51,7 +51,7 @@ namespace Mobilect {
 				try {
 						window.ui_manager.add_ui_from_resource ("/com/mobilectpower/Payroll/mobilect-payroll-cpanel-ui.xml");
 				} catch (Error e) {
-					critical ("Failed to add UI to UI Manager: %s", e.message);
+					warning ("Failed to add UI to UI Manager: %s", e.message);
 				}
 
 				Gtk.ActionEntry[] actions = {

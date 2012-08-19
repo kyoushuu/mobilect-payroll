@@ -17,5 +17,6 @@
  */
 
 
-gchar *get_prefix ();
-gboolean show_file (GtkWidget *window, const gchar *filename);
+gchar *portability_get_prefix ();
+gboolean portability_show_file (GtkWidget *window, const gchar *filename);
+

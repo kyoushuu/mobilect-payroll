@@ -27,11 +27,12 @@
 #include <shlwapi.h>
 #endif
 
-#include "mobilect-payroll-os-compat.h"
+#include "portability.h"
 
 
 gchar *
-get_prefix () {
+portability_get_prefix ()
+{
 #ifdef G_OS_WIN32
 	return g_win32_get_package_installation_directory_of_module (NULL);
 #else
@@ -41,14 +42,16 @@ get_prefix () {
 
 
 gboolean
-show_file (GtkWidget *window, const gchar *filename) {
+portability_show_file (GtkWidget *window,
+                       const gchar *filename)
+{
 	gboolean result;
 
 #ifdef G_OS_WIN32
 	gchar *prefix;
 
 	/* Use ShellExecute in Windows since GIO doesn't fully support Windows */
-	prefix = get_prefix ();
+	prefix = portability_get_prefix ();
 	result = ShellExecute (window? GDK_WINDOW_HWND (gtk_widget_get_window (window)) : NULL,
 	                       "open", filename, NULL, prefix, SW_SHOWNORMAL) > 32;
 	g_free (prefix);
@@ -58,7 +61,8 @@ show_file (GtkWidget *window, const gchar *filename) {
 
 	screen = window? gtk_widget_get_screen (window) : NULL;
 	uri = g_filename_to_uri (filename, NULL, NULL);
-	if (uri) {
+	if (uri)
+	{
 		result = gtk_show_uri (screen, uri, GDK_CURRENT_TIME, NULL);
 		g_free (uri);
 	}
@@ -66,3 +70,4 @@ show_file (GtkWidget *window, const gchar *filename) {
 
 	return result;
 }
+

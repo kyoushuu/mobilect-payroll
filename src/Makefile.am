@@ -15,6 +15,7 @@ AM_CPPFLAGS = \
 	$(GDA_CFLAGS) \
 	$(GEE_CFLAGS) \
 	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/portability \
 	-include $(top_builddir)/config.h
 
 AM_CFLAGS = \
@@ -27,7 +28,6 @@ mobilect_payroll_SOURCES = \
 	main/mobilect-payroll.vala \
 	main/application.vala \
 	main/window.vala \
-	main/preferences-dialog.vala \
 	database/database.vala \
 	database/employee.vala \
 	database/employee-list.vala \
@@ -46,6 +46,7 @@ mobilect_payroll_SOURCES = \
 	widgets/dialog.vala \
 	widgets/find-dialog.vala \
 	widgets/password-dialog.vala \
+	widgets/preferences-dialog.vala \
 	widgets/sort-tree-view-dialog.vala \
 	login/login-page.vala \
 	login/employee-login-page.vala \
@@ -72,8 +73,9 @@ mobilect_payroll_SOURCES = \
 	filter/pay-period.vala \
 	filter/time-period.vala \
 	config.vapi \
-  mobilect-payroll-os-compat.c \
-  mobilect-payroll-resources.c
+	portability/portability.vapi \
+  portability/portability.c \
+  resources/resources.c
 
 mobilect_payroll_VALAFLAGS = \
 	--pkg gtk+-3.0 \
@@ -107,26 +109,26 @@ endif
 
 
 ui_files = \
-	mobilect-payroll-ui.xml \
-	mobilect-payroll-cpanel-ui.xml \
-	mobilect-payroll-cpanel-employees-ui.xml \
-	mobilect-payroll-cpanel-time-records-ui.xml \
-	mobilect-payroll-cpanel-deductions-ui.xml \
-	mobilect-payroll-cpanel-administrators-ui.xml \
-	mobilect-payroll-cpanel-holidays-ui.xml \
-	mobilect-payroll-cpanel-report-ui.xml
+	ui/mobilect-payroll-ui.xml \
+	ui/mobilect-payroll-cpanel-ui.xml \
+	ui/mobilect-payroll-cpanel-employees-ui.xml \
+	ui/mobilect-payroll-cpanel-time-records-ui.xml \
+	ui/mobilect-payroll-cpanel-deductions-ui.xml \
+	ui/mobilect-payroll-cpanel-administrators-ui.xml \
+	ui/mobilect-payroll-cpanel-holidays-ui.xml \
+	ui/mobilect-payroll-cpanel-report-ui.xml
 
 
 mobilect-payroll-win32-res.o: mobilect-payroll.rc
-	$(WINDRES) $< $@
+	$(AM_V_GEN) $(WINDRES) $< $@
 
-mobilect-payroll-resources.c: mobilect-payroll.gresource.xml $(ui_files)
-	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --target=$@ --sourcedir=$(srcdir) --generate $(srcdir)/mobilect-payroll.gresource.xml
+resources/resources.c: resources/mobilect-payroll.gresource.xml $(ui_files)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) \
+		--sourcedir=$(srcdir)/ui --target=$@ --generate $<
 
 
 EXTRA_DIST = \
-  mobilect-payroll-os-compat.h \
 	mobilect-payroll.rc.in \
-	mobilect-payroll.gresource.xml \
+  portability/portability.h \
+	resources/mobilect-payroll.gresource.xml \
 	$(ui_files)
-

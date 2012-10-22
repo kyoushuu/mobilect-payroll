@@ -37,7 +37,7 @@ namespace Mobilect {
 
 				window.notebook.switch_page.connect ((t, p, n) => {
 					if (current_page != null) {
-						if (n == window.PAGE_ADMIN) {
+						if (n == Window.Page.CONTROL_PANEL) {
 							current_page.changed_to ();
 							action_group.visible = true;
 						} else {
@@ -60,7 +60,7 @@ namespace Mobilect {
 						stock_id = Stock.CLOSE,
 						tooltip = _("Close control panel"),
 						callback = (a) => {
-							this.window.notebook.page = this.window.PAGE_LOGIN_EMPLOYEE;
+							this.window.notebook.page = Window.Page.LOGIN_EMPLOYEE;
 						}
 					},
 					Gtk.ActionEntry () {
@@ -102,6 +102,7 @@ namespace Mobilect {
 				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
 				this.add_page (new CPanelDeductions (this), _("Deductions"));
 				this.add_page (new CPanelAdministrators (this), _("Administrators"));
+				this.add_page (new CPanelBranches (this), _("Branches"));
 				this.add_page (new CPanelHolidays (this), _("Holidays"));
 				this.add_page (new CPanelReport (this), _("Report"));
 			}

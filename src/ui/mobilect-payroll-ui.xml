@@ -21,6 +21,7 @@
     </menu>
     <menu name="ViewMenu" action="view">
       <menuitem name="Toolbar" action="view-toolbar" />
+      <menuitem name="Statusbar" action="view-statusbar" />
       <separator/>
       <placeholder name="ViewMenuAdditions" />
     </menu>

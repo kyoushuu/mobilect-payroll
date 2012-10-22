@@ -59,16 +59,16 @@ namespace Mobilect {
 
 				new_value = 0;
 
-				var scanned = text.scanf ("%u:%u %2s", out hour, out minute, out ampm);
+				var scanned = text.scanf ("%u:%u %1s", out hour, out minute, out ampm);
 
 				if (minute < 0 || minute >= 60) {
 					return INPUT_ERROR;
 				}
 
 				if (scanned == 3) {
-					if (((string) ampm).ascii_casecmp ("AM") == 0) {
+					if (((string) ampm).ascii_casecmp ("A") == 0) {
 						is_pm = false;
-					} else if (((string) ampm).ascii_casecmp ("PM") == 0) {
+					} else if (((string) ampm).ascii_casecmp ("P") == 0) {
 						is_pm = true;
 					} else {
 						/* Neither AM or PM */
@@ -95,7 +95,39 @@ namespace Mobilect {
 
 					return (int) true;
 				} else {
-					return INPUT_ERROR;
+					scanned = text.scanf ("%u%1s", out hour, out ampm);
+					if (scanned == 2) {
+						if (((string) ampm).ascii_casecmp ("A") == 0) {
+							is_pm = false;
+						} else if (((string) ampm).ascii_casecmp ("P") == 0) {
+							is_pm = true;
+						} else {
+							/* Neither AM or PM */
+							return INPUT_ERROR;
+						}
+
+						if (hour < 1 || hour > 12) {
+							return INPUT_ERROR;
+						} else if (hour < 12 && is_pm) {
+							hour += 12;
+						} else if (hour == 12 && !is_pm) {
+							hour = 0;
+						}
+
+						new_value = hour * 60;
+
+						return (int) true;
+					} else if (scanned == 1) {
+						if (hour < 0 || hour >= 24) {
+							return INPUT_ERROR;
+						}
+
+						new_value = hour * 60;
+
+						return (int) true;
+					} else {
+						return INPUT_ERROR;
+					}
 				}
 			}
 

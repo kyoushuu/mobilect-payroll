@@ -79,6 +79,13 @@ namespace Mobilect {
 
 					return (int) Math.round(employee1.rate_per_hour - employee2.rate_per_hour);
 				});
+				sort.set_sort_func (EmployeeList.Columns.BRANCH, (model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					return strcmp (employee1.branch.name,
+					               employee2.branch.name);
+				});
 
 
 				push_composite_child ();
@@ -122,15 +129,20 @@ namespace Mobilect {
 				column.resizable = true;
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn.with_attributes (_("TIN Number"),
-				                                             new CellRendererText (),
-				                                             "text", EmployeeList.Columns.TIN);
-				column.sort_column_id = EmployeeList.Columns.TIN;
+				renderer = new CellRendererText ();
+				column = new TreeViewColumn.with_attributes (_("Branch"), renderer);
+				column.sort_column_id = EmployeeList.Columns.BRANCH;
 				column.reorderable = true;
 				column.resizable = true;
+				column.set_cell_data_func (renderer, (c, r, m, i) => {
+					TreeIter iter;
+					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
+					(r as CellRendererText).text = list.get_from_iter (iter).branch.name;
+				});
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
+				renderer.xalign = 1;
 				column = new TreeViewColumn.with_attributes (_("Monthly Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.RATE;
 				column.reorderable = true;
@@ -143,6 +155,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
+				renderer.xalign = 1;
 				column = new TreeViewColumn.with_attributes (_("Daily Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.DAYRATE;
 				column.reorderable = true;
@@ -155,6 +168,7 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
+				renderer.xalign = 1;
 				column = new TreeViewColumn.with_attributes (_("Hourly Rate"), renderer);
 				column.sort_column_id = EmployeeList.Columns.HOURRATE;
 				column.reorderable = true;
@@ -164,6 +178,14 @@ namespace Mobilect {
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
 					(r as CellRendererText).text = "%.2lf".printf (list.get_from_iter (iter).rate_per_hour);
 				});
+				tree_view.append_column (column);
+
+				column = new TreeViewColumn.with_attributes (_("TIN Number"),
+				                                             new CellRendererText (),
+				                                             "text", EmployeeList.Columns.TIN);
+				column.sort_column_id = EmployeeList.Columns.TIN;
+				column.reorderable = true;
+				column.resizable = true;
 				tree_view.append_column (column);
 
 
@@ -315,7 +337,8 @@ namespace Mobilect {
 						                       employee.middlename,
 						                       employee.tin,
 						                       password_entry.text,
-						                       employee.rate);
+						                       employee.rate,
+						                       employee.branch);
 						dialog.destroy ();
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();

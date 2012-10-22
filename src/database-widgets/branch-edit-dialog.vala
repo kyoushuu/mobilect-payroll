@@ -24,21 +24,21 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class EmployeeEditDialog : Dialog {
+		public class BranchEditDialog : Dialog {
 
-			public Employee employee {
+			public Branch branch {
 				public get {
-					return widget.employee;
+					return widget.branch;
 				}
 				public set {
-					widget.employee = value;
+					widget.branch = value;
 				}
 			}
 
-			public EmployeeEditWidget widget { public get; private set; }
+			public BranchEditWidget widget { public get; private set; }
 
 
-			public EmployeeEditDialog (string title, Window parent, Employee employee) {
+			public BranchEditDialog (string title, Window parent, Branch branch) {
 				base (title, parent);
 
 				var content_area = this.get_content_area ();
@@ -46,11 +46,13 @@ namespace Mobilect {
 
 				push_composite_child ();
 
-				widget = new EmployeeEditWidget (employee);
+				widget = new BranchEditWidget (branch);
 				widget.border_width = 5;
-				widget.lastname_entry.changed.connect (changed);
-				widget.branch_combobox.changed.connect (changed);
-				changed ();
+				widget.name_entry.changed.connect ((e) => {
+	set_response_sensitive (ResponseType.ACCEPT,
+	                        widget.name_entry.text_length > 0);
+});
+				widget.name_entry.changed ();
 				content_area.add (widget);
 
 				widget.show ();
@@ -63,12 +65,6 @@ namespace Mobilect {
 		this.widget.save ();
 	}
 });
-			}
-
-			private void changed () {
-				set_response_sensitive (ResponseType.ACCEPT,
-				                        widget.lastname_entry.text_length > 0 &&
-				                        widget.branch_combobox.active != -1);
 			}
 		}
 

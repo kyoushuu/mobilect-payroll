@@ -10,6 +10,12 @@
       <_description>Whether the toolbar should be visible.</_description>
     </key>
 
+    <key type="b" name="statusbar-visible">
+      <default>true</default>
+      <_summary>Statusbar is Visible</_summary>
+      <_description>Whether the statusbar should be visible.</_description>
+    </key>
+
     <key type="s" name="database-provider">
       <default>'SQLite'</default>
       <_summary>Database Provider</_summary>
@@ -60,6 +66,24 @@
       <default l10n="messages">'Monospace Bold 9'</default>
       <_summary>Emphasized Number Font</_summary>
       <_description>A custom font that will be used for emphasized numbers in the report. These are usually used in columns for total.</_description>
+    </key>
+
+    <key type="s" name="preparer">
+      <default l10n="messages">'Maybelen R. Bajo'</default>
+      <_summary>Preparer Name</_summary>
+      <_description>The name of the preparer.</_description>
+    </key>
+
+    <key type="s" name="approver">
+      <default l10n="messages">'Joe Arlin Divinagracia'</default>
+      <_summary>Approver Name</_summary>
+      <_description>The name of the approver.</_description>
+    </key>
+
+    <key type="s" name="approver-position">
+      <default l10n="messages">'President'</default>
+      <_summary>Approver Position</_summary>
+      <_description>The company position of the approver.</_description>
     </key>
 
   </schema>

@@ -21,14 +21,41 @@ namespace Mobilect {
 
 	namespace Payroll {
 
+		/**
+		 * Class for pay periods
+		 *
+		 * This is the class for pay periods, the partitioning of a day with each
+		 * part with different rates, e.g. Regular, Overtime and Extended Overtime.
+		 *
+		 * This class is only used in {@link OvertimeReport}, since
+		 * {@link RegularReport} only uses one pay period and rate (Regular).
+		 */
 		public class PayPeriod : Object {
 
+			/**
+			 * The name of the pay period.
+			 */
 			public string name { get; private set; }
+			/**
+			 * Whether the period is overtime. If it not an overtime, part of it will
+			 * be paid in regular, and the remaining will be paid in the overtime
+			 * payroll.
+			 */
 			public bool is_overtime { get; private set; }
+			/**
+			 * The rate per hour of the period, decimal percentage (e.g. 1.30%).
+			 */
 			public double rate { get; private set; }
+			/**
+			 * The time periods of the pay period. This is used to break the time,
+			 * skipping unpaid time (e.g. lunch break).
+			 */
 			public TimePeriod[] time_periods { get; private set; }
 
 
+			/**
+			 * Creates a new pay period.
+			 */
 			public PayPeriod (string name,
 			                  bool is_overtime,
 			                  double rate,

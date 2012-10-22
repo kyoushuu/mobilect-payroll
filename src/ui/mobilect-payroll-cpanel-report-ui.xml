@@ -2,23 +2,19 @@
   <menubar name="menubar">
     <menu name="FileMenu" action="file">
       <placeholder name="FileSaveMenuAdditions">
-          <menuitem name="ReportSave" action="cpanel-report-save" />
+          <menuitem name="ReportNew" action="cpanel-report-new" />
       </placeholder>
       <placeholder name="FileExportMenuAdditions">
           <menuitem name="ReportPageSetup" action="cpanel-report-page-setup" />
-          <menuitem name="ReportPrint" action="cpanel-report-print" />
-          <menuitem name="ReportPrintPreview" action="cpanel-report-print-preview" />
       </placeholder>
     </menu>
   </menubar>
   <toolbar name="toolbar">
     <placeholder name="FileSaveToolbarAdditions">
-      <toolitem name="ReportSave" action="cpanel-report-save" />
+      <toolitem name="ReportNew" action="cpanel-report-new" />
     </placeholder>
     <placeholder name="FileExportToolbarAdditions">
       <toolitem name="ReportPageSetup" action="cpanel-report-page-setup" />
-      <toolitem name="ReportPrint" action="cpanel-report-print" />
-      <toolitem name="ReportPrintPreview" action="cpanel-report-print-preview" />
     </placeholder>
   </toolbar>
 </ui>

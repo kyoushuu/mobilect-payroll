@@ -32,6 +32,8 @@ namespace Mobilect {
 
 			internal weak Database database { get; set; }
 
+			internal HashMap<Employee, bool> enabled;
+
 
 			public enum Columns {
 				OBJECT,
@@ -44,6 +46,8 @@ namespace Mobilect {
 				RATE,
 				DAYRATE,
 				HOURRATE,
+				BRANCH,
+				ENABLED,
 				NUM
 			}
 
@@ -52,6 +56,7 @@ namespace Mobilect {
 				stamp = (int) Random.next_int ();
 
 				this.database = database;
+				this.enabled = new HashMap<Employee, bool> ();
 			}
 
 			public new void add (Employee employee) {
@@ -62,6 +67,7 @@ namespace Mobilect {
 					row_changed (get_path (iter), iter);
 				});
 				(this as ArrayList<Employee>).add (employee);
+				enabled.set (employee, true);
 
 				TreeIter iter;
 				create_iter (out iter, employee);
@@ -75,6 +81,7 @@ namespace Mobilect {
 
 				employee.list = null;
 				(this as ArrayList<Employee>).remove (employee);
+				enabled.unset (employee);
 			}
 
 			public new void remove_all () {
@@ -146,6 +153,10 @@ namespace Mobilect {
 						return typeof (int);
 					case Columns.HOURRATE:
 						return typeof (int);
+					case Columns.BRANCH:
+						return typeof (Branch);
+					case Columns.ENABLED:
+						return typeof (bool);
 					default:
 						return Type.INVALID;
 				}
@@ -165,7 +176,7 @@ namespace Mobilect {
 			}
 
 			public int get_n_columns () {
-				return this.Columns.NUM;
+				return Columns.NUM;
 			}
 
 			public TreePath? get_path (TreeIter iter) requires (iter_valid (iter)) {
@@ -176,38 +187,44 @@ namespace Mobilect {
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter_valid (iter)) {
-				var record = get_from_iter (iter);
+				var employee = get_from_iter (iter);
 
 				switch (column) {
 					case Columns.OBJECT:
-						value = record;
+						value = employee;
 						break;
 					case Columns.ID:
-						value = record.id;
+						value = employee.id;
 						break;
 					case Columns.LASTNAME:
-						value = record.lastname;
+						value = employee.lastname;
 						break;
 					case Columns.FIRSTNAME:
-						value = record.firstname;
+						value = employee.firstname;
 						break;
 					case Columns.MIDDLENAME:
-						value = record.middlename;
+						value = employee.middlename;
 						break;
 					case Columns.NAME:
-						value = record.get_name ();
+						value = employee.get_name ();
 						break;
 					case Columns.TIN:
-						value = record.tin;
+						value = employee.tin;
 						break;
 					case Columns.RATE:
-						value = record.rate;
+						value = employee.rate;
 						break;
 					case Columns.DAYRATE:
-						value = record.rate_per_day;
+						value = employee.rate_per_day;
 						break;
 					case Columns.HOURRATE:
-						value = record.rate_per_hour;
+						value = employee.rate_per_hour;
+						break;
+					case Columns.BRANCH:
+						value = employee.branch;
+						break;
+					case Columns.ENABLED:
+						value = enabled.get (employee);
 						break;
 					default:
 						value = Value (Type.INVALID);
@@ -302,11 +319,48 @@ namespace Mobilect {
 			}
 
 			private void create_iter (out TreeIter iter, Employee employee) {
-				/* We simply store a pointer to our custom record in the iter */
+				/* We simply store a pointer to our custom employee in the iter */
 				iter = TreeIter () {
 					stamp      = this.stamp,
 					user_data  = employee
 				};
+			}
+
+
+			public bool get_is_enabled (Employee employee) {
+				if (enabled.has_key (employee)) {
+					return this.enabled.get (employee);
+				} else {
+					return false;
+				}
+			}
+
+			public void set_is_enabled (Employee employee, bool enabled) {
+				this.enabled.set (employee, enabled);
+			}
+
+			public EmployeeList get_subset (bool enabled) {
+				var list = new EmployeeList (this.database);
+
+				foreach (var employee in this) {
+					if (this.enabled.get (employee) == enabled) {
+						list.add (employee);
+					}
+				}
+
+				return list;
+			}
+
+			public EmployeeList get_subset_with_branch (Branch branch) {
+				var list = new EmployeeList (this.database);
+
+				foreach (var employee in this) {
+					if (employee.branch == branch) {
+						list.add (employee);
+					}
+				}
+
+				return list;
 			}
 
 		}

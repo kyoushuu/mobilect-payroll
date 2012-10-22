@@ -18,7 +18,9 @@
 
 
 using Gtk;
+using Gdk;
 using Config;
+using Portability;
 
 
 namespace Mobilect {
@@ -27,15 +29,21 @@ namespace Mobilect {
 
 		public class Window : Gtk.Window {
 
-			public int PAGE_LOGIN_EMPLOYEE;
-			public int PAGE_LOGIN_ADMIN;
-			public int PAGE_ADMIN;
+			public const string ACTION_TOOLBAR = "view-toolbar";
+			public const string ACTION_STATUSBAR = "view-statusbar";
+
+			public enum Page {
+				LOGIN_EMPLOYEE,
+				LOGIN_ADMIN,
+				CONTROL_PANEL
+			}
 
 			public Application app { get; private set; }
 
 			public UIManager ui_manager { get; private set; }
 			public MenuBar menubar { get; private set; }
 			public Toolbar toolbar { get; private set; }
+			public Statusbar statusbar { get; private set; }
 			public Notebook notebook { get; private set; }
 
 
@@ -89,7 +97,7 @@ namespace Mobilect {
 						accelerator = _("F1"),
 						tooltip = _("Open manual"),
 						callback = (a) => {
-							this.app.show_help (null, null);
+							help (null, null);
 						}
 					},
 					Gtk.ActionEntry () {
@@ -129,15 +137,14 @@ namespace Mobilect {
 
 				Gtk.ToggleActionEntry[] toggle_actions = {
 					Gtk.ToggleActionEntry () {
-						name = "view-toolbar",
+						name = ACTION_TOOLBAR,
 						label = _("_Toolbar"),
-						tooltip = _("Show or hide the toolbar"),
-						callback = (a) => {
-							var visible = (a as ToggleAction).active;
-							toolbar.visible = visible;
-							this.app.settings.main.set_boolean ("toolbar-visible", visible);
-						},
-						is_active = this.app.settings.main.get_boolean ("toolbar-visible")
+						tooltip = _("Show or hide the toolbar")
+					},
+					Gtk.ToggleActionEntry () {
+						name = ACTION_STATUSBAR,
+						label = _("_Statusbar"),
+						tooltip = _("Show or hide the statusbar")
 					}
 				};
 
@@ -163,7 +170,14 @@ namespace Mobilect {
 				(toolbar as Toolbar).set_style (ToolbarStyle.BOTH_HORIZ);
 				toolbar.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
 				box.add (toolbar);
-				toolbar.visible = this.app.settings.main.get_boolean ("toolbar-visible");
+
+				/* Bind toolbar visibility to setting */
+				this.app.settings.main.bind ("toolbar-visible",
+				                             toolbar,
+				                             "visible", SettingsBindFlags.DEFAULT);
+				this.app.settings.main.bind ("toolbar-visible",
+				                             action_group.get_action (ACTION_TOOLBAR),
+				                             "active", SettingsBindFlags.DEFAULT);
 
 				notebook = new Notebook ();
 				notebook.show_border = false;
@@ -177,20 +191,33 @@ namespace Mobilect {
 
 				/* Employee Login Page */
 				var emp_login_page = new EmployeeLoginPage (this);
-				PAGE_LOGIN_EMPLOYEE = notebook.append_page (emp_login_page);
+				notebook.insert_page (emp_login_page, null, Page.LOGIN_EMPLOYEE);
 				emp_login_page.show ();
 
 				/* Administrator Login Page */
 				var admin_login_page = new AdminLoginPage (this);
-				PAGE_LOGIN_ADMIN = notebook.append_page (admin_login_page);
+				notebook.insert_page (admin_login_page, null, Page.LOGIN_ADMIN);
 				admin_login_page.show ();
 
-				/* Administrator Page */
+				/* Control Panel Page */
 				var cpanel = new CPanel (this);
 				cpanel.hexpand = true;
 				cpanel.vexpand = true;
-				PAGE_ADMIN = notebook.append_page (cpanel);
+				notebook.insert_page (cpanel, null, Page.CONTROL_PANEL);
 				cpanel.show ();
+
+
+				statusbar = new Statusbar ();
+				box.add (statusbar);
+				statusbar.show ();
+
+				/* Bind toolbar visibility to setting */
+				this.app.settings.main.bind ("statusbar-visible",
+				                             statusbar,
+				                             "visible", SettingsBindFlags.DEFAULT);
+				this.app.settings.main.bind ("statusbar-visible",
+				                             action_group.get_action (ACTION_STATUSBAR),
+				                             "active", SettingsBindFlags.DEFAULT);
 
 
 				pop_composite_child ();
@@ -218,6 +245,27 @@ namespace Mobilect {
 				dialog.secondary_text = secondary;
 				dialog.run ();
 				dialog.destroy ();
+			}
+
+			public void help (string? name, string? link_id) {
+				try {
+					var page = Path.build_filename(get_prefix (), "share", "help", "C",
+					                               name?? PACKAGE,
+					                               "%s.html".printf (link_id?? "index"));
+
+					if (AppInfo.get_default_for_uri_scheme ("help") == null &&
+					    FileUtils.test (page, FileTest.IS_REGULAR)) {
+						if (!show_file (this, page)) {
+							warning ("Failed to display the help");
+						}
+					} else {
+						show_uri (get_screen (),
+						          "help:%s/%s".printf (name?? PACKAGE, link_id?? "index"),
+						          CURRENT_TIME);
+					}
+				} catch (Error e) {
+					show_error_dialog (_("Failed to display the help"), e.message);
+				}
 			}
 
 		}

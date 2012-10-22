@@ -238,7 +238,7 @@ namespace Mobilect {
 			}
 
 			public int get_n_columns () {
-				return this.Columns.NUM + this.Category.NUM;
+				return Columns.NUM + Category.NUM;
 			}
 
 			public TreePath? get_path (TreeIter iter) requires (iter.stamp == this.stamp) {

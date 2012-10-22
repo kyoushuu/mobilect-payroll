@@ -26,7 +26,7 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class TimeRecordList : ArrayList<TimeRecord>, TreeModel {
+		public class BranchList : ArrayList<Branch>, TreeModel {
 
 			public int stamp { get; private set; }
 
@@ -35,57 +35,55 @@ namespace Mobilect {
 			public enum Columns {
 				OBJECT,
 				ID,
-				EMPLOYEE,
-				START,
-				END,
+				NAME,
 				NUM
 			}
 
 
-			public TimeRecordList (Database database) {
+			public BranchList (Database database) {
 				stamp = (int) Random.next_int ();
 
 				this.database = database;
 			}
 
-			public new void add (TimeRecord time_record) {
-				time_record.list = this;
-				time_record.notify.connect ((o, p) => {
+			public new void add (Branch branch) {
+				branch.list = this;
+				branch.notify.connect ((o, p) => {
 					TreeIter iter;
-					create_iter (out iter, o as TimeRecord);
+					create_iter (out iter, o as Branch);
 					row_changed (get_path (iter), iter);
 				});
-				(this as ArrayList<TimeRecord>).add (time_record);
+				(this as ArrayList<Branch>).add (branch);
 
 				TreeIter iter;
-				create_iter (out iter, time_record);
+				create_iter (out iter, branch);
 				row_inserted (get_path (iter), iter);
 			}
 
-			public new void remove (TimeRecord time_record) {
+			public new void remove (Branch branch) {
 				TreeIter iter;
-				create_iter (out iter, time_record);
+				create_iter (out iter, branch);
 				row_deleted (get_path (iter));
 
-				time_record.list = null;
-				(this as ArrayList<TimeRecord>).remove (time_record);
+				branch.list = null;
+				(this as ArrayList<Branch>).remove (branch);
 			}
 
 			public new void remove_all () {
-				var list = new TimeRecord[0];
+				var list = new Branch[0];
 
-				foreach (var time_record in this) {
-					list += time_record;
+				foreach (var branch in this) {
+					list += branch;
 				}
 
-				foreach (var time_record in list) {
-					remove (time_record);
+				foreach (var branch in list) {
+					remove (branch);
 				}
 			}
 
 			public bool contains_id (int id) {
-				foreach (var time_record in this) {
-					if (time_record.id == id) {
+				foreach (var branch in this) {
+					if (branch.id == id) {
 						return true;
 					}
 				}
@@ -93,40 +91,39 @@ namespace Mobilect {
 				return false;
 			}
 
-			public TimeRecord? get_with_id (int id) {
-				foreach (var time_record in this) {
-					if (time_record.id == id) {
-						return time_record;
+			public bool contains_name (string name) {
+				return get_with_name (name) != null;
+			}
+
+			public Branch? get_with_id (int id) {
+				foreach (var branch in this) {
+					if (branch.id == id) {
+						return branch;
 					}
 				}
 
 				return null;
 			}
 
-			public TimeRecord? get_with_employee_id (int employee_id) {
-				foreach (var time_record in this) {
-					if (time_record.employee_id == employee_id) {
-						return time_record;
+			public Branch? get_with_name (string name) {
+				foreach (var branch in this) {
+					if (branch.name == name) {
+						return branch;
 					}
 				}
 
 				return null;
 			}
-
 
 			/* TreeModel implementation */
 			public Type get_column_type (int index_) {
 				switch (index_) {
 					case Columns.OBJECT:
-						return typeof (TimeRecord);
+						return typeof (Branch);
 					case Columns.ID:
 						return typeof (int);
-					case Columns.EMPLOYEE:
-						return typeof (Employee);
-					case Columns.START:
-						return typeof (DateTime);
-					case Columns.END:
-						return typeof (DateTime);
+					case Columns.NAME:
+						return typeof (string);
 					default:
 						return Type.INVALID;
 				}
@@ -157,23 +154,17 @@ namespace Mobilect {
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter_valid (iter)) {
-				var time_record = get_from_iter (iter);
+				var record = get_from_iter (iter);
 
 				switch (column) {
 					case Columns.OBJECT:
-						value = time_record;
+						value = record;
 						break;
 					case Columns.ID:
-						value = time_record.id;
+						value = record.id;
 						break;
-					case Columns.EMPLOYEE:
-						value = time_record.employee;
-						break;
-					case Columns.START:
-						value = time_record.start;
-						break;
-					case Columns.END:
-						value = time_record.end;
+					case Columns.NAME:
+						value = record.name;
 						break;
 					default:
 						value = Value (Type.INVALID);
@@ -187,7 +178,7 @@ namespace Mobilect {
 					return false;
 				}
 
-				return get_iter_from_time_record (out iter, this.first ());
+				return get_iter_from_branch (out iter, this.first ());
 			}
 
 			public bool iter_has_child (TreeIter iter) {
@@ -221,17 +212,17 @@ namespace Mobilect {
 			}
 
 			/* Additional TreeModel implementation */
-			public TimeRecord get_from_iter (TreeIter iter) requires (iter_valid (iter)) {
-				return iter.user_data as TimeRecord;
+			public Branch get_from_iter (TreeIter iter) requires (iter_valid (iter)) {
+				return iter.user_data as Branch;
 			}
 
 			public bool iter_valid (TreeIter iter) {
 				return iter.stamp == this.stamp && iter.user_data != null;
 			}
 
-			public bool get_iter_from_time_record (out TreeIter iter, TimeRecord time_record) {
-				if (time_record in this) {
-					create_iter (out iter, time_record);
+			public bool get_iter_from_branch (out TreeIter iter, Branch branch) {
+				if (branch in this) {
+					create_iter (out iter, branch);
 					return true;
 				} else {
 					iter = TreeIter ();
@@ -245,20 +236,33 @@ namespace Mobilect {
 					return false;
 				}
 
-				var time_record = (this as ArrayList<TimeRecord>).get (index);
+				var branch = (this as ArrayList<Branch>).get (index);
 
-				assert (time_record != null);
+				assert (branch != null);
 
-				create_iter (out iter, time_record);
+				create_iter (out iter, branch);
 
 				return true;
 			}
 
-			private void create_iter (out TreeIter iter, TimeRecord time_record) {
+			public bool get_iter_with_id (out TreeIter iter, int id) {
+				var branch = this.get_with_id (id);
+
+				if (branch == null) {
+					iter = TreeIter ();
+					return false;
+				}
+
+				create_iter (out iter, branch);
+
+				return true;
+			}
+
+			private void create_iter (out TreeIter iter, Branch branch) {
 				/* We simply store a pointer to our custom record in the iter */
 				iter = TreeIter () {
 					stamp      = this.stamp,
-					user_data  = time_record
+					user_data  = branch
 				};
 			}
 

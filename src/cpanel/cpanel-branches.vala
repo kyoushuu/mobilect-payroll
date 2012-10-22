@@ -25,35 +25,34 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class CPanelAdministrators : CPanelTab {
+		public class CPanelBranches : CPanelTab {
 
-			public const string ACTION = "cpanel-administrators";
-			public const string ACTION_ADD = "cpanel-administrators-add";
-			public const string ACTION_REMOVE = "cpanel-administrators-remove";
-			public const string ACTION_PROPERTIES = "cpanel-administrators-properties";
-			public const string ACTION_PASSWORD = "cpanel-administrators-password";
-			public const string ACTION_SELECT_ALL = "cpanel-administrators-select-all";
-			public const string ACTION_DESELECT_ALL = "cpanel-administrators-deselect-all";
-			public const string ACTION_SORT_BY = "cpanel-administrators-sort-by";
-			public const string ACTION_REFRESH = "cpanel-administrators-refresh";
+			public const string ACTION = "cpanel-branches";
+			public const string ACTION_ADD = "cpanel-branches-add";
+			public const string ACTION_REMOVE = "cpanel-branches-remove";
+			public const string ACTION_PROPERTIES = "cpanel-branches-properties";
+			public const string ACTION_SELECT_ALL = "cpanel-branches-select-all";
+			public const string ACTION_DESELECT_ALL = "cpanel-branches-deselect-all";
+			public const string ACTION_SORT_BY = "cpanel-branches-sort-by";
+			public const string ACTION_REFRESH = "cpanel-branches-refresh";
 
 			public TreeView tree_view { get; private set; }
 			public TreeModelSort sort { get; private set; }
-			public AdministratorList list;
+			public BranchList list;
 
 
-			public CPanelAdministrators (CPanel cpanel) {
-				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-administrators-ui.xml");
+			public CPanelBranches (CPanel cpanel) {
+				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-branches-ui.xml");
 
-				this.list = this.cpanel.window.app.database.administrator_list;
+				this.list = this.cpanel.window.app.database.branch_list;
 
 				sort = new TreeModelSort.with_model (this.list);
-				sort.set_sort_func (AdministratorList.Columns.USERNAME, (model, a, b) => {
-					var administrator1 = a.user_data as Administrator;
-					var administrator2 = b.user_data as Administrator;
+				sort.set_sort_func (BranchList.Columns.NAME, (model, a, b) => {
+					var branch1 = a.user_data as Branch;
+					var branch2 = b.user_data as Branch;
 
-					return strcmp (administrator1.username,
-					               administrator2.username);
+					return strcmp (branch1.name,
+					               branch2.name);
 				});
 
 
@@ -68,7 +67,7 @@ namespace Mobilect {
 				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
-				tree_view.search_column = (int) AdministratorList.Columns.USERNAME;
+				tree_view.search_column = (int) BranchList.Columns.NAME;
 				tree_view.row_activated.connect ((t, p, c) => {
 					properties_action ();
 				});
@@ -86,10 +85,10 @@ namespace Mobilect {
 				sw.add (tree_view);
 				tree_view.show ();
 
-				var column = new TreeViewColumn.with_attributes (_("Username"),
+				var column = new TreeViewColumn.with_attributes (_("Name"),
 				                                                 new CellRendererText (),
-				                                                 "text", AdministratorList.Columns.USERNAME);
-				column.sort_column_id = AdministratorList.Columns.USERNAME;
+				                                                 "text", BranchList.Columns.NAME);
+				column.sort_column_id = BranchList.Columns.NAME;
 				column.expand = true;
 				column.reorderable = true;
 				column.resizable = true;
@@ -104,7 +103,7 @@ namespace Mobilect {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
 						accelerator = _("<Control>I"),
-						tooltip = _("Add an administrator to database"),
+						tooltip = _("Add an branch to database"),
 						callback = (a) => {
 							add_action ();
 						}
@@ -113,7 +112,7 @@ namespace Mobilect {
 						name = ACTION_REMOVE,
 						stock_id = Stock.REMOVE,
 						accelerator = _("Delete"),
-						tooltip = _("Remove the selected administrators from database"),
+						tooltip = _("Remove the selected branches from database"),
 						callback = (a) => {
 							remove_action ();
 						}
@@ -122,25 +121,16 @@ namespace Mobilect {
 						name = ACTION_PROPERTIES,
 						stock_id = Stock.PROPERTIES,
 						accelerator = _("<Alt>Return"),
-						tooltip = _("Edit information about the selected administrators"),
+						tooltip = _("Edit information about the selected branches"),
 						callback = (a) => {
 							properties_action ();
-						}
-					},
-					Gtk.ActionEntry () {
-						name = ACTION_PASSWORD,
-						stock_id = Stock.DIALOG_AUTHENTICATION,
-						label = _("_Change Password"),
-						tooltip = _("Change password of selected administrators"),
-						callback = (a) => {
-							change_password_action ();
 						}
 					},
 					Gtk.ActionEntry () {
 						name = ACTION_SELECT_ALL,
 						stock_id = Stock.SELECT_ALL,
 						accelerator = _("<Control>A"),
-						tooltip = _("Select all administrators"),
+						tooltip = _("Select all branches"),
 						callback = (a) => {
 							tree_view.get_selection ().select_all ();
 						}
@@ -149,7 +139,7 @@ namespace Mobilect {
 						name = ACTION_DESELECT_ALL,
 						label = _("_Deselect All"),
 						accelerator = _("<Shift><Control>A"),
-						tooltip = _("Deselects all selected administrators"),
+						tooltip = _("Deselects all selected branches"),
 						callback = (a) => {
 							tree_view.get_selection ().unselect_all ();
 						}
@@ -176,7 +166,7 @@ namespace Mobilect {
 						accelerator = _("<Control>R"),
 						tooltip = _("Reload information from database"),
 						callback = (a) => {
-							this.cpanel.window.app.database.update_administrators ();
+							this.cpanel.window.app.database.update_branches ();
 						}
 					}
 				};
@@ -185,18 +175,16 @@ namespace Mobilect {
 				this.action_group.get_action (ACTION_ADD).is_important = true;
 				this.action_group.get_action (ACTION_REMOVE).sensitive = false;
 				this.action_group.get_action (ACTION_PROPERTIES).sensitive = false;
-				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
-				var selected = tree_view.get_selection ().count_selected_rows () > 0;
+					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_PROPERTIES).sensitive = selected;
-					this.action_group.get_action (ACTION_PASSWORD).sensitive = selected;
 				});
 			}
 
 
-			private GLib.List<Administrator> get_selected (TreeSelection selection) {
-				var administrators = new GLib.List<Administrator>();
+			private GLib.List<Branch> get_selected (TreeSelection selection) {
+				var branches = new GLib.List<Branch>();
 
 				foreach (var p in selection.get_selected_rows (null)) {
 					TreePath path;
@@ -204,43 +192,26 @@ namespace Mobilect {
 
 					path = sort.convert_path_to_child_path (p);
 					list.get_iter (out iter, path);
-					administrators.append (this.list.get_from_iter (iter));
+					branches.append (this.list.get_from_iter (iter));
 				}
 
-				return administrators;
+				return branches;
 			}
 
 			private void add_action () {
 				var database = this.cpanel.window.app.database;
-				var administrator = new Administrator (0, database);
+				var branch = new Branch (0, database);
 
-				var dialog = new AdministratorEditDialog (_("Add Administrator"),
-				                                          this.cpanel.window,
-				                                          administrator);
-				dialog.help_link_id = "administrators-add";
+				var dialog = new BranchEditDialog (_("Add Branch"),
+				                                   this.cpanel.window,
+				                                   branch);
+				dialog.help_link_id = "branches-add";
 				dialog.action = Stock.ADD;
-
-				var password_label = new Label.with_mnemonic (_("_Password:"));
-				password_label.xalign = 0.0f;
-				dialog.widget.grid.add (password_label);
-				password_label.show ();
-
-				var password_entry = new Entry ();
-				password_entry.hexpand = true;
-				password_entry.activates_default = true;
-				password_entry.visibility = false;
-				dialog.widget.grid.attach_next_to (password_entry,
-				                                   password_label,
-				                                   PositionType.RIGHT,
-				                                   1, 1);
-				password_label.mnemonic_widget = password_entry;
-				password_entry.show ();
 
 				dialog.response.connect ((d, r) => {
 					if (r == ResponseType.ACCEPT) {
 						dialog.hide ();
-						database.add_administrator (administrator.username,
-						                            password_entry.text);
+						database.add_branch (branch.name);
 						dialog.destroy ();
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
@@ -251,7 +222,7 @@ namespace Mobilect {
 
 			private void remove_action () {
 				var selection = tree_view.get_selection ();
-				var administrators = get_selected (selection);
+				var branches = get_selected (selection);
 
 				int selected_count = selection.count_selected_rows ();
 				if (selected_count < 1) {
@@ -259,10 +230,10 @@ namespace Mobilect {
 				}
 
 				if (this.list.size - selected_count < 1) {
-					this.cpanel.window.show_error_dialog (ngettext ("Can't remove selected administrator",
-					                                                "Can't remove selected administrators",
+					this.cpanel.window.show_error_dialog (ngettext ("Can't remove selected branch",
+					                                                "Can't remove selected branches",
 					                                                selected_count),
-					                                      _("There should be at least one administrator."));
+					                                      _("There should be at least one branch."));
 
 					return;
 				}
@@ -271,11 +242,11 @@ namespace Mobilect {
 				                                DialogFlags.MODAL,
 				                                MessageType.WARNING,
 				                                ButtonsType.NONE,
-				                                ngettext ("Are you sure you want to remove the selected administrator?",
-				                                          "Are you sure you want to remove the %d selected administrators?",
+				                                ngettext ("Are you sure you want to remove the selected branch?",
+				                                          "Are you sure you want to remove the %d selected branches?",
 				                                          selected_count).printf (selected_count));
-				dialog.secondary_text = ngettext ("All information about this administrator will be deleted and cannot be restored.",
-				                                  "All information about these administrators will be deleted and cannot be restored.",
+				dialog.secondary_text = ngettext ("All information about this branch will be deleted and cannot be restored.",
+				                                  "All information about these branches will be deleted and cannot be restored.",
 				                                  selected_count);
 				dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
 				                    Stock.DELETE, ResponseType.ACCEPT);
@@ -283,8 +254,8 @@ namespace Mobilect {
 
 				if (dialog.run () == ResponseType.ACCEPT) {
 					dialog.hide ();
-					foreach (var administrator in administrators) {
-						administrator.remove ();
+					foreach (var branch in branches) {
+						branch.remove ();
 					}
 				}
 
@@ -293,42 +264,18 @@ namespace Mobilect {
 
 			private void properties_action () {
 				var selection = tree_view.get_selection ();
-				var administrators = get_selected (selection);
+				var branches = get_selected (selection);
 
-				foreach (var administrator in administrators) {
-					var dialog = new AdministratorEditDialog (_("Administrator Properties"),
-					                                          this.cpanel.window,
-					                                          administrator);
-					dialog.help_link_id = "administrators-edit";
+				foreach (var branch in branches) {
+					var dialog = new BranchEditDialog (_("Branch Properties"),
+					                                   this.cpanel.window,
+					                                   branch);
+					dialog.help_link_id = "branches-edit";
 					dialog.action = Stock.SAVE;
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
 							dialog.hide ();
-							dialog.administrator.update ();
-							dialog.destroy ();
-						} else if (r == ResponseType.REJECT) {
-							dialog.destroy ();
-						}
-					});
-					dialog.show ();
-				}
-			}
-
-			private void change_password_action () {
-				var selection = tree_view.get_selection ();
-				var administrators = get_selected (selection);
-				Administrator administrator;
-
-				foreach (var a in administrators) {
-					administrator = a;
-
-					var dialog = new PasswordDialog (this.cpanel.window, administrator.username);
-					dialog.help_link_id = "administrators-change-password";
-
-					dialog.response.connect ((d, r) => {
-						if (r == ResponseType.ACCEPT) {
-							dialog.hide ();
-							administrator.change_password (dialog.get_password ());
+							dialog.branch.update ();
 							dialog.destroy ();
 						} else if (r == ResponseType.REJECT) {
 							dialog.destroy ();
@@ -344,7 +291,7 @@ namespace Mobilect {
 					return false;
 				}
 
-				var menu = cpanel.window.ui_manager.get_widget ("/popup-administrators") as Gtk.Menu;
+				var menu = cpanel.window.ui_manager.get_widget ("/popup-branches") as Gtk.Menu;
 				menu.popup (null, null, null, button, time);
 				return true;
 			}

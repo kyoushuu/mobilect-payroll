@@ -1,0 +1,37 @@
+<ui>
+  <menubar name="menubar">
+    <menu name="EditMenu" action="edit">
+      <placeholder name="EditSelectedMenuAdditions">
+        <menuitem name="BranchAdd" action="cpanel-branches-add" />
+        <menuitem name="BranchRemove" action="cpanel-branches-remove" />
+        <separator />
+        <menuitem name="BranchProperties" action="cpanel-branches-properties" />
+        <separator />
+        <menuitem name="BranchSelectAll" action="cpanel-branches-select-all" />
+        <menuitem name="BranchDeselectAll" action="cpanel-branches-deselect-all" />
+      </placeholder>
+    </menu>
+    <menu name="ViewMenu" action="view">
+      <placeholder name="ViewMenuAdditions">
+        <menuitem name="BranchSortBy" action="cpanel-branches-sort-by" />
+        <separator />
+        <menuitem name="BranchRefresh" action="cpanel-branches-refresh" />
+      </placeholder>
+    </menu>
+  </menubar>
+  <popup name="popup-branches">
+    <menuitem name="BranchProperties" action="cpanel-branches-properties" />
+    <separator />
+    <menuitem name="BranchRemove" action="cpanel-branches-remove" />
+  </popup>
+  <toolbar name="toolbar">
+    <placeholder name="EditSelectedToolbarAdditions">
+      <toolitem name="BranchAdd" action="cpanel-branches-add" />
+      <toolitem name="BranchRemove" action="cpanel-branches-remove" />
+      <toolitem name="BranchProperties" action="cpanel-branches-properties" />
+    </placeholder>
+    <placeholder name="ViewToolbarAdditions">
+      <toolitem name="BranchRefresh" action="cpanel-branches-refresh" />
+    </placeholder>
+  </toolbar>
+</ui>

@@ -45,28 +45,29 @@ gboolean
 portability_show_file (GtkWidget *window,
                        const gchar *filename)
 {
+	g_return_if_fail (GTK_IS_WINDOW (window));
+
 	gboolean result;
-
-#ifdef G_OS_WIN32
-	gchar *prefix;
-
-	/* Use ShellExecute in Windows since GIO doesn't fully support Windows */
-	prefix = portability_get_prefix ();
-	result = ShellExecute (window? GDK_WINDOW_HWND (gtk_widget_get_window (window)) : NULL,
-	                       "open", filename, NULL, prefix, SW_SHOWNORMAL) > 32;
-	g_free (prefix);
-#else
-	GdkScreen *screen;
 	gchar *uri;
 
-	screen = window? gtk_widget_get_screen (window) : NULL;
 	uri = g_filename_to_uri (filename, NULL, NULL);
 	if (uri)
 	{
-		result = gtk_show_uri (screen, uri, GDK_CURRENT_TIME, NULL);
+#ifdef G_OS_WIN32
+		gchar *prefix;
+
+		/* Use ShellExecute in Windows since GIO doesn't fully support Windows */
+		prefix = portability_get_prefix ();
+		result = ShellExecute (GDK_WINDOW_HWND (gtk_widget_get_window (window)),
+	                       "open", filename, NULL, prefix, SW_SHOWNORMAL) > 32;
+		g_free (prefix);
+#else
+		result = gtk_show_uri (gtk_widget_get_screen (window),
+		                       uri, GDK_CURRENT_TIME, NULL);
+#endif
+
 		g_free (uri);
 	}
-#endif
 
 	return result;
 }

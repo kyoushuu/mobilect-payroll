@@ -162,7 +162,7 @@ namespace Mobilect {
 				});
 
 				this.button_admin.clicked.connect ((t) => {
-					this.window.notebook.page = this.window.PAGE_LOGIN_ADMIN;
+					this.window.notebook.page = Window.Page.LOGIN_ADMIN;
 				});
 			}
 

@@ -17,7 +17,6 @@
  */
 
 
-using Gda;
 using Gee;
 using Gtk;
 
@@ -26,107 +25,62 @@ namespace Mobilect {
 
 	namespace Payroll {
 
-		public class TimeRecordList : ArrayList<TimeRecord>, TreeModel {
+		public class CheckList : ArrayList<Object>, TreeModel {
 
 			public int stamp { get; private set; }
 
-			internal weak Database database { get; set; }
 
 			public enum Columns {
 				OBJECT,
-				ID,
-				EMPLOYEE,
-				START,
-				END,
+				CHECKED,
 				NUM
 			}
 
 
-			public TimeRecordList (Database database) {
+			public CheckList () {
 				stamp = (int) Random.next_int ();
-
-				this.database = database;
 			}
 
-			public new void add (TimeRecord time_record) {
-				time_record.list = this;
-				time_record.notify.connect ((o, p) => {
+			public new void add (Object object) {
+				object.notify.connect ((o, p) => {
 					TreeIter iter;
-					create_iter (out iter, o as TimeRecord);
+					create_iter (out iter, o as Object);
 					row_changed (get_path (iter), iter);
 				});
-				(this as ArrayList<TimeRecord>).add (time_record);
+				(this as ArrayList<Object>).add (object);
 
 				TreeIter iter;
-				create_iter (out iter, time_record);
+				create_iter (out iter, object);
 				row_inserted (get_path (iter), iter);
 			}
 
-			public new void remove (TimeRecord time_record) {
+			public new void remove (Object object) {
 				TreeIter iter;
-				create_iter (out iter, time_record);
+				create_iter (out iter, object);
 				row_deleted (get_path (iter));
 
-				time_record.list = null;
-				(this as ArrayList<TimeRecord>).remove (time_record);
+				(this as ArrayList<Object>).remove (object);
 			}
 
 			public new void remove_all () {
-				var list = new TimeRecord[0];
+				var list = new Object[0];
 
-				foreach (var time_record in this) {
-					list += time_record;
+				foreach (var object in this) {
+					list += object;
 				}
 
-				foreach (var time_record in list) {
-					remove (time_record);
+				foreach (var object in list) {
+					remove (object);
 				}
 			}
-
-			public bool contains_id (int id) {
-				foreach (var time_record in this) {
-					if (time_record.id == id) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			public TimeRecord? get_with_id (int id) {
-				foreach (var time_record in this) {
-					if (time_record.id == id) {
-						return time_record;
-					}
-				}
-
-				return null;
-			}
-
-			public TimeRecord? get_with_employee_id (int employee_id) {
-				foreach (var time_record in this) {
-					if (time_record.employee_id == employee_id) {
-						return time_record;
-					}
-				}
-
-				return null;
-			}
-
 
 			/* TreeModel implementation */
 			public Type get_column_type (int index_) {
 				switch (index_) {
 					case Columns.OBJECT:
-						return typeof (TimeRecord);
-					case Columns.ID:
-						return typeof (int);
-					case Columns.EMPLOYEE:
-						return typeof (Employee);
-					case Columns.START:
-						return typeof (DateTime);
-					case Columns.END:
-						return typeof (DateTime);
+						return typeof (Object);
+					case Columns.CHECKED:
+						return typeof (bool);
 					default:
 						return Type.INVALID;
 				}
@@ -151,29 +105,18 @@ namespace Mobilect {
 
 			public TreePath? get_path (TreeIter iter) requires (iter_valid (iter)) {
 				var path = new TreePath ();
-				path.append_index (this.index_of (get_from_iter (iter)));
+				path.append_index (this.index_of (iter.user_data as Object));
 
 				return path;
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter_valid (iter)) {
-				var time_record = get_from_iter (iter);
-
 				switch (column) {
 					case Columns.OBJECT:
-						value = time_record;
+						value = iter.user_data as Object;
 						break;
-					case Columns.ID:
-						value = time_record.id;
-						break;
-					case Columns.EMPLOYEE:
-						value = time_record.employee;
-						break;
-					case Columns.START:
-						value = time_record.start;
-						break;
-					case Columns.END:
-						value = time_record.end;
+					case Columns.CHECKED:
+						value = (bool) iter.user_data2;
 						break;
 					default:
 						value = Value (Type.INVALID);
@@ -187,7 +130,7 @@ namespace Mobilect {
 					return false;
 				}
 
-				return get_iter_from_time_record (out iter, this.first ());
+				return get_iter_from_object (out iter, this.first ());
 			}
 
 			public bool iter_has_child (TreeIter iter) {
@@ -203,7 +146,7 @@ namespace Mobilect {
 			}
 
 			public bool iter_next (ref TreeIter iter) requires (iter_valid (iter)) {
-				return get_iter_with_index (out iter, this.index_of (get_from_iter (iter)) + 1);
+				return get_iter_with_index (out iter, this.index_of (iter.user_data as Object) + 1);
 			}
 
 			public bool iter_nth_child (out TreeIter iter, TreeIter? parent, int n) {
@@ -221,17 +164,13 @@ namespace Mobilect {
 			}
 
 			/* Additional TreeModel implementation */
-			public TimeRecord get_from_iter (TreeIter iter) requires (iter_valid (iter)) {
-				return iter.user_data as TimeRecord;
-			}
-
 			public bool iter_valid (TreeIter iter) {
 				return iter.stamp == this.stamp && iter.user_data != null;
 			}
 
-			public bool get_iter_from_time_record (out TreeIter iter, TimeRecord time_record) {
-				if (time_record in this) {
-					create_iter (out iter, time_record);
+			public bool get_iter_from_object (out TreeIter iter, Object object) {
+				if (object in this) {
+					create_iter (out iter, object);
 					return true;
 				} else {
 					iter = TreeIter ();
@@ -245,20 +184,21 @@ namespace Mobilect {
 					return false;
 				}
 
-				var time_record = (this as ArrayList<TimeRecord>).get (index);
+				var object = (this as ArrayList<Object>).get (index);
 
-				assert (time_record != null);
+				assert (object != null);
 
-				create_iter (out iter, time_record);
+				create_iter (out iter, object);
 
 				return true;
 			}
 
-			private void create_iter (out TreeIter iter, TimeRecord time_record) {
+			private void create_iter (out TreeIter iter, Object object) {
 				/* We simply store a pointer to our custom record in the iter */
 				iter = TreeIter () {
 					stamp      = this.stamp,
-					user_data  = time_record
+					user_data  = object,
+					user_data2 = (void*) false
 				};
 			}
 

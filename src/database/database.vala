@@ -30,6 +30,7 @@ namespace Mobilect {
 			public Connection cnc { get; private set; }
 			public DataHandler dh_string { get; private set; }
 
+			public BranchList branch_list { get; private set; }
 			public EmployeeList employee_list { get; private set; }
 			public AdministratorList administrator_list { get; private set; }
 
@@ -47,6 +48,12 @@ namespace Mobilect {
 
 				dh_string = cnc.get_provider ().get_data_handler_g_type (cnc, typeof (string));
 
+				/* Create branches table if doesn't exists */
+				execute_sql ("CREATE TABLE IF NOT EXISTS branches (" +
+				             "  id integer primary key autoincrement," +
+				             "  name string not null" +
+				             ")");
+
 				/* Create employees table if doesn't exists */
 				execute_sql ("CREATE TABLE IF NOT EXISTS employees (" +
 				             "  id integer primary key autoincrement," +
@@ -55,7 +62,8 @@ namespace Mobilect {
 				             "  middlename string not null," +
 				             "  tin string not null," +
 				             "  password string not null," +
-				             "  rate integer" +
+				             "  rate integer," +
+				             "  branch_id integer" +
 				             ")");
 
 				/* Create time_records table if doesn't exists */
@@ -118,6 +126,9 @@ namespace Mobilect {
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				}
 
+				branch_list = new BranchList (this);
+				update_branches ();
+
 				employee_list = new EmployeeList (this);
 				update_employees ();
 
@@ -131,6 +142,42 @@ namespace Mobilect {
 					cnc.statement_execute_non_select (stmt, null, null);
 				} catch (Error e) {
 					warning ("Failed to execute SQL: %s", e.message);
+				}
+			}
+
+			public void update_branches () {
+				branch_list.remove_all ();
+
+				try {
+					var stmt = cnc.parse_sql_string ("SELECT id" +
+					                                 "  FROM branches",
+					                                 null);
+					var data_model = cnc.statement_execute_select (stmt, null);
+
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						branch_list.add (new Branch (data_model.get_value_at (0, i).get_int (), this));
+					}
+				} catch (Error e) {
+					warning ("Failed to update branch list: %s", e.message);
+				}
+			}
+
+			public void add_branch (string name) {
+				Set stmt_params, last_insert_row;
+
+				try {
+					var stmt = cnc.parse_sql_string ("INSERT INTO branches (name)" +
+					                                 "  VALUES (##name::string)",
+					                                 out stmt_params);
+					stmt_params.get_holder ("name").set_value_str (null, name);
+					cnc.statement_execute_non_select (stmt, stmt_params, out last_insert_row);
+					if (last_insert_row != null) {
+						branch_list.add (new Branch (last_insert_row.get_holder_value ("+0").get_int (), this));
+					} else {
+						update_branches ();
+					}
+				} catch (Error e) {
+					warning ("Failed to add branch to database: %s", e.message);
 				}
 			}
 
@@ -188,14 +235,15 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate) {
+			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate, Branch branch) {
 				Set stmt_params, last_insert_row;
 
 				Value value_rate = rate;
+				Value value_branch_id = branch.id;
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate)" +
-					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##tin::string, ##password::string, ##rate::int)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate, branch_id)" +
+					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##tin::string, ##password::string, ##rate::int, ##branch_id::int)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("lastname").set_value_str (null, lastname);
 					stmt_params.get_holder ("firstname").set_value_str (null, firstname);
@@ -203,6 +251,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("tin").set_value_str (null, tin);
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					stmt_params.get_holder ("rate").set_value (value_rate);
+					stmt_params.get_holder ("branch_id").set_value (value_branch_id);
 					cnc.statement_execute_non_select (stmt, stmt_params, out last_insert_row);
 					if (last_insert_row != null) {
 						employee_list.add (new Employee (last_insert_row.get_holder_value ("+0").get_int (), this));

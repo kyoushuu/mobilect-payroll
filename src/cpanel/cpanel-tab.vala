@@ -52,6 +52,8 @@ namespace Mobilect {
 
 				if (action_name != null) {
 					this.action_group = new Gtk.ActionGroup (action_name);
+					this.action_group.sensitive = false;
+					this.action_group.visible = false;
 					cpanel.window.ui_manager.insert_action_group (this.action_group, -1);
 				}
 

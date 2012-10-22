@@ -152,6 +152,7 @@ namespace Mobilect {
 				if (this._time_record != null) {
 					TreeIter iter;
 					Employee employee;
+
 					if (this.employee_combobox.get_active_iter (out iter)) {
 						this.employee_combobox.model.get (iter, EmployeeList.Columns.OBJECT, out employee);
 						this._time_record.employee = employee;

@@ -96,7 +96,7 @@ namespace Mobilect {
 				renderer_spin.edited.connect ((r, p, n) => {
 					render_spin_edited (p, n, Deductions.Category.TAX);
 				});
-				column = new TreeViewColumn.with_attributes (_("Tax"), renderer_spin);
+				column = new TreeViewColumn.with_attributes (_("Tax / SSS"), renderer_spin);
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;
@@ -138,7 +138,7 @@ namespace Mobilect {
 				renderer_spin.edited.connect ((r, p, n) => {
 					render_spin_edited (p, n, Deductions.Category.PAG_IBIG);
 				});
-				column = new TreeViewColumn.with_attributes (_("PAG-IBIG"), renderer_spin);
+				column = new TreeViewColumn.with_attributes (_("PAG-IBIG / PH"), renderer_spin);
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;

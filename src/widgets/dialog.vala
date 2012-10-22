@@ -70,7 +70,7 @@ namespace Mobilect {
 				(action_area as ButtonBox).set_child_secondary (help_button, true);
 				this.response.connect ((d, r) => {
 														if (r == ResponseType.HELP) {
-															(this.transient_for as Window).app.show_help (null, this.help_link_id);
+															(this.transient_for as Window).help (null, this.help_link_id);
 														}
 													});
 

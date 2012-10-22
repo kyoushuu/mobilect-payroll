@@ -18,9 +18,7 @@
 
 
 using Gtk;
-using Gdk;
 using Config;
-using Portability;
 
 
 namespace Mobilect {
@@ -54,7 +52,7 @@ namespace Mobilect {
 				try {
 					database = new Database (this);
 				} catch (Error e) {
-					var e_dialog = new MessageDialog (this.get_window (), DialogFlags.MODAL,
+					var e_dialog = new MessageDialog (null, DialogFlags.MODAL,
 					                                  MessageType.ERROR, ButtonsType.OK,
 					                                  _("Failed to load database."));
 					e_dialog.secondary_text = e.message;
@@ -73,9 +71,10 @@ namespace Mobilect {
 														 type = MessageType.WARNING;
 													 }
 
-													 var dialog = new MessageDialog (this.get_window (), DialogFlags.DESTROY_WITH_PARENT,
+													 var dialog = new MessageDialog (null, DialogFlags.DESTROY_WITH_PARENT,
 													                                 type, ButtonsType.OK,
 													                                 text);
+													 dialog.title = _("Mobilect Payroll");
 
 													 if (l != LogLevelFlags.LEVEL_MESSAGE) {
 														 dialog.secondary_text = m;
@@ -93,37 +92,6 @@ namespace Mobilect {
 
 				var window = new Window (this);
 				window.present ();
-			}
-
-			public void show_help (string? name, string? link_id) {
-				var window = this.get_window ();
-
-				try {
-					var page = "%s/share/help/C/%s/%s.html"
-						.printf (get_prefix (), name?? PACKAGE, link_id?? "index");
-
-					if (AppInfo.get_default_for_uri_scheme ("help") == null &&
-					    FileUtils.test (page, FileTest.IS_REGULAR)) {
-						if (!show_file (window, page)) {
-							warning ("Failed to display the help");
-						}
-					} else {
-						show_uri (window != null? (window as Widget).get_screen () : null,
-						          "help:%s/%s".printf (name?? PACKAGE, link_id?? "index"),
-						          CURRENT_TIME);
-					}
-				} catch (Error e) {
-					if (window != null) {
-						window.show_error_dialog (_("Failed to display the help"), e.message);
-					} else {
-						warning ("Failed to display the help: %s", e.message);
-					}
-				}
-			}
-
-			private Window? get_window () {
-				var windows = this.get_windows ().copy ();
-				return windows != null? windows.data as Window : null;
 			}
 
 		}

@@ -28,6 +28,8 @@ namespace Mobilect {
 
 			public Grid grid { public get; private set; }
 
+			public ComboBox branch_combobox { public get; private set; }
+
 			public Entry lastname_entry { public get; private set; }
 			public Entry firstname_entry { public get; private set; }
 			public Entry middlename_entry { public get; private set; }
@@ -48,6 +50,17 @@ namespace Mobilect {
 						middlename_entry.text = value.middlename?? "";
 						tin_entry.text = value.tin?? "";
 						rate_spin.value = value.rate;
+
+						var branches = employee.database.branch_list;
+						branch_combobox.model = branches;
+
+						if (_employee.branch != null) {
+							TreeIter iter;
+
+							if (branches.get_iter_with_id (out iter, _employee.branch.id)) {
+								branch_combobox.set_active_iter (iter);
+							}
+						}
 					}
 				}
 			}
@@ -76,12 +89,12 @@ namespace Mobilect {
 				lastname_entry.activates_default = true;
 				lastname_entry.secondary_icon_tooltip_text = _("Last name is empty");
 				lastname_entry.changed.connect ((e) => {
-														if (lastname_entry.text_length > 0) {
-															lastname_entry.secondary_icon_stock = null;
-														} else {
-															lastname_entry.secondary_icon_stock = Stock.DIALOG_WARNING;
-														}
-													});
+	if (lastname_entry.text_length > 0) {
+		lastname_entry.secondary_icon_stock = null;
+	} else {
+		lastname_entry.secondary_icon_stock = Stock.DIALOG_WARNING;
+	}
+});
 				grid.attach_next_to (lastname_entry,
 				                     lastname_label,
 				                     PositionType.RIGHT,
@@ -156,6 +169,26 @@ namespace Mobilect {
 				rate_spin.show ();
 
 
+				var branch_label = new Label.with_mnemonic (_("_Branch:"));
+				branch_label.xalign = 0.0f;
+				grid.add (branch_label);
+				branch_label.show ();
+
+				branch_combobox = new ComboBox ();
+				branch_combobox.hexpand = true;
+				grid.attach_next_to (branch_combobox,
+				                     branch_label,
+				                     PositionType.RIGHT,
+				                     1, 1);
+				branch_label.mnemonic_widget = branch_combobox;
+				branch_combobox.show ();
+
+				var branch_cell_renderer = new CellRendererText ();
+				branch_combobox.pack_start (branch_cell_renderer, true);
+				branch_combobox.add_attribute (branch_cell_renderer,
+				                               "text", BranchList.Columns.NAME);
+
+
 				pop_composite_child ();
 
 
@@ -164,11 +197,19 @@ namespace Mobilect {
 
 			public void save () {
 				if (this._employee != null) {
+					TreeIter iter;
+					Branch branch;
+
 					this._employee.lastname = this.lastname_entry.text;
 					this._employee.firstname = this.firstname_entry.text;
 					this._employee.middlename = this.middlename_entry.text;
 					this._employee.tin = this.tin_entry.text;
 					this._employee.rate = this.rate_spin.get_value_as_int ();
+
+					if (this.branch_combobox.get_active_iter (out iter)) {
+						this.branch_combobox.model.get (iter, BranchList.Columns.OBJECT, out branch);
+						this._employee.branch = branch;
+					}
 				}
 			}
 

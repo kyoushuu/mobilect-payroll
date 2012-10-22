@@ -100,7 +100,7 @@ namespace Mobilect {
 
 						if (administrator.get_password_checksum () ==
 						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1)) {
-								this.window.notebook.page = this.window.PAGE_ADMIN;
+								this.window.notebook.page = Window.Page.CONTROL_PANEL;
 								this.username_entry.text = "";
 								this.password_entry.text = "";
 							} else {
@@ -112,7 +112,7 @@ namespace Mobilect {
 				});
 
 				button_cancel.clicked.connect ((t) => {
-					this.window.notebook.page = this.window.PAGE_LOGIN_EMPLOYEE;
+					this.window.notebook.page = Window.Page.LOGIN_EMPLOYEE;
 				});
 			}
 

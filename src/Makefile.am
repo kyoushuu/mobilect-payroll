@@ -29,20 +29,25 @@ mobilect_payroll_SOURCES = \
 	main/application.vala \
 	main/window.vala \
 	database/database.vala \
+	database/branch.vala \
+	database/branch-list.vala \
 	database/employee.vala \
 	database/employee-list.vala \
 	database/time-record.vala \
 	database/time-record-list.vala \
-	database/deductions.vala \
 	database/administrator.vala \
 	database/administrator-list.vala \
+	database/deductions.vala \
 	database/month-info.vala \
-	database-widgets/administrator-edit-widget.vala \
-	database-widgets/administrator-edit-dialog.vala \
+	database-widgets/branch-edit-widget.vala \
+	database-widgets/branch-edit-dialog.vala \
 	database-widgets/employee-edit-widget.vala \
 	database-widgets/employee-edit-dialog.vala \
 	database-widgets/time-record-edit-widget.vala \
 	database-widgets/time-record-edit-dialog.vala \
+	database-widgets/administrator-edit-widget.vala \
+	database-widgets/administrator-edit-dialog.vala \
+	widgets/check-list.vala \
 	widgets/dialog.vala \
 	widgets/find-dialog.vala \
 	widgets/password-dialog.vala \
@@ -53,13 +58,15 @@ mobilect_payroll_SOURCES = \
 	login/admin-login-page.vala \
 	cpanel/cpanel.vala \
 	cpanel/cpanel-tab.vala \
+	cpanel/cpanel-branches.vala \
 	cpanel/cpanel-employees.vala \
-	cpanel/cpanel-administrators.vala \
 	cpanel/cpanel-time-records.vala \
+	cpanel/cpanel-administrators.vala \
 	cpanel/cpanel-deductions.vala \
 	cpanel/cpanel-holidays.vala \
 	cpanel/cpanel-report.vala \
-  settings/settings.vala \
+	cpanel/report-assistant.vala \
+	settings/settings.vala \
 	report/report.vala \
 	report/regular-report.vala \
 	report/overtime-report.vala \
@@ -74,10 +81,11 @@ mobilect_payroll_SOURCES = \
 	filter/time-period.vala \
 	config.vapi \
 	portability/portability.vapi \
-  portability/portability.c \
-  resources/resources.c
+	portability/portability.c \
+	resources/resources.c
 
-mobilect_payroll_VALAFLAGS = \
+mobilect_payroll_VALAFLAGS =  \
+	--vapidir=$(top_srcdir)/vapi \
 	--pkg gtk+-3.0 \
 	--pkg gdk-3.0 \
 	--pkg glib-2.0 \
@@ -87,8 +95,8 @@ mobilect_payroll_VALAFLAGS = \
 	--pkg pangocairo \
 	--pkg libxml-2.0 \
 	--pkg libgda-5.0 \
-	--pkg gee-1.0 \
-	--vapidir $(top_srcdir)/vapi
+	--pkg $(GEE_MODULE) \
+	--debug
 
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \
@@ -107,10 +115,10 @@ mobilect_payroll_LDADD += mobilect-payroll-win32-res.o
 endif
 
 
-
 ui_files = \
 	ui/mobilect-payroll-ui.xml \
 	ui/mobilect-payroll-cpanel-ui.xml \
+	ui/mobilect-payroll-cpanel-branches-ui.xml \
 	ui/mobilect-payroll-cpanel-employees-ui.xml \
 	ui/mobilect-payroll-cpanel-time-records-ui.xml \
 	ui/mobilect-payroll-cpanel-deductions-ui.xml \
@@ -129,6 +137,6 @@ resources/resources.c: resources/mobilect-payroll.gresource.xml $(ui_files)
 
 EXTRA_DIST = \
 	mobilect-payroll.rc.in \
-  portability/portability.h \
+	portability/portability.h \
 	resources/mobilect-payroll.gresource.xml \
 	$(ui_files)

@@ -107,7 +107,10 @@ PKG_CHECK_MODULES(CAIRO, cairo)
 PKG_CHECK_MODULES(PANGOCAIRO, pangocairo)
 PKG_CHECK_MODULES(XML, libxml-2.0)
 PKG_CHECK_MODULES(GDA, libgda-5.0 >= $GDA_REQUIRED)
-PKG_CHECK_MODULES(GEE, gee-1.0)
+PKG_CHECK_MODULES(GEE, gee-0.8,
+                  [GEE_MODULE=gee-0.8],
+                  [PKG_CHECK_MODULES(GEE, gee-1.0, [GEE_MODULE=gee-1.0])])
+AC_SUBST(GEE_MODULE)
 
 
 dnl ***************************************************************************

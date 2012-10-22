@@ -94,7 +94,7 @@ namespace Mobilect {
 					var wd = (DateWeekday) value;
 					switch (wd) {
 						case DateWeekday.SUNDAY:
-							markup = _("<span foreground=\"red\">Sun</span>");
+							markup = _("<b>Sun</b>");
 							break;
 						case DateWeekday.MONDAY:
 							markup = _("Mon");

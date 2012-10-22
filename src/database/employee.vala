@@ -35,6 +35,31 @@ namespace Mobilect {
 			public double rate_per_day { get { return rate / 26.0; } }
 			public double rate_per_hour { get { return rate / (26.0 * 8.0); } }
 
+			private Branch _branch;
+			public Branch branch {
+				get {
+					return _branch;
+				}
+				set {
+					if (value != null) {
+						_branch = value;
+					}
+				}
+			}
+
+			/* -1 if not found */
+			public int branch_id {
+				get {
+					return _branch != null? _branch.id : -1;
+				}
+				set {
+					var e = database.branch_list.get_with_id (value);
+					if (e != null) {
+						_branch = e;
+					}
+				}
+			}
+
 			internal weak Database database { get; private set; }
 			internal weak EmployeeList list { get; set; }
 
@@ -49,7 +74,7 @@ namespace Mobilect {
 				if (id != 0) {
 					try {
 						/* Get employee data from database */
-						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename, tin, rate" +
+						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename, tin, rate, branch_id" +
 						                                          "  FROM employees" +
 						                                          "  WHERE id=##id::int",
 						                                          out stmt_params);
@@ -70,6 +95,13 @@ namespace Mobilect {
 
 						var cell_data_rate = data_model.get_value_at (4, 0);
 						this.rate = (int) cell_data_rate;
+
+						if (branch != null) {
+							this.branch = branch;
+						} else {
+							var cell_data_branch_id = data_model.get_value_at (5, 0);
+							this.branch_id = (int) cell_data_branch_id;
+						}
 					} catch (Error e) {
 						warning ("Failed to get employee data from database: %s", e.message);
 					}
@@ -219,6 +251,7 @@ namespace Mobilect {
 				Set stmt_params;
 				Value value_id = this.id;
 				Value value_rate = this.rate;
+				Value value_branch_id = this.branch.id;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
@@ -226,7 +259,8 @@ namespace Mobilect {
 					                                          "    firstname=##firstname::string," +
 					                                          "    middlename=##middlename::string," +
 					                                          "    tin=##tin::string," +
-					                                          "    rate=##rate::int" +
+					                                          "    rate=##rate::int," +
+					                                          "    branch_id=##branch_id::int" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
@@ -235,6 +269,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("middlename").set_value_str (database.dh_string, this.middlename);
 					stmt_params.get_holder ("tin").set_value_str (database.dh_string, this.tin);
 					stmt_params.get_holder ("rate").set_value (value_rate);
+					stmt_params.get_holder ("branch_id").set_value (value_branch_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					warning ("Failed to update employee in database: %s", e.message);

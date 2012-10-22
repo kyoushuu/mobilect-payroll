@@ -28,7 +28,6 @@ namespace Mobilect {
 			public MonthInfo.HolidayType holiday_type { get; private set; }
 			public double rate { get; private set; }
 			public PayPeriod[] periods { get; private set; }
-			public double[] minus_period_rates { get; private set; }
 			public Filter[] filters { get; private set; }
 
 
@@ -36,16 +35,15 @@ namespace Mobilect {
 			                 bool is_sunday_work,
 			                 MonthInfo.HolidayType holiday_type,
 			                 double rate,
-			                 PayPeriod[] periods,
-			                 double[]? minus_period_rates) {
+			                 PayPeriod[] periods) {
 				this.name = name;
 				this.is_sunday_work = is_sunday_work;
 				this.holiday_type = holiday_type;
 				this.rate = rate;
 				this.periods = periods;
-				this.minus_period_rates = minus_period_rates;
 				this.filters = new Filter[periods.length];
 
+				/* Cache filters */
 				for (int i = 0; i < periods.length; i++) {
 					var filter = new Filter ();
 					filter.time_periods = periods[i].time_periods;

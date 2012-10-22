@@ -29,47 +29,26 @@ namespace Mobilect {
 
 		public class OvertimeReport : Report {
 
-			private int lines_per_page;
-			private int lines_first_page;
-			private int num_lines;
-
-			private double height;
-			private double width;
-			private double payroll_height;
-			private double payroll_width;
-
-			private double table_top;
-			private double header_height;
-			private double footer_height;
 			private double table_width;
-			private double table_header_height;
 
 			/* In points */
 			private double hour_column_width = 25;
 			private double number_column_width = 60;
-			private double name_column_width = 120;
+			private double name_column_width = 150;
 			private double signature_column_width = 70;
 
 			private int pages_v;
 			private int pages_h;
-			private int pages_payroll;
-			private int pages_payslip;
 
 			private Surface[] surfaces;
+			private double[] units;
 			private double[] earnings;
+			private double total_earnings;
 			public PayGroup[] pay_groups { get; set; }
 
 
 			public OvertimeReport (Date start, Date end) throws ReportError {
 				base (start, end);
-			}
-
-
-			public override void request_page_setup (PrintContext context, int page_nr, PageSetup setup) {
-				/* Print payroll in landscape */
-				if (page_nr < pages_payroll) {
-					setup.set_orientation (PageOrientation.LANDSCAPE);
-				}
 			}
 
 			public override void begin_print (PrintContext context) {
@@ -83,12 +62,12 @@ namespace Mobilect {
 				var table_header_line_height = table_header_height/3;
 
 
-				height = context.get_height ();
-				width = context.get_width ();
+				payslip_height = context.get_height ();
+				payslip_width = context.get_width ();
 
 				/* Landscape for payroll */
-				payroll_height = width;
-				payroll_width = height;
+				payroll_height = payslip_width;
+				payroll_width = payslip_height;
 
 
 				/* Name, Rate and Hourly Rate */
@@ -104,6 +83,7 @@ namespace Mobilect {
 					table_width += number_column_width;
 				}
 				/* Total and Signature */
+				double total_x = table_width;
 				table_width += number_column_width;
 				table_width += signature_column_width;
 
@@ -121,11 +101,11 @@ namespace Mobilect {
 					lines_first_page = num_lines;
 				}
 
-				payslip_per_page = (int) Math.floor (height / get_payslip_height ());
+				payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
 
 
-				/* Note: +10 for footer */
-				pages_v = (int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 10) / lines_per_page);
+				/* Note: +12 for footer */
+				pages_v = (int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 12) / lines_per_page);
 				pages_h = (int) Math.ceil (table_width / payroll_width);
 				pages_payroll = pages_v * pages_h;
 				pages_payslip = (int) Math.ceil ((double) employees.size / payslip_per_page);
@@ -135,6 +115,7 @@ namespace Mobilect {
 				double table_x, table_y;
 
 
+				units = new double[employees.size];
 				earnings = new double[employees.size];
 
 
@@ -148,6 +129,7 @@ namespace Mobilect {
 					var cr = new Cairo.Context (surfaces[surface]);
 
 					var layout = context.create_pango_layout ();
+					layout.get_context ().set_font_map (CairoFontMap.new_for_font_type (FontType.FT));
 					layout.set_wrap (Pango.WrapMode.WORD_CHAR);
 					layout.set_ellipsize (EllipsizeMode.END);
 
@@ -187,7 +169,7 @@ namespace Mobilect {
 						layout.set_font_description (header_font);
 						layout.set_width (units_from_double (payroll_width/2));
 
-						cr.move_to (payroll_width/2, table_top - (header_font_height + padding));
+						cr.move_to (table_width > payroll_width? table_width - (payroll_width / 2) : payroll_width - (table_width / 2), table_top - (header_font_height + padding));
 						layout.set_markup (_("For the period of %s").printf (period_to_string (start, end).up ()), -1);
 						cairo_show_layout (cr, layout);
 
@@ -400,9 +382,7 @@ namespace Mobilect {
 
 					for (int i = 0; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++) {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
-						double salary = 0, subtotal, hours, pay, rate, deduction;
-
-						layout.set_height (units_from_double (text_font_height));
+						double salary = 0, subtotal, hours, total_hours = 0, pay, rate, deduction;
 
 						layout.set_font_description (text_font);
 						layout.set_alignment (Pango.Alignment.LEFT);
@@ -435,14 +415,19 @@ namespace Mobilect {
 							subtotal = 0;
 							deduction = 0;
 
+							layout.set_font_description (number_font);
+
 							for (var j = 0; j < pay_group.periods.length; j++) {
 								var pay_period = pay_group.periods[j];
 								hours = employee.get_hours (pay_group.create_filter (j, start, end));
 								pay = hours * rate * pay_period.rate;
 
 								subtotal += pay;
-								if (pay_group.minus_period_rates != null) {
-									deduction += hours * rate * pay_group.minus_period_rates[j];
+								total_hours += hours;
+
+								/* Deduct part already paid in regular payroll */
+								if (!pay_period.is_overtime) {
+									deduction += hours * rate;
 								}
 
 								/* Hour */
@@ -463,6 +448,7 @@ namespace Mobilect {
 							salary += subtotal;
 
 							/* Subtotal each group */
+							layout.set_font_description (emp_number_font);
 							layout.set_width (units_from_double (number_column_width - (padding * 2)));
 							layout.set_markup ("%.2lf".printf (subtotal), -1);
 							cairo_show_layout (cr, layout);
@@ -470,6 +456,7 @@ namespace Mobilect {
 						}
 
 						/* Total */
+						layout.set_font_description (emp_number_font);
 						layout.set_width (units_from_double (number_column_width - (padding * 2)));
 						layout.set_markup ("%.2lf".printf (salary), -1);
 						cairo_show_layout (cr, layout);
@@ -483,9 +470,58 @@ namespace Mobilect {
 						cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * ((2 * i) + 1)));
 						layout.set_markup (employee.tin, -1);
 						cairo_show_layout (cr, layout);
-						cr.rel_move_to (0, (text_font_height + (padding * 2)));
 
+						units[i + id] = total_hours;
 						earnings[i + id] = salary;
+						total_earnings += salary;
+					}
+
+					if (surface == pages_v - 1) {
+						double y;
+						cr.get_current_point (null, out y);
+						y += (text_font_height + (padding * 2)) * 2;
+
+						layout.set_width (units_from_double (number_column_width - (padding * 2)));
+						layout.set_font_description (emp_number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+
+						cr.move_to (total_x, y);
+						layout.set_markup (_("%.2lf").printf (total_earnings), -1);
+						cairo_show_layout (cr, layout);
+
+						layout.set_width (units_from_double (table_width / 2));
+						layout.set_font_description (header_font);
+						layout.set_alignment (Pango.Alignment.LEFT);
+
+						cr.move_to (table_width / 2, y);
+						layout.set_markup (_("TOTAL OVERTIME:"), -1);
+						cairo_show_layout (cr, layout);
+
+						layout.set_font_description (header_font);
+						layout.set_alignment (Pango.Alignment.LEFT);
+
+						cr.move_to (0, y + (text_font_height + (padding * 2)) * 3);
+						layout.set_markup (_("Prepared by:"), -1);
+						cairo_show_layout (cr, layout);
+						cr.rel_move_to (0, (text_font_height + (padding * 2)) * 3);
+						layout.set_markup (_("<u>%s</u>").printf (preparer), -1);
+						cairo_show_layout (cr, layout);
+
+						int layout_width;
+						cr.move_to ((table_width / 2), y + (text_font_height + (padding * 2)) * 3);
+						layout.set_markup (_("Approved by:"), -1);
+						cairo_show_layout (cr, layout);
+						cr.rel_move_to (0, (text_font_height + (padding * 2)) * 3);
+						layout.set_markup (_("<u>%s</u>").printf (approver), -1);
+						cairo_update_layout (cr, layout);
+						layout.get_size (out layout_width, null);
+						cairo_show_layout (cr, layout);
+
+						layout.set_width (layout_width);
+						layout.set_alignment (Pango.Alignment.CENTER);
+						cr.rel_move_to (0, text_font_height + (padding * 2));
+						layout.set_markup (approver_position, -1);
+						cairo_show_layout (cr, layout);
 					}
 				}
 			}
@@ -510,7 +546,7 @@ namespace Mobilect {
 					double y = 0;
 					var size = employees.size;
 					for (int i = 0; i < payslip_per_page && i + id < size; i++) {
-						draw_payslip (context, y, (employees as ArrayList<Employee>).get (i + id), earnings[i + id]);
+						draw_payslip (context, y, (employees as ArrayList<Employee>).get (i + id), units[i + id], earnings[i + id]);
 						y += get_payslip_height ();
 					}
 				}

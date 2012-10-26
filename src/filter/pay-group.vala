@@ -25,6 +25,7 @@ namespace Mobilect {
 
 			public string name { get; private set; }
 			public bool is_sunday_work { get; private set; }
+			public bool straight_time { get; private set; }
 			public MonthInfo.HolidayType holiday_type { get; private set; }
 			public double rate { get; private set; }
 			public PayPeriod[] periods { get; private set; }
@@ -32,12 +33,14 @@ namespace Mobilect {
 
 
 			public PayGroup (string name,
+			                 bool straight_time,
 			                 bool is_sunday_work,
 			                 MonthInfo.HolidayType holiday_type,
 			                 double rate,
 			                 PayPeriod[] periods) {
 				this.name = name;
 				this.is_sunday_work = is_sunday_work;
+				this.straight_time = straight_time;
 				this.holiday_type = holiday_type;
 				this.rate = rate;
 				this.periods = periods;
@@ -50,6 +53,7 @@ namespace Mobilect {
 					filter.use_holiday_type = true;
 					filter.holiday_type = holiday_type;
 					filter.sunday_work = is_sunday_work;
+					filter.straight_time = straight_time;
 					filter.period = periods[i].is_overtime? 1.0 : 4.0;
 					this.filters[i] = filter;
 				}

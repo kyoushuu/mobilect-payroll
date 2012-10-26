@@ -299,6 +299,11 @@ namespace Mobilect {
 							return;
 						}
 
+						database.add_time_record (time_record.employee_id,
+						                          time_record.start,
+						                          time_record.end,
+						                          time_record.straight_time);
+
 						dialog.destroy ();
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();

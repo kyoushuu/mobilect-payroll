@@ -44,6 +44,8 @@ namespace Mobilect {
 
 			private Deductions deductions;
 
+			private double index_column_width = 20;
+
 
 			public RegularReport (Date start, Date end) throws ReportError, RegularReportError {
 				base (start, end);
@@ -76,6 +78,8 @@ namespace Mobilect {
 				filter_nh = new Filter ();
 				filter_nh.use_holiday_type = true;
 				filter_nh.holiday_type = MonthInfo.HolidayType.NON_HOLIDAY;
+				filter_nh.sunday_work = false;
+				filter_nh.straight_time = false;
 				filter_nh.date_start = start;
 				filter_nh.date_end = end;
 				filter_nh.time_periods = new TimePeriod[] {
@@ -219,6 +223,14 @@ namespace Mobilect {
 				/* Landscape for payroll */
 				payroll_height = payslip_width;
 				payroll_width = payslip_height;
+
+
+				if (continuous) {
+					payslip_per_page = employees.size;
+					payslip_height = payslip_per_page * get_payslip_height ();
+				} else {
+					payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+				}
 
 
 				lines_first_page = (int) Math.floor ((payroll_height - header_height) / (text_font_height + (padding * 2)));
@@ -389,7 +401,10 @@ namespace Mobilect {
 
 
 						/* Draw table lines */
-						cr.rectangle (0, table_top, payroll_width, table_content_height + table_header_height);
+						cr.rectangle (table_border / 2,
+						              table_top + (table_border / 2),
+						              payroll_width - table_border,
+						              table_content_height + table_header_height - table_border);
 						/* Vertical */
 						for (int i = 0; i < 13; i++) {
 							cr.move_to (column_width * (2+i), table_top + ((i >= 4 && i <= 7)? (header_font_height + (padding * 2)) : 0));
@@ -401,16 +416,18 @@ namespace Mobilect {
 						cr.move_to (0, table_top + table_header_height);
 						cr.rel_line_to (payroll_width, 0);
 
-						cr.set_line_width (1.5);
+						cr.set_line_width (table_border);
 						cr.stroke ();
 					} else {
 						table_x = 0;
 						table_y = 0;
 
 						/* Draw table lines */
-						cr.rectangle (0, 0, payroll_width, table_content_height);
+						cr.rectangle (table_border / 2, table_border / 2,
+						              payroll_width - table_border,
+						              table_content_height - table_border);
 
-						cr.set_line_width (1.5);
+						cr.set_line_width (table_border);
 						cr.stroke ();
 					}
 
@@ -426,7 +443,7 @@ namespace Mobilect {
 						cr.move_to (column_width * (2+i), table_y);
 						cr.rel_line_to (0, table_content_height);
 					}
-					cr.set_line_width (1);
+					cr.set_line_width (cell_border);
 					cr.stroke ();
 
 
@@ -434,13 +451,23 @@ namespace Mobilect {
 					for (int i = 0, j = 1; i * 2 < page_num_lines && (i+id) * 2 < num_lines; i++, j = 1) {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
 
-						layout.set_width (units_from_double ((column_width * 2) - (padding * 2)));
+						layout.set_width (units_from_double (index_column_width - (padding * 2)));
+
+						layout.set_font_description (number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+
+						/* Index */
+						cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * 2 * i));
+						layout.set_markup ("%d.".printf (i + id + 1), -1);
+						cairo_show_layout (cr, layout);
+
+						layout.set_width (units_from_double ((column_width * 2) - (padding * 2) - index_column_width));
 
 						layout.set_font_description (text_font);
 						layout.set_alignment (Pango.Alignment.LEFT);
 
 						/* Name */
-						cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * 2 * i));
+						cr.rel_move_to (index_column_width, 0);
 						layout.set_markup (employee.get_name ().up (), -1);
 						cairo_show_layout (cr, layout);
 
@@ -450,7 +477,7 @@ namespace Mobilect {
 						layout.set_alignment (Pango.Alignment.RIGHT);
 
 						/* Rates */
-						cr.rel_move_to (column_width * 2 - padding, 0);
+						cr.rel_move_to (column_width * 2 - padding - index_column_width, 0);
 						layout.set_markup ("%.2lf".printf (cells[i + id, j]), -1);
 						cairo_show_layout (cr, layout);
 						j++;

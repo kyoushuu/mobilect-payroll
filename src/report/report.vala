@@ -41,7 +41,11 @@ namespace Mobilect {
 			public Date start { get; private set; }
 			public Date end { get; private set; }
 
+			public bool continuous;
+
 			public double padding = 1.0;
+			public double table_border = 1.5;
+			public double cell_border = 1.0;
 
 			public string preparer;
 			public string approver;
@@ -104,18 +108,39 @@ namespace Mobilect {
 					setup.set_bottom_margin (right_margin, Unit.POINTS);
 					setup.set_left_margin (top_margin, Unit.POINTS);
 					setup.set_right_margin (bottom_margin, Unit.POINTS);
+
+					if (continuous) {
+						var paper_size = new PaperSize.custom ("continuous-payroll-page-size",
+						                                       "Continuous Payroll Page Size",
+						                                       setup.get_paper_height (Unit.POINTS),
+						                                       top_margin + payroll_width + bottom_margin,
+						                                       Unit.POINTS);
+						setup.set_paper_size (paper_size);
+					}
+				} else {
+					if (continuous) {
+						var bottom_margin = setup.get_bottom_margin (Unit.POINTS);
+						var top_margin = setup.get_top_margin (Unit.POINTS);
+
+						var paper_size = new PaperSize.custom ("continuous-payslip-page-size",
+						                                       "Continuous Payslip Page Size",
+						                                       setup.get_paper_width (Unit.POINTS),
+						                                       top_margin + payslip_height + bottom_margin,
+						                                       Unit.POINTS);
+						setup.set_paper_size (paper_size);
+					}
 				}
 			}
 
-			public void print_dialog (Window window) throws Error {
+			public void print_dialog (Gtk.Window window) throws Error {
 				run (PrintOperationAction.PRINT_DIALOG, window);
 			}
 
-			public void preview_dialog (Window window) throws Error {
+			public void preview_dialog (Gtk.Window window) throws Error {
 				run (PrintOperationAction.PREVIEW, window);
 			}
 
-			public void export (Window window) throws Error {
+			public void export (Gtk.Window window) throws Error {
 				run (PrintOperationAction.EXPORT, window);
 			}
 

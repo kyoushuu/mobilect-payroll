@@ -133,7 +133,7 @@ namespace Mobilect {
 			}
 
 			public void log_employee_in () {
-				database.add_time_record (this.id, new DateTime.now_local (), null);
+				database.add_time_record (this.id, new DateTime.now_local (), null, false);
 			}
 
 			public void log_employee_out () {
@@ -185,7 +185,14 @@ namespace Mobilect {
 
 					for (int i = 0; i < data_model.get_n_rows (); i++) {
 						var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
+
+						/* Open end cannot be computed */
 						if (time_record.end == null) {
+							continue;
+						}
+
+						/* Check if straight time values matches */
+						if (filter.straight_time != time_record.straight_time) {
 							continue;
 						}
 

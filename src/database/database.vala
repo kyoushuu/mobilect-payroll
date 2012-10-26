@@ -74,7 +74,8 @@ namespace Mobilect {
 				             "  month integer," +
 				             "  day integer," +
 				             "  start timestamp not null," +
-				             "  end timestamp" +
+				             "  end timestamp," +
+				             "  straight_time boolean" +
 				             ")");
 
 				/* Create deductions table if doesn't exists */
@@ -344,16 +345,17 @@ namespace Mobilect {
 				return list;
 			}
 
-			public void add_time_record (int employee_id, DateTime start, DateTime? end) {
+			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time) {
 				Set stmt_params;
 				Value value_id = employee_id;
 				Value value_year = (int) start.get_year ();
 				Value value_month = (int) start.get_month ();
 				Value value_day = (int) start.get_day_of_month ();
+				Value value_straight_time = (bool) straight_time;
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end)" +
-					                                 "  VALUES (##employee_id::int, ##year::int, ##month::int, ##day::int, ##start::string, ##end::string::null)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end, straight_time)" +
+					                                 "  VALUES (##employee_id::int, ##year::int, ##month::int, ##day::int, ##start::string, ##end::string::null, ##straight_time::boolean)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("employee_id").set_value (value_id);
 					stmt_params.get_holder ("year").set_value (value_year);
@@ -361,6 +363,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("day").set_value (value_day);
 					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.format ("%F %T"));
 					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
+					stmt_params.get_holder ("straight_time").set_value (value_straight_time);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					warning ("Failed to add time record to database: %s", e.message);

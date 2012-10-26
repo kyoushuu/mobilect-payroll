@@ -34,6 +34,7 @@ namespace Mobilect {
 			public DateTimeSpinButton end_spin { public get; private set; }
 
 			public CheckButton open_end_check { public get; private set; }
+			public CheckButton straight_time_check { public get; private set; }
 
 			private TimeRecord _time_record;
 			public TimeRecord time_record {
@@ -51,6 +52,8 @@ namespace Mobilect {
 						var tr_null = (value.end == null);
 						open_end_check.active = tr_null;
 						end_spin.sensitive = !tr_null;
+
+						straight_time_check.active = value.straight_time;
 
 						var employees = time_record.database.employee_list;
 						employee_combobox.model = employees;
@@ -142,6 +145,15 @@ namespace Mobilect {
 				open_end_check.show ();
 
 
+				straight_time_check = new CheckButton.with_mnemonic (_("St_raight time only"));
+				straight_time_check.hexpand = true;
+				grid.attach_next_to (straight_time_check,
+				                     open_end_check,
+				                     PositionType.BOTTOM,
+				                     2, 1);
+				straight_time_check.show ();
+
+
 				pop_composite_child ();
 
 
@@ -160,6 +172,7 @@ namespace Mobilect {
 
 					this._time_record.start = this.start_spin.get_date_time ();
 					this._time_record.end = (this.open_end_check.active)? null : this.end_spin.get_date_time ();
+					this._time_record.straight_time = straight_time_check.active;
 				}
 			}
 

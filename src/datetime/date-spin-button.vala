@@ -74,10 +74,20 @@ namespace Mobilect {
 				date.set_parse (text);
 
 				if (date.valid ()) {
+					DateYear year = date.get_year ();
+					if (year >= 0 && year < 70) {
+						year += 2000;
+					} else if (year >= 70 && year < 100) {
+						year += 1900;
+					}
+					date.set_year (year);
+
 					new_value = date.get_julian ();
+
 					return (int) true;
 				} else {
 					new_value = 0;
+
 					return INPUT_ERROR;
 				}
 			}

@@ -10,5 +10,6 @@
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-administrators-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-holidays-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-report-ui.xml</file>
+    <file preprocess="xml-stripblanks">mobilect-payroll-report-assistant-ui.xml</file>
   </gresource>
 </gresources>

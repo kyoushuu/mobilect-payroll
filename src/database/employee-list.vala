@@ -339,6 +339,12 @@ namespace Mobilect {
 				this.enabled.set (employee, enabled);
 			}
 
+			public void set_is_enable_all (bool enabled) {
+				foreach (var employee in this) {
+					this.enabled.set (employee, enabled);
+				}
+			}
+
 			public EmployeeList get_subset (bool enabled) {
 				var list = new EmployeeList (this.database);
 

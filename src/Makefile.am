@@ -47,7 +47,6 @@ mobilect_payroll_SOURCES = \
 	database-widgets/time-record-edit-dialog.vala \
 	database-widgets/administrator-edit-widget.vala \
 	database-widgets/administrator-edit-dialog.vala \
-	widgets/check-list.vala \
 	widgets/dialog.vala \
 	widgets/find-dialog.vala \
 	widgets/password-dialog.vala \
@@ -65,11 +64,18 @@ mobilect_payroll_SOURCES = \
 	cpanel/cpanel-deductions.vala \
 	cpanel/cpanel-holidays.vala \
 	cpanel/cpanel-report.vala \
-	cpanel/report-assistant.vala \
 	settings/settings.vala \
 	report/report.vala \
 	report/regular-report.vala \
 	report/overtime-report.vala \
+	report-assistant/report-assistant.vala \
+	report-assistant/report-assistant-page.vala \
+	report-assistant/report-assistant-welcome-page.vala \
+	report-assistant/report-assistant-basic-info-page.vala \
+	report-assistant/report-assistant-select-employees-page.vala \
+	report-assistant/report-assistant-footer-info-page.vala \
+	report-assistant/report-assistant-page-setup-page.vala \
+	report-assistant/report-assistant-finish-page.vala \
 	datetime/time.vala \
 	datetime/time-spin-button.vala \
 	datetime/date-spin-button.vala \
@@ -124,11 +130,12 @@ ui_files = \
 	ui/mobilect-payroll-cpanel-deductions-ui.xml \
 	ui/mobilect-payroll-cpanel-administrators-ui.xml \
 	ui/mobilect-payroll-cpanel-holidays-ui.xml \
-	ui/mobilect-payroll-cpanel-report-ui.xml
+	ui/mobilect-payroll-cpanel-report-ui.xml \
+	ui/mobilect-payroll-report-assistant-ui.xml
 
 
 mobilect-payroll-win32-res.o: mobilect-payroll.rc
-	$(AM_V_GEN) $(WINDRES) $< $@
+	$(AM_V_GEN) $(WINDRES) --include-dir=$(top_srcdir)/data/icons $< $@
 
 resources/resources.c: resources/mobilect-payroll.gresource.xml $(ui_files)
 	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) \

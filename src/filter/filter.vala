@@ -34,6 +34,7 @@ namespace Mobilect {
 			public bool use_holiday_type = false;
 			public MonthInfo.HolidayType holiday_type;
 			public bool sunday_work = false;
+			public bool straight_time = false;
 			public double period = 4.0;
 
 			private Date cached_date_start = Date ();
@@ -69,15 +70,16 @@ namespace Mobilect {
 						                            date.get_month ());
 					}
 
-					if (use_holiday_type) {
-						if (month_info.get_day_type (date.get_day ()) != holiday_type) {
+					if (!straight_time) {
+						if (use_holiday_type &&
+						    month_info.get_day_type (date.get_day ()) != holiday_type) {
 							continue;
 						}
-					}
 
-					if (sunday_work !=
-					    (month_info.get_weekday (date.get_day ()) == DateWeekday.SUNDAY)) {
-						continue;
+						if (sunday_work !=
+						    (month_info.get_weekday (date.get_day ()) == DateWeekday.SUNDAY)) {
+							continue;
+						}
 					}
 
 					dates += date;
@@ -135,6 +137,7 @@ namespace Mobilect {
 				filter.use_holiday_type = use_holiday_type;
 				filter.holiday_type = holiday_type;
 				filter.sunday_work = sunday_work;
+				filter.straight_time = straight_time;
 				filter.period = period;
 
 				return filter;
@@ -157,6 +160,7 @@ namespace Mobilect {
 					filter.use_holiday_type == this.use_holiday_type &&
 					filter.holiday_type == this.holiday_type &&
 					filter.sunday_work == this.sunday_work &&
+					filter.straight_time == this.straight_time &&
 					filter.period == this.period;
 			}
 

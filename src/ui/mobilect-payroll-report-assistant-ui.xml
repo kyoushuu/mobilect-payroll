@@ -1,0 +1,7 @@
+<ui>
+  <popup name="popup-report-assistant-select-employees">
+    <menuitem name="ReportAssistantSelectEmployeesIncludeAll" action="report-assistant-select-employees-include-all" />
+    <separator />
+    <menuitem name="ReportAssistantSelectEmployeesIncludeNone" action="report-assistant-select-employees-include-none" />
+  </popup>
+</ui>

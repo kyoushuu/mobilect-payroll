@@ -34,6 +34,7 @@ namespace Mobilect {
 			/* In points */
 			private double hour_column_width = 25;
 			private double number_column_width = 60;
+			private double index_column_width = 20;
 			private double name_column_width = 150;
 			private double signature_column_width = 70;
 
@@ -71,7 +72,8 @@ namespace Mobilect {
 
 
 				/* Name, Rate and Hourly Rate */
-				table_width = name_column_width +
+				table_width = index_column_width +
+					name_column_width +
 					number_column_width +
 					number_column_width;
 				foreach (var pay_group in pay_groups) {
@@ -87,6 +89,10 @@ namespace Mobilect {
 				table_width += number_column_width;
 				table_width += signature_column_width;
 
+				if (continuous) {
+					payroll_width = payroll_width > table_width? payroll_width : table_width;
+				}
+
 
 				/* Compute number of lines possible at first page of payroll */
 				lines_first_page = (int) Math.floor ((payroll_height - header_height) / (text_font_height + (padding * 2)));
@@ -101,12 +107,22 @@ namespace Mobilect {
 					lines_first_page = num_lines;
 				}
 
-				payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+				if (continuous) {
+					payslip_per_page = employees.size;
+					payslip_height = payslip_per_page * get_payslip_height ();
+				} else {
+					payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+				}
 
 
 				/* Note: +12 for footer */
 				pages_v = (int) Math.ceil ((double) (num_lines + (lines_first_page != num_lines? lines_per_page - lines_first_page : 0) + 12) / lines_per_page);
-				pages_h = (int) Math.ceil (table_width / payroll_width);
+				if (continuous) {
+					pages_h = 1;
+				} else {
+					pages_h = (int) Math.ceil (table_width / payroll_width);
+				}
+
 				pages_payroll = pages_v * pages_h;
 				pages_payslip = (int) Math.ceil ((double) employees.size / payslip_per_page);
 				set_n_pages (pages_payroll + pages_payslip);
@@ -179,10 +195,10 @@ namespace Mobilect {
 
 						/* Name */
 						cr.move_to (x, table_top + padding);
-						layout.set_width (units_from_double (name_column_width - (padding * 2)));
+						layout.set_width (units_from_double (index_column_width + name_column_width - (padding * 2)));
 						layout.set_markup (_("NAME OF EMPLOYEE"), -1);
 						cairo_show_layout (cr, layout);
-						x += name_column_width;
+						x += index_column_width + name_column_width;
 
 						/* Rate */
 						cr.move_to (x, table_top + padding);
@@ -262,8 +278,11 @@ namespace Mobilect {
 						table_y = header_height;
 
 						/* Draw table lines */
-						cr.rectangle (0, table_top, table_width, table_content_height + table_header_height);
-						cr.set_line_width (1.5);
+						cr.rectangle (table_border / 2,
+						              table_top + (table_border / 2),
+						              table_width - table_border,
+						              table_content_height + table_header_height - table_border);
+						cr.set_line_width (table_border);
 						cr.stroke ();
 
 						/* Vertical */
@@ -271,7 +290,7 @@ namespace Mobilect {
 						x0 = 0;
 
 						/* Name */
-						x += name_column_width;
+						x += index_column_width + name_column_width;
 						cr.move_to (x, table_top);
 						cr.rel_line_to (0, table_header_height);
 
@@ -313,15 +332,17 @@ namespace Mobilect {
 						cr.move_to (0, table_top + table_header_height);
 						cr.rel_line_to (table_width, 0);
 
-						cr.set_line_width (1.5);
+						cr.set_line_width (table_border);
 						cr.stroke ();
 					} else {
 						table_x = 0;
 						table_y = 0;
 
 						/* Draw table lines */
-						cr.rectangle (0, 0, table_width, table_content_height);
-						cr.set_line_width (1.5);
+						cr.rectangle (table_border / 2, table_border / 2,
+						              table_width - table_border,
+						              table_content_height - table_border);
+						cr.set_line_width (table_border);
 						cr.stroke ();
 					}
 
@@ -338,7 +359,7 @@ namespace Mobilect {
 					double x = 0;
 
 					/* Name */
-					x += name_column_width;
+					x += index_column_width + name_column_width;
 					cr.move_to (x, table_y);
 					cr.rel_line_to (0, table_content_height);
 
@@ -376,7 +397,7 @@ namespace Mobilect {
 					cr.move_to (x, table_y);
 					cr.rel_line_to (0, table_content_height);
 
-					cr.set_line_width (1);
+					cr.set_line_width (cell_border);
 					cr.stroke ();
 
 
@@ -384,10 +405,21 @@ namespace Mobilect {
 						var employee = (employees as ArrayList<Employee>).get (i + id);
 						double salary = 0, subtotal, hours, total_hours = 0, pay, rate, deduction;
 
+						cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * 2 * i));
+
+						/* Setup for numbers */
+						layout.set_font_description (number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+						layout.set_width (units_from_double (index_column_width - (padding * 2)));
+
+						/* Index */
+						layout.set_markup ("%d.".printf (i + id + 1), -1);
+						cairo_show_layout (cr, layout);
+						cr.rel_move_to (index_column_width, 0);
+
+						/* Setup for text */
 						layout.set_font_description (text_font);
 						layout.set_alignment (Pango.Alignment.LEFT);
-
-						cr.move_to (table_x + padding, table_y + padding + ((text_font_height + (padding * 2)) * 2 * i));
 
 						/* Name */
 						layout.set_width (units_from_double (name_column_width - (padding * 2)));
@@ -426,7 +458,7 @@ namespace Mobilect {
 								total_hours += hours;
 
 								/* Deduct part already paid in regular payroll */
-								if (!pay_period.is_overtime) {
+								if (!pay_period.is_overtime && !pay_group.straight_time && !pay_group.is_sunday_work) {
 									deduction += hours * rate;
 								}
 
@@ -461,7 +493,7 @@ namespace Mobilect {
 						layout.set_markup ("%.2lf".printf (salary), -1);
 						cairo_show_layout (cr, layout);
 
-						layout.set_width (units_from_double (name_column_width - (padding * 2)));
+						layout.set_width (units_from_double (index_column_width + name_column_width - (padding * 2)));
 
 						layout.set_font_description (number_font);
 						layout.set_alignment (Pango.Alignment.CENTER);

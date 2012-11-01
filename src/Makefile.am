@@ -47,6 +47,7 @@ mobilect_payroll_SOURCES = \
 	database-widgets/time-record-edit-dialog.vala \
 	database-widgets/administrator-edit-widget.vala \
 	database-widgets/administrator-edit-dialog.vala \
+	database-widgets/add-time-record-assistant.vala \
 	widgets/dialog.vala \
 	widgets/find-dialog.vala \
 	widgets/password-dialog.vala \
@@ -75,6 +76,8 @@ mobilect_payroll_SOURCES = \
 	report-assistant/report-assistant-select-employees-page.vala \
 	report-assistant/report-assistant-footer-info-page.vala \
 	report-assistant/report-assistant-page-setup-page.vala \
+	report-assistant/report-assistant-confirm-page.vala \
+	report-assistant/report-assistant-apply-page.vala \
 	report-assistant/report-assistant-finish-page.vala \
 	datetime/time.vala \
 	datetime/time-spin-button.vala \
@@ -90,7 +93,7 @@ mobilect_payroll_SOURCES = \
 	portability/portability.c \
 	resources/resources.c
 
-mobilect_payroll_VALAFLAGS =  \
+mobilect_payroll_VALAFLAGS = \
 	--vapidir=$(top_srcdir)/vapi \
 	--pkg gtk+-3.0 \
 	--pkg gdk-3.0 \
@@ -131,7 +134,8 @@ ui_files = \
 	ui/mobilect-payroll-cpanel-administrators-ui.xml \
 	ui/mobilect-payroll-cpanel-holidays-ui.xml \
 	ui/mobilect-payroll-cpanel-report-ui.xml \
-	ui/mobilect-payroll-report-assistant-ui.xml
+	ui/mobilect-payroll-report-assistant-ui.xml \
+	ui/mobilect-payroll-add-time-record-assistant-ui.xml
 
 
 mobilect-payroll-win32-res.o: mobilect-payroll.rc

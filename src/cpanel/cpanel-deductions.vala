@@ -272,7 +272,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REFRESH,
 						stock_id = Stock.REFRESH,
-						accelerator = _("<Control>R"),
+						accelerator = _("<Primary>R"),
 						tooltip = _("Reload information from database"),
 						callback = (a) => {
 							update ();
@@ -283,7 +283,7 @@ namespace Mobilect {
 				this.action_group.add_actions (actions, this);
 
 
-				var dt = new DateTime.now_local ().add_days (-15);
+				var dt = new DateTime.now_local ().add_days (-12);
 				period_spin.set_dmy (dt.get_day_of_month (), dt.get_month (), dt.get_year ());
 			}
 

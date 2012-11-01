@@ -337,11 +337,15 @@ namespace Mobilect {
 
 			public void set_is_enabled (Employee employee, bool enabled) {
 				this.enabled.set (employee, enabled);
+
+				TreeIter iter;
+				create_iter (out iter, employee);
+				row_changed (get_path (iter), iter);
 			}
 
 			public void set_is_enable_all (bool enabled) {
 				foreach (var employee in this) {
-					this.enabled.set (employee, enabled);
+					set_is_enabled (employee, enabled);
 				}
 			}
 

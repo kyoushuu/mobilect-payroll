@@ -21,7 +21,7 @@ information. See the file 'COPYING' for license terms and conditions.
                               Installation
 
   Mobilect Payroll's dependencies are GTK+ 3.x, GNOME Data Access
-(libgda) 5.x, Cairo, Pango and libgee.
+(libgda) 5.x, Cairo, Pango and libgee 0.8.
 
   Mobilect Payroll is tested to work for Linux and Microsoft Windows
 operating systems.

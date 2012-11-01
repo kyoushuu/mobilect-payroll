@@ -27,6 +27,7 @@ namespace Mobilect {
 		public class Settings : Object {
 
 			public GLib.Settings main { public get; private set; }
+			public GLib.Settings view { public get; private set; }
 			public GLib.Settings report { public get; private set; }
 
 			public string page_setup { public get; private set; }
@@ -35,6 +36,7 @@ namespace Mobilect {
 
 			public Settings () {
 				main = new GLib.Settings ("com.mobilectpower.payroll");
+				view = new GLib.Settings ("com.mobilectpower.payroll.view");
 				report = new GLib.Settings ("com.mobilectpower.payroll.report");
 
 				var user_config_dir = Environment.get_user_config_dir ();

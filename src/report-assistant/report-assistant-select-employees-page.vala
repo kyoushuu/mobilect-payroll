@@ -18,8 +18,6 @@
 
 
 using Gtk;
-using Gdk;
-using Pango;
 
 
 namespace Mobilect {
@@ -117,7 +115,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_INCLUDE_ALL,
 						label = _("_Include All"),
-						accelerator = _("<Control>A"),
+						accelerator = _("<Primary>A"),
 						tooltip = _("Include all employees"),
 						callback = (a) => {
 							list.set_is_enable_all (true);
@@ -126,7 +124,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_INCLUDE_NONE,
 						label = _("_Uninclude All"),
-						accelerator = _("<Shift><Control>A"),
+						accelerator = _("<Shift><Primary>A"),
 						tooltip = _("Don't include all employees"),
 						callback = (a) => {
 							list.set_is_enable_all (false);

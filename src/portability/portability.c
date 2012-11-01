@@ -25,6 +25,8 @@
 
 #include <windows.h>
 #include <shlwapi.h>
+#else
+#include <monetary.h>
 #endif
 
 #include "portability.h"
@@ -70,5 +72,55 @@ portability_show_file (GtkWidget *window,
 	}
 
 	return result;
+}
+
+
+gchar *
+portability_format_money (gdouble number, gint decimal_places)
+{
+	gboolean success;
+	gchar *format;
+	gchar buffer[64];
+
+#ifdef G_OS_WIN32
+	gchar *value;
+
+	format = g_strdup_printf ("%%.%dlf", decimal_places);
+	value = g_strdup_printf (format, number);
+
+	success = GetNumberFormat (LOCALE_USER_DEFAULT, 0, value, NULL,
+	                           buffer, sizeof (buffer)) > 0;
+
+	if (success && decimal_places == 0)
+	{
+		int size, i;
+
+		size = strlen (buffer);
+		for (i = size - 1; i >= 0; i--)
+		{
+			if (!isdigit (buffer[i]))
+			{
+				buffer[i] = '\0';
+				break;
+			}
+		}
+	}
+
+	g_free (value);
+#else
+	format = g_strdup_printf ("%%!.%dn", decimal_places);
+	success = strfmon (buffer, sizeof (buffer), format, number) > 0;
+#endif
+
+	g_free (format);
+
+	if (success)
+	{
+		return g_strdup (buffer);
+	}
+	else
+	{
+		return NULL;
+	}
 }
 

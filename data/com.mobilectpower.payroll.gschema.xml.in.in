@@ -24,6 +24,16 @@
 
   </schema>
 
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.view" path="/com/mobilectpower/payroll/view/">
+
+    <key type="b" name="employee-log-in">
+      <default>false</default>
+      <_summary>Employee Log In</_summary>
+      <_description>Whether employees are allowed to log in to record time in and out.</_description>
+    </key>
+
+  </schema>
+
   <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.report" path="/com/mobilectpower/payroll/report/">
 
     <key type="d" name="padding">

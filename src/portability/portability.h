@@ -19,4 +19,5 @@
 
 gchar *portability_get_prefix ();
 gboolean portability_show_file (GtkWidget *window, const gchar *filename);
+gchar *portability_format_money (gdouble number, gint decimal_places);
 

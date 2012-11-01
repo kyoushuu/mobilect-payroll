@@ -46,9 +46,26 @@ namespace Mobilect {
 				notebook.show ();
 
 
+				var view_grid = new Grid ();
+				view_grid.orientation = Orientation.VERTICAL;
+				view_grid.row_homogeneous = true;
+				view_grid.valign = Align.START;
+				view_grid.row_spacing = 3;
+				view_grid.column_spacing = 12;
+				view_grid.border_width = 5;
+				notebook.append_page (view_grid, new Label (_("View")));
+				view_grid.show ();
+
+
+				var employee_login_check = new CheckButton.with_mnemonic (_("_Enable employee log in"));
+				view_grid.add (employee_login_check);
+				employee_login_check.show ();
+
+
 				var fonts_grid = new Grid ();
 				fonts_grid.orientation = Orientation.VERTICAL;
 				fonts_grid.row_homogeneous = true;
+				fonts_grid.valign = Align.START;
 				fonts_grid.row_spacing = 3;
 				fonts_grid.column_spacing = 12;
 				fonts_grid.border_width = 5;
@@ -144,6 +161,11 @@ namespace Mobilect {
 
 
 				/* Bind to settings */
+				var view_settings = parent.app.settings.view;
+				view_settings.bind ("employee-log-in",
+				                    employee_login_check,
+				                    "active", SettingsBindFlags.DEFAULT);
+
 				var report_settings = parent.app.settings.report;
 				report_settings.bind ("title-font",
 				                      title_font_button,

@@ -60,7 +60,8 @@ namespace Mobilect {
 						stock_id = Stock.CLOSE,
 						tooltip = _("Close control panel"),
 						callback = (a) => {
-							this.window.notebook.page = Window.Page.LOGIN_EMPLOYEE;
+							this.window.notebook.page = this.window.app.settings.view.get_boolean ("employee-log-in")?
+								Window.Page.LOGIN_EMPLOYEE : Window.Page.LOGIN_ADMIN;
 						}
 					},
 					Gtk.ActionEntry () {

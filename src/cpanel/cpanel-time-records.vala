@@ -29,6 +29,7 @@ namespace Mobilect {
 
 			public const string ACTION = "cpanel-time-records";
 			public const string ACTION_ADD = "cpanel-time-records-add";
+			public const string ACTION_ADD_MULTIPLE = "cpanel-time-records-add-multiple";
 			public const string ACTION_REMOVE = "cpanel-time-records-remove";
 			public const string ACTION_PROPERTIES = "cpanel-time-records-properties";
 			public const string ACTION_SELECT_ALL = "cpanel-time-records-select-all";
@@ -131,10 +132,19 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						accelerator = _("<Control>I"),
+						accelerator = _("<Primary>I"),
 						tooltip = _("Add a time record to database"),
 						callback = (a) => {
 							add_action ();
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_ADD_MULTIPLE,
+						label = _("_Add Multiple"),
+						accelerator = _("<Shift><Primary>I"),
+						tooltip = _("Add a set of time records to database"),
+						callback = (a) => {
+							add_multiple_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -158,7 +168,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_SELECT_ALL,
 						stock_id = Stock.SELECT_ALL,
-						accelerator = _("<Control>A"),
+						accelerator = _("<Primary>A"),
 						tooltip = _("Select all time records"),
 						callback = (a) => {
 							tree_view.get_selection ().select_all ();
@@ -167,7 +177,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_DESELECT_ALL,
 						label = _("_Deselect All"),
-						accelerator = _("<Shift><Control>A"),
+						accelerator = _("<Shift><Primary>A"),
 						tooltip = _("Deselects all selected time records"),
 						callback = (a) => {
 							tree_view.get_selection ().unselect_all ();
@@ -176,11 +186,11 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_FIND,
 						stock_id = Stock.FIND,
-						accelerator = _("<Control>F"),
+						accelerator = _("<Primary>F"),
 						tooltip = _("Find time records"),
 						callback = (a) => {
 							/* Set period */
-							var date = new DateTime.now_local ().add_days (-15);
+							var date = new DateTime.now_local ().add_days (-12);
 							var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
 
 							DateDay last_day;
@@ -241,7 +251,7 @@ namespace Mobilect {
 
 
 				/* Set period */
-				var date = new DateTime.now_local ().add_days (-15);
+				var date = new DateTime.now_local ().add_days (-12);
 				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
 
 				DateDay last_day;
@@ -310,6 +320,17 @@ namespace Mobilect {
 					}
 				});
 				dialog.show ();
+			}
+
+			private void add_multiple_action () {
+				var assistant = new AddTimeRecordAssistant (this.cpanel.window);
+				assistant.cancel.connect ((assistant) => {
+					assistant.destroy ();
+				});
+				assistant.close.connect ((assistant) => {
+					assistant.destroy ();
+				});
+				assistant.show ();
 			}
 
 			private void remove_action () {

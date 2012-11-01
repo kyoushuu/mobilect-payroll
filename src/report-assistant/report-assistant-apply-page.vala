@@ -18,28 +18,43 @@
 
 
 using Gtk;
+using Pango;
 
 
 namespace Mobilect {
 
 	namespace Payroll {
 
-		public class ReportAssistantWelcomePage : ReportAssistantPage {
+		public class ReportAssistantApplyPage : ReportAssistantPage {
 
-			public ReportAssistantWelcomePage (ReportAssistant assistant) {
+			public ProgressBar progress_bar { get; private set; }
+
+
+			public ReportAssistantApplyPage (ReportAssistant assistant) {
 				base (assistant);
 
 
 				push_composite_child ();
 
 
-				var label = new Label (_("Welcome to the Report Assistant.\n\nClick \"Forward\" to continue."));
+				var label = new Label (_("Creating the report..."));
 				label.xalign = 0.0f;
 				this.add (label);
 				label.show ();
 
+				progress_bar = new ProgressBar ();
+				progress_bar.ellipsize = EllipsizeMode.END;
+				progress_bar.show_text = true;
+				progress_bar.text = _("Please wait...");
+				this.pack_end (progress_bar, true, false);
+				progress_bar.show ();
+
 
 				pop_composite_child ();
+			}
+
+			public override void prepare () {
+				assistant.commit ();
 			}
 
 		}

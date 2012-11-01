@@ -102,7 +102,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_ADD,
 						stock_id = Stock.ADD,
-						accelerator = _("<Control>I"),
+						accelerator = _("<Primary>I"),
 						tooltip = _("Add an branch to database"),
 						callback = (a) => {
 							add_action ();
@@ -129,7 +129,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_SELECT_ALL,
 						stock_id = Stock.SELECT_ALL,
-						accelerator = _("<Control>A"),
+						accelerator = _("<Primary>A"),
 						tooltip = _("Select all branches"),
 						callback = (a) => {
 							tree_view.get_selection ().select_all ();
@@ -138,7 +138,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_DESELECT_ALL,
 						label = _("_Deselect All"),
-						accelerator = _("<Shift><Control>A"),
+						accelerator = _("<Shift><Primary>A"),
 						tooltip = _("Deselects all selected branches"),
 						callback = (a) => {
 							tree_view.get_selection ().unselect_all ();
@@ -163,7 +163,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REFRESH,
 						stock_id = Stock.REFRESH,
-						accelerator = _("<Control>R"),
+						accelerator = _("<Primary>R"),
 						tooltip = _("Reload information from database"),
 						callback = (a) => {
 							this.cpanel.window.app.database.update_branches ();

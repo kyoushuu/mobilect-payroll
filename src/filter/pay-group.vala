@@ -28,39 +28,32 @@ namespace Mobilect {
 			public bool straight_time { get; private set; }
 			public MonthInfo.HolidayType holiday_type { get; private set; }
 			public double rate { get; private set; }
-			public PayPeriod[] periods { get; private set; }
-			public Filter[] filters { get; private set; }
+			public Filter filter { get; private set; }
 
 
 			public PayGroup (string name,
 			                 bool straight_time,
 			                 bool is_sunday_work,
 			                 MonthInfo.HolidayType holiday_type,
-			                 double rate,
-			                 PayPeriod[] periods) {
+			                 double rate) {
 				this.name = name;
 				this.is_sunday_work = is_sunday_work;
 				this.straight_time = straight_time;
 				this.holiday_type = holiday_type;
 				this.rate = rate;
-				this.periods = periods;
-				this.filters = new Filter[periods.length];
 
-				/* Cache filters */
-				for (int i = 0; i < periods.length; i++) {
-					var filter = new Filter ();
-					filter.time_periods = periods[i].time_periods;
-					filter.use_holiday_type = true;
-					filter.holiday_type = holiday_type;
-					filter.sunday_work = is_sunday_work;
-					filter.straight_time = straight_time;
-					filter.period = periods[i].is_overtime? 1.0 : 4.0;
-					this.filters[i] = filter;
-				}
+				/* Cache filter */
+				filter = new Filter ();
+				filter.use_holiday_type = true;
+				filter.holiday_type = holiday_type;
+				filter.sunday_work = is_sunday_work;
+				filter.straight_time = straight_time;
 			}
 
-			public Filter create_filter (int period, Date start, Date end) requires (period >= 0 && period < periods.length) {
-				var filter = this.filters[period].duplicate ();
+			public Filter create_filter (PayPeriod period, Date start, Date end) {
+				var filter = this.filter.duplicate ();
+				filter.time_periods = period.time_periods;
+				filter.period = period.is_overtime? 1.0 : 4.0;
 				filter.date_start = start;
 				filter.date_end = end;
 				return filter;

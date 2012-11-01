@@ -1,0 +1,6 @@
+<ui>
+  <popup name="popup-add-time-record-assistant-select-employees">
+    <menuitem name="AddTimeRecordAssistantSelectEmployeesIncludeAll" action="add-time-record-assistant-select-employees-include-all" />
+    <menuitem name="AddTimeRecordAssistantSelectEmployeesIncludeNone" action="add-time-record-assistant-select-employees-include-none" />
+  </popup>
+</ui>

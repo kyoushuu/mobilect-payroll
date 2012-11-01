@@ -72,7 +72,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = "file-quit",
 						stock_id = Stock.QUIT,
-						accelerator = _("<Control>Q"),
+						accelerator = _("<Primary>Q"),
 						tooltip = _("Quit"),
 						callback = (a) => {
 							destroy ();
@@ -179,6 +179,7 @@ namespace Mobilect {
 				                             action_group.get_action (ACTION_TOOLBAR),
 				                             "active", SettingsBindFlags.DEFAULT);
 
+
 				notebook = new Notebook ();
 				notebook.show_border = false;
 				notebook.show_tabs = false;
@@ -205,6 +206,14 @@ namespace Mobilect {
 				cpanel.vexpand = true;
 				notebook.insert_page (cpanel, null, Page.CONTROL_PANEL);
 				cpanel.show ();
+
+				/* Bind employee login page visibility to setting */
+				this.app.settings.view.bind ("employee-log-in",
+				                             emp_login_page,
+				                             "visible", SettingsBindFlags.DEFAULT);
+				this.app.settings.view.bind ("employee-log-in",
+				                             admin_login_page.button_cancel,
+				                             "visible", SettingsBindFlags.DEFAULT);
 
 
 				statusbar = new Statusbar ();
@@ -234,8 +243,13 @@ namespace Mobilect {
 					emp_login_page.button_login.grab_default ();
 				});
 
-				emp_login_page.name_combobox.grab_focus ();
-				emp_login_page.button_login.grab_default ();
+				if (this.app.settings.view.get_boolean ("employee-log-in")) {
+					emp_login_page.name_combobox.grab_focus ();
+					emp_login_page.button_login.grab_default ();
+				} else {
+					admin_login_page.username_entry.grab_focus ();
+					admin_login_page.button_login.grab_default ();
+				}
 			}
 
 			public void show_error_dialog (string primary, string secondary) {

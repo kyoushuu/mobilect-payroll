@@ -3,6 +3,7 @@
     <menu name="EditMenu" action="edit">
       <placeholder name="EditSelectedMenuAdditions">
         <menuitem name="TimeRecordAdd" action="cpanel-time-records-add" />
+        <menuitem name="TimeRecordAddMultiple" action="cpanel-time-records-add-multiple" />
         <menuitem name="TimeRecordRemove" action="cpanel-time-records-remove" />
         <separator />
         <menuitem name="TimeRecordProperties" action="cpanel-time-records-properties" />

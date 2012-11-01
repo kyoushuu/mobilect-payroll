@@ -215,7 +215,7 @@ namespace Mobilect {
 					Gtk.ActionEntry () {
 						name = ACTION_REFRESH,
 						stock_id = Stock.REFRESH,
-						accelerator = _("<Control>R"),
+						accelerator = _("<Primary>R"),
 						tooltip = _("Reload information from database"),
 						callback = (a) => {
 							update ();

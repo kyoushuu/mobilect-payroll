@@ -18,8 +18,6 @@
 
 
 using Gtk;
-using Gdk;
-using Pango;
 
 
 namespace Mobilect {
@@ -126,7 +124,7 @@ namespace Mobilect {
 
 
 				/* Set default period */
-				var date = new DateTime.now_local ().add_days (-15);
+				var date = new DateTime.now_local ().add_days (-12);
 				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
 
 				DateDay last_day;

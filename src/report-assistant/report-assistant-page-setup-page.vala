@@ -18,8 +18,6 @@
 
 
 using Gtk;
-using Gdk;
-using Pango;
 
 
 namespace Mobilect {

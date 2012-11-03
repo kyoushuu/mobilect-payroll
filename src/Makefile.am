@@ -107,6 +107,8 @@ mobilect_payroll_VALAFLAGS = \
 	--pkg $(GEE_MODULE) \
 	--debug
 
+mobilect_payroll_LDFLAGS =
+
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \
 	$(GLIB_LIBS) \
@@ -119,7 +121,7 @@ mobilect_payroll_LDADD = \
 
 
 if NATIVE_WIN32
-mobilect_payroll_LDFLAGS = -mwindows -lshlwapi
+mobilect_payroll_LDFLAGS += -mwindows -lshlwapi
 mobilect_payroll_LDADD += mobilect-payroll-win32-res.o
 endif
 
@@ -134,8 +136,7 @@ ui_files = \
 	ui/mobilect-payroll-cpanel-administrators-ui.xml \
 	ui/mobilect-payroll-cpanel-holidays-ui.xml \
 	ui/mobilect-payroll-cpanel-report-ui.xml \
-	ui/mobilect-payroll-report-assistant-ui.xml \
-	ui/mobilect-payroll-add-time-record-assistant-ui.xml
+	ui/mobilect-payroll-report-assistant-ui.xml
 
 
 mobilect-payroll-win32-res.o: mobilect-payroll.rc

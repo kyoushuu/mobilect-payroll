@@ -57,7 +57,8 @@ namespace Mobilect {
 
 			private class GroupPay {
 				public weak PayGroup pay_group;
-				public LinkedList <PeriodPay> periods;
+				public LinkedList<PeriodPay> periods;
+				public LinkedList<Date?> dates;
 
 				private int _total_hours;
 				public int total_hours {
@@ -68,6 +69,7 @@ namespace Mobilect {
 							foreach (var period in periods) {
 								if (period.pay_period.is_overtime ||
 								    pay_group.straight_time ||
+								    pay_group.holiday_type != MonthInfo.HolidayType.NON_HOLIDAY ||
 								    pay_group.is_sunday_work) {
 									_total_hours += period.hours;
 								}
@@ -101,6 +103,7 @@ namespace Mobilect {
 				public GroupPay (PayGroup pay_group) {
 					this.pay_group = pay_group;
 					this.periods = new LinkedList <PeriodPay> ();
+					this.dates = new LinkedList<Date?> ((a, b) => { return a.compare (b) == 0; });
 				}
 			}
 
@@ -185,10 +188,12 @@ namespace Mobilect {
 
 					foreach (var pay_group in affected_pay_groups) {
 						var group = new GroupPay (pay_group);
+						LinkedList<Date?> dates = new LinkedList<Date?> ();;
 
 						foreach (var pay_period in pay_periods) {
 							var period = new PeriodPay (pay_period);
-							period.hours = (int) Math.floor (employee.get_hours (pay_group.create_filter (pay_period, start, end)));
+							period.hours = (int) Math.floor (employee.get_hours (pay_group.create_filter (pay_period, start, end), out dates));
+							group.dates.add_all (dates);
 
 							group.periods.add (period);
 
@@ -468,7 +473,8 @@ namespace Mobilect {
 								layout.set_font_description (text_font);
 								layout.set_alignment (Pango.Alignment.CENTER);
 
-								layout.set_markup (group.pay_group.name, -1);
+								layout.set_markup (group.pay_group.name != null?
+								                   _("%s (%s)").printf (group.pay_group.name, dates_to_string (group.dates).up ()) : dates_to_string (group.dates).up (), -1);
 								cairo_show_layout (cr, layout);
 
 
@@ -485,6 +491,7 @@ namespace Mobilect {
 									if (period.hours > 0 &&
 									    (period.pay_period.is_overtime ||
 									     group.pay_group.straight_time ||
+									     group.pay_group.holiday_type != MonthInfo.HolidayType.NON_HOLIDAY ||
 									     group.pay_group.is_sunday_work)) {
 										/* Hours */
 										cr.move_to (x, y + padding);
@@ -575,7 +582,7 @@ namespace Mobilect {
 						curr_line++;
 						y += table_content_line_height;
 
-						if (page_line > lines_per_page || curr_line == num_lines) {
+						if (page_line >= lines_per_page || curr_line == num_lines) {
 							double table_content_height = (page_line * table_content_line_height);
 
 							/* Draw table lines */
@@ -647,7 +654,7 @@ namespace Mobilect {
 							cr.stroke ();
 						}
 
-						if (page_line > lines_per_page) {
+						if (page_line >= lines_per_page) {
 							page_line = 0;
 							surface++;
 						}
@@ -714,7 +721,7 @@ namespace Mobilect {
 					layout.get_size (out layout_width, null);
 					cairo_show_layout (cr, layout);
 
-					cr.rel_move_to (0, table_content_line_height);
+					cr.rel_move_to (0, table_content_line_height - padding);
 
 					cr.rel_line_to (units_to_double (layout_width), 0);
 					cr.set_line_width (1);
@@ -730,14 +737,14 @@ namespace Mobilect {
 					layout.get_size (out layout_width, null);
 					cairo_show_layout (cr, layout);
 
-					cr.rel_move_to (0, table_content_line_height);
+					cr.rel_move_to (0, table_content_line_height - padding);
 					cr.get_current_point (out x, out y);
 
 					cr.rel_line_to (units_to_double (layout_width), 0);
 					cr.set_line_width (1);
 					cr.stroke ();
 
-					cr.move_to (x, y);
+					cr.move_to (x, y + padding);
 					layout.set_width (layout_width);
 					layout.set_alignment (Pango.Alignment.CENTER);
 					layout.set_markup (_("<b>%s</b>").printf (approver_position), -1);

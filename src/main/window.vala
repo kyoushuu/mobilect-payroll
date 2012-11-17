@@ -167,7 +167,6 @@ namespace Mobilect {
 				menubar.show ();
 
 				toolbar = ui_manager.get_widget ("/toolbar") as Toolbar;
-				(toolbar as Toolbar).set_style (ToolbarStyle.BOTH_HORIZ);
 				toolbar.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
 				box.add (toolbar);
 

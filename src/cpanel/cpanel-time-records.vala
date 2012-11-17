@@ -18,7 +18,7 @@
 
 
 using Gtk;
-using Gdk;
+using Pango;
 
 
 namespace Mobilect {
@@ -57,6 +57,7 @@ namespace Mobilect {
 				tree_view.expand = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
+				tree_view.fixed_height_mode = true;
 				tree_view.row_activated.connect ((t, p, c) => {
 					properties_action ();
 				});
@@ -83,8 +84,11 @@ namespace Mobilect {
 				CellRendererText renderer;
 
 				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
 				column = new TreeViewColumn.with_attributes (_("Employee"), renderer);
 				column.sort_column_id = TimeRecordList.Columns.EMPLOYEE;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 150;
 				column.expand = true;
 				column.reorderable = true;
 				column.resizable = true;
@@ -96,31 +100,33 @@ namespace Mobilect {
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
 				column = new TreeViewColumn.with_attributes (_("Start Date"), renderer);
 				column.sort_column_id = TimeRecordList.Columns.START;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 200;
 				column.reorderable = true;
 				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					TreeIter iter;
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
-					(r as CellRendererText).text = list.get_from_iter (iter).start.format (_("%a, %d %B, %Y %I:%M %p"));
+					(r as CellRendererText).text = list.get_from_iter (iter).start.format (_("%a, %d %b, %Y %I:%M %p"));
 				});
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
 				column = new TreeViewColumn.with_attributes (_("End Date"), renderer);
 				column.sort_column_id = TimeRecordList.Columns.END;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 200;
 				column.reorderable = true;
 				column.resizable = true;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					TreeIter iter;
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
 					var dt = list.get_from_iter (iter).end;
-					if (dt != null) {
-						(r as CellRendererText).text = dt.format (_("%a, %d %B, %Y %I:%M %p"));
-					} else {
-						(r as CellRendererText).text = _("Open");
-					}
+					(r as CellRendererText).text = (dt != null)? dt.format (_("%a, %d %b, %Y %I:%M %p")) : _("Open");
 				});
 				tree_view.append_column (column);
 
@@ -206,13 +212,29 @@ namespace Mobilect {
 							}
 
 
-							var dialog = new FindDialog (this.cpanel.window);
+							var dialog = new FindTimeRecordDialog (this.cpanel.window);
 							dialog.set_start_dmy ((15 * period) + 1, date.get_month (), date.get_year ());
 							dialog.set_end_dmy (last_day, date.get_month (), date.get_year ());
 							dialog.response.connect ((d, r) => {
 								if (r == ResponseType.ACCEPT) {
 									d.hide ();
-									update (dialog.get_start_date (), dialog.get_end_date ());
+
+									TreeIter iter;
+
+									Branch branch = null;
+									if (dialog.branch_check.active && dialog.branch_combobox.get_active_iter (out iter)) {
+										dialog.branch_combobox.get_active_iter (out iter); /* NOTE: Vala bug */
+										branch = (dialog.branch_combobox.model as BranchList).get_from_iter (iter);
+									}
+
+									Employee employee = null;
+									if (dialog.employee_check.sensitive && dialog.employee_check.active && dialog.employee_combobox.get_active_iter (out iter)) {
+										dialog.employee_combobox.get_active_iter (out iter); /* NOTE: Vala bug */
+										employee = (dialog.employee_combobox.model as EmployeeList).get_from_iter (iter);
+									}
+
+									update (dialog.get_start_date (), dialog.get_end_date (), branch, employee);
+
 									d.destroy ();
 								} else if (r == ResponseType.REJECT) {
 									d.destroy ();
@@ -300,8 +322,6 @@ namespace Mobilect {
 				dialog.action = Stock.ADD;
 				dialog.response.connect ((d, r) => {
 					if (r == ResponseType.ACCEPT) {
-						dialog.hide ();
-
 						if (time_record.employee == null) {
 							this.cpanel.window.show_error_dialog (_("No employee selected"),
 							                                      _("Select at least one employee first."));
@@ -309,12 +329,18 @@ namespace Mobilect {
 							return;
 						}
 
-						database.add_time_record (time_record.employee_id,
-						                          time_record.start,
-						                          time_record.end,
-						                          time_record.straight_time);
+						dialog.hide ();
 
-						dialog.destroy ();
+						try {
+							database.add_time_record (time_record.employee_id,
+							                          time_record.start,
+							                          time_record.end,
+							                          time_record.straight_time);
+
+							dialog.destroy ();
+						} catch (Error e) {
+							(dialog.transient_for as Window).show_error_dialog (_("Failed to add time record"), e.message);
+						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
 					}
@@ -343,15 +369,15 @@ namespace Mobilect {
 				}
 
 				var dialog = new MessageDialog (this.cpanel.window,
-				                                  DialogFlags.MODAL,
-				                                  MessageType.WARNING,
-				                                  ButtonsType.NONE,
-				                                  ngettext ("Are you sure you want to remove the selected time record?",
-				                                           "Are you sure you want to remove the %d selected time records?",
-				                                           selected_count).printf (selected_count));
+				                                DialogFlags.MODAL,
+				                                MessageType.WARNING,
+				                                ButtonsType.NONE,
+				                                ngettext ("Are you sure you want to remove the selected time record?",
+				                                          "Are you sure you want to remove the %d selected time records?",
+				                                          selected_count).printf (selected_count));
 				dialog.secondary_text = ngettext ("All information about this time record will be deleted and cannot be restored.",
 				                                  "All information about these time records will be deleted and cannot be restored.",
-				                                   selected_count);
+				                                  selected_count);
 				dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
 				                    Stock.DELETE, ResponseType.ACCEPT);
 				dialog.set_alternative_button_order (ResponseType.ACCEPT, ResponseType.REJECT);
@@ -378,6 +404,25 @@ namespace Mobilect {
 					dialog.action = Stock.SAVE;
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
+							foreach (var t in time_record.database.get_time_records_of_employee (time_record.employee)) {
+								if (t.id == time_record.id) {
+									continue;
+								}
+
+								/* Check if the time records overlap */
+								if (t.end.compare (time_record.start) > 0 &&
+								    t.start.compare (time_record.end) < 0) {
+									this.cpanel.window.show_error_dialog (_("Cannot save time record"),
+										                                    _("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s").printf (t.employee.get_name (),
+										                                    t.start.format (_("%a, %d %b, %Y %I:%M %p")),
+										                                    t.end.format (_("%a, %d %b, %Y %I:%M %p"))));
+
+									time_record.pull ();
+
+									return;
+								}
+							}
+
 							dialog.hide ();
 							dialog.time_record.update ();
 							dialog.destroy ();
@@ -401,8 +446,14 @@ namespace Mobilect {
 				return true;
 			}
 
-			public void update (Date start, Date end) {
+			public void update (Date start, Date end, Branch? branch = null, Employee? employee = null) {
 				this.list = this.cpanel.window.app.database.get_time_records_within_date (start, end);
+
+				if (employee != null) {
+					this.list = this.list.get_subset_with_employee (employee);
+				} else if (branch != null) {
+					this.list = this.list.get_subset_with_branch (branch);
+				}
 
 				this.sort = new TreeModelSort.with_model (this.list);
 				sort.set_sort_func (TimeRecordList.Columns.EMPLOYEE, (model, a, b) => {

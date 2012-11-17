@@ -24,6 +24,11 @@ namespace Mobilect {
 
 	namespace Payroll {
 
+		public errordomain AdminLoginPageError {
+			USERNAME_NOT_FOUND,
+			WRONG_PASSWORD
+		}
+
 		public class AdminLoginPage : LoginPage {
 
 			public Entry username_entry { get; private set; }
@@ -95,17 +100,16 @@ namespace Mobilect {
 						var administrator = (this.window.application as Application).database.administrator_list.get_with_username (this.username_entry.text);
 
 						if (administrator == null) {
-							throw new ApplicationError.USERNAME_NOT_FOUND (_("Username not found."));
+							throw new AdminLoginPageError.USERNAME_NOT_FOUND (_("Username not found."));
 						}
 
-						if (administrator.get_password_checksum () ==
-						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1)) {
-								this.window.notebook.page = Window.Page.CONTROL_PANEL;
-								this.username_entry.text = "";
-								this.password_entry.text = "";
-							} else {
-								throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
-							}
+						if (!administrator.password_matches (this.password_entry.text)) {
+							throw new AdminLoginPageError.WRONG_PASSWORD (_("Wrong password."));
+						}
+
+						this.window.notebook.page = Window.Page.CONTROL_PANEL;
+						this.username_entry.text = "";
+						this.password_entry.text = "";
 					} catch (Error e) {
 						this.window.show_error_dialog (_("Failed to log in"), e.message);
 					}

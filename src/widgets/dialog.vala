@@ -38,6 +38,12 @@ namespace Mobilect {
 				}
 			}
 
+			public Button help_button {
+				public get {
+					return get_widget_for_response (ResponseType.HELP) as Button;
+				}
+			}
+
 			public string action {
 				public get {
 					return accept_button.label;
@@ -66,7 +72,6 @@ namespace Mobilect {
 				                                   ResponseType.HELP);
 				this.set_default_response (ResponseType.ACCEPT);
 
-				var help_button = get_widget_for_response (ResponseType.HELP);
 				(action_area as ButtonBox).set_child_secondary (help_button, true);
 				this.response.connect ((d, r) => {
 														if (r == ResponseType.HELP) {

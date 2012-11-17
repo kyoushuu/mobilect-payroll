@@ -36,13 +36,41 @@ namespace Mobilect {
 				VALE,
 				MOESALA_LOAN,
 				MOESALA_SAVINGS,
-				NUM
+				NUM;
+
+				public string to_string () {
+					switch (this) {
+						case TAX:
+							return "tax";
+
+						case LOAN:
+							return "loan";
+
+						case PAG_IBIG:
+							return "pagibig";
+
+						case SSS_LOAN:
+							return "sssloan";
+
+						case VALE:
+							return "vale";
+
+						case MOESALA_LOAN:
+							return "moesala_loan";
+
+						case MOESALA_SAVINGS:
+							return "moesala_savings";
+
+						default:
+							assert_not_reached();
+					}
+				}
 			}
 
 
 			public enum Columns {
 				EMPLOYEE,
-				NUM
+				NUM;
 			}
 
 
@@ -55,16 +83,16 @@ namespace Mobilect {
 			private double[,] amount;
 
 
-			public Deductions (Database database, int period) {
-				this.database = database;
+			public Deductions (EmployeeList list, int period) {
+				this.database = list.database;
 				this.stamp = (int) Random.next_int ();
-				this.list = database.employee_list;
+				this.list = list;
 
 				set_period (period);
 			}
 
-			public Deductions.with_date (Database database, Date date) {
-				this (database,
+			public Deductions.with_date (EmployeeList list, Date date) {
+				this (list,
 				      (date.get_year () * 12 * 2) +
 				      ((date.get_month ()-1) * 2) +
 				      (date.get_day () <= 15? 0 : 1));
@@ -178,7 +206,7 @@ namespace Mobilect {
 					/* Set each amount */
 					for (var i = 0; i < Category.NUM; i++) {
 						value_amount = amount[employee_index, i];
-						stmt_params.get_holder (get_category_column_name (i)).set_value (value_amount);
+						stmt_params.get_holder (((Category) i).to_string ()).set_value (value_amount);
 					}
 
 					/* Execute */
@@ -188,25 +216,14 @@ namespace Mobilect {
 				}
 			}
 
-			private static string get_category_column_name (Category category) requires (category >= 0 && category < Category.NUM) {
-				switch (category) {
-					case Category.TAX:
-						return "tax";
-					case Category.LOAN:
-						return "loan";
-					case Category.PAG_IBIG:
-						return "pagibig";
-					case Category.SSS_LOAN:
-						return "sssloan";
-					case Category.VALE:
-						return "vale";
-					case Category.MOESALA_LOAN:
-						return "moesala_loan";
-					case Category.MOESALA_SAVINGS:
-						return "moesala_savings";
-					default:
-						return "<invalid category>";
+			public double get_total_deductions_with_category (Category category) requires (category >= 0 && category < Category.NUM) {
+				double total = 0;
+
+				for (var i = 0; i < list.size; i++) {
+					total += amount[i,category];
 				}
+
+				return total;
 			}
 
 

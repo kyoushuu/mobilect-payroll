@@ -18,11 +18,18 @@
 
 
 using Gda;
+using Gee;
 
 
 namespace Mobilect {
 
 	namespace Payroll {
+
+		public errordomain EmployeeLoginError {
+			WRONG_PASSWORD,
+			ALREADY_LOGGED_IN,
+			NOT_LOGGED_IN
+		}
 
 		public class Employee : Object {
 
@@ -68,7 +75,7 @@ namespace Mobilect {
 				this.database = database;
 
 
-				Set stmt_params;
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 
 				if (id != 0) {
@@ -113,7 +120,7 @@ namespace Mobilect {
 			}
 
 			public int get_open_time_records_num () {
-				Set stmt_params;
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 
 				try {
@@ -132,46 +139,44 @@ namespace Mobilect {
 				}
 			}
 
-			public void log_employee_in () {
-				database.add_time_record (this.id, new DateTime.now_local (), null, false);
-			}
+			public void log_in (string password) throws EmployeeLoginError {
+				if (!password_matches (password))
+					throw new EmployeeLoginError.WRONG_PASSWORD (_("Wrong password"));
 
-			public void log_employee_out () {
-				Set stmt_params;
-				Value value_id = this.id;
+				if (get_open_time_records_num () > 0)
+					throw new EmployeeLoginError.ALREADY_LOGGED_IN (_("You are already logged in."));
 
 				try {
-					var stmt = database.cnc.parse_sql_string ("SELECT id FROM time_records" +
-					                                          "  WHERE employee_id=##employee_id::int" +
-					                                          "  AND end IS NULL" +
-					                                          "  ORDER BY id DESC",
-					                                          out stmt_params);
-					stmt_params.get_holder ("employee_id").set_value (value_id);
-					var data_model = database.cnc.statement_execute_select (stmt, stmt_params);
-
-					var record_id = data_model.get_value_at (0, 0);
-
-					stmt = database.cnc.parse_sql_string ("UPDATE time_records" +
-					                                      "  SET end=##end::string" +
-					                                      "  WHERE id=##id::int",
-					                                      out stmt_params);
-					stmt_params.get_holder ("id").set_value (record_id);
-					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_local ().format ("%F %T"));
-					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
+					database.add_time_record (this.id, new DateTime.now_local (), null, false);
 				} catch (Error e) {
-					warning ("Failed to update time record in database for employee logout: %s", e.message);
+					warning ("Failed to add time record of employee to database: %s", e.message);
 				}
 			}
 
-			public double get_hours (Filter filter) {
+			public void log_out (string password) throws EmployeeLoginError {
+				if (!password_matches (password))
+					throw new EmployeeLoginError.WRONG_PASSWORD (_("Wrong password."));
+
+				var open_time_records = database.get_time_records_of_employee (this).get_subset_open ();
+
+				if (open_time_records.size < 1)
+					throw new EmployeeLoginError.NOT_LOGGED_IN (_("Not logged in."));
+
+				open_time_records.sort ((a, b) => { return a.id - b.id; });
+
+				(open_time_records as ArrayList<TimeRecord>).get (0).close_now ();
+			}
+
+			public double get_hours (Filter filter, out LinkedList<Date?> dates = null) {
 				int minutes;
-				double hours, hours_span = 0.0;
+				double hours, hours_span_curr, hours_span = 0.0;
 				Time time_start, time_end;
 				DateTime period_start, period_end;
 				DateTime record_start, record_end;
 				DateTime span_start, span_end;
+				dates = new LinkedList<Date?> ();
 
-				Set stmt_params;
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 
 				try {
@@ -202,6 +207,8 @@ namespace Mobilect {
 								time_start = period.start;
 								time_end = period.end;
 
+								//stdout.printf ("Period: %s - %s\n", time_start.to_string (), time_end.to_string ());
+
 								period_start = new DateTime.local (date.get_year (),
 								                                   date.get_month (),
 								                                   date.get_day (),
@@ -226,6 +233,7 @@ namespace Mobilect {
 								/* Check if period is not in time record */
 								if (period_end.compare (record_start) <= 0 ||
 								    period_start.compare (record_end) >= 0) {
+									//stdout.printf ("Outside range, skipping...\n");
 									continue;
 								}
 
@@ -237,13 +245,27 @@ namespace Mobilect {
 
 								/* Get hours spanned */
 								hours = span_end.difference (span_start) / TimeSpan.HOUR;
-								hours_span += Math.floor (hours/filter.period) * filter.period;
+								hours_span_curr = Math.floor (hours/filter.period) * filter.period;
+
+								//stdout.printf ("Hours: %lf\n", hours);
 
 								/* Allow 1/4 of period late */
 								if (Math.floor ((hours + (filter.period/4)) / filter.period) >
 								    Math.floor (hours / filter.period)) {
-									hours_span += filter.period;
+									hours_span_curr += filter.period;
 								}
+
+								if (filter.enlist) {
+									/* Add to list */
+									var curr_date = Date ();
+									curr_date.set_dmy ((DateDay) span_start.get_day_of_month (),
+									                   (DateMonth) span_start.get_month (),
+									                   (DateYear) span_start.get_year ());
+									dates.add (curr_date);
+									//stdout.printf ("%s: %lf\n", Report.format_date (curr_date, "%b %d"), hours_span_curr);
+								}
+
+								hours_span += hours_span_curr;
 							}
 						}
 					}
@@ -255,7 +277,7 @@ namespace Mobilect {
 			}
 
 			public void update () {
-				Set stmt_params;
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 				Value value_rate = this.rate;
 				Value value_branch_id = this.branch.id;
@@ -284,7 +306,7 @@ namespace Mobilect {
 			}
 
 			public void remove () {
-				Set stmt_params;
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 
 				if (list != null) {
@@ -311,8 +333,13 @@ namespace Mobilect {
 				}
 			}
 
-			public string? get_password_checksum () {
-				Set stmt_params;
+			public bool password_matches (string password) {
+				return get_password_checksum () ==
+					Checksum.compute_for_string (ChecksumType.SHA256, password, -1);
+			}
+
+			private string? get_password_checksum () {
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 
 				try {
@@ -332,7 +359,7 @@ namespace Mobilect {
 			}
 
 			public void change_password (string password) {
-				Set stmt_params;
+				Gda.Set stmt_params;
 				Value value_id = this.id;
 
 				try {

@@ -59,6 +59,11 @@ namespace Mobilect {
 				}
 			}
 
+			public bool password_matches (string password) {
+				return get_password_checksum () ==
+					Checksum.compute_for_string (ChecksumType.SHA256, password, -1);
+			}
+
 			public void update () {
 				Set stmt_params;
 				Value value_id = this.id;
@@ -94,7 +99,7 @@ namespace Mobilect {
 				}
 			}
 
-			public string? get_password_checksum () {
+			private string? get_password_checksum () {
 				Set stmt_params;
 				Value value_id = this.id;
 

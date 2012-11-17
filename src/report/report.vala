@@ -172,7 +172,7 @@ namespace Mobilect {
 				run (PrintOperationAction.EXPORT, window);
 			}
 
-			public string format_date (Date date, string format) {
+			public static string format_date (Date date, string format) {
 				char s[64];
 				date.strftime (s, format);
 				return (string) s;
@@ -195,10 +195,70 @@ namespace Mobilect {
 				}
 			}
 
+			internal string dates_to_string (LinkedList<Date?> dates) {
+				bool is_range = false;
+				Date start_date = Date (), last_date = Date (), last_added_date = Date ();
+				string result = null;
+
+				dates.sort ((a, b) => { return a.compare (b); });
+
+				foreach (var date in dates) {
+					if (last_date.valid () && date.compare (last_date) == 0) {
+						continue;
+					}
+
+					if (last_date.valid () &&
+					    date.get_julian () - last_date.get_julian () == 1) {
+						if (!is_range) {
+							is_range = true;
+							start_date = date;
+						}
+					} else {
+						if (is_range) {
+							is_range = false;
+
+							if (start_date.get_month () != last_date.get_month ()) {
+								result += format_date (last_date, _(" - %b %d"));
+							} else {
+								result += format_date (last_date, _("-%d"));
+							}
+
+							result += ", ";
+						} else {
+							if (result != null) {
+								result += ", ";
+							} else {
+								result = "";
+							}
+						}
+
+						if (!last_added_date.valid () ||
+						    last_added_date.get_month () != date.get_month ()) {
+							result += format_date (date, _("%b %d"));
+						} else {
+							result += format_date (date, _("%d"));
+						}
+
+						last_added_date = date;
+					}
+
+					last_date = date;
+				}
+
+				if (is_range) {
+					if (start_date.get_month () != last_date.get_month ()) {
+						result += format_date (last_date, _(" - %b %d"));
+					} else {
+						result += format_date (last_date, _("-%d"));
+					}
+				}
+
+				return result;
+			}
+
 			private inline double greater (double a, double b) { return a > b? a : b; }
 
 			internal void update_font_metrics (Gtk.PrintContext context) {
-
 				/* Get font height */
 				FontMetrics font_metrics;
 				var pcontext = context.create_pango_context ();

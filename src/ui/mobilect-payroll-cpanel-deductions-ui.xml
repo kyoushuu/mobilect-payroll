@@ -5,12 +5,14 @@
         <menuitem name="DeductionSortBy" action="cpanel-deductions-sort-by" />
         <separator />
         <menuitem name="DeductionRefresh" action="cpanel-deductions-refresh" />
+        <menuitem name="DeductionTotal" action="cpanel-deductions-total" />
       </placeholder>
     </menu>
   </menubar>
   <toolbar name="toolbar">
     <placeholder name="ViewToolbarAdditions">
       <toolitem name="DeductionRefresh" action="cpanel-deductions-refresh" />
+      <toolitem name="DeductionTotal" action="cpanel-deductions-total" />
     </placeholder>
   </toolbar>
 </ui>

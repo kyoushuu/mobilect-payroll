@@ -36,6 +36,7 @@ namespace Mobilect {
 			public bool sunday_work = false;
 			public bool straight_time = false;
 			public double period = 4.0;
+			public bool enlist = false;
 
 			private Date cached_date_start = Date ();
 			private Date cached_date_end = Date ();

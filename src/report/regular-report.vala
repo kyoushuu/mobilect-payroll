@@ -123,7 +123,7 @@ namespace Mobilect {
 				}
 
 
-				deductions = new Deductions.with_date (this.employees.database, this.start);
+				deductions = new Deductions.with_date (this.employees, this.start);
 
 				int size = employees.size;
 				cells = new double[size + 1, Columns.NUM]; /* Last is total */

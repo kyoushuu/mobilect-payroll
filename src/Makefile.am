@@ -47,9 +47,10 @@ mobilect_payroll_SOURCES = \
 	database-widgets/time-record-edit-dialog.vala \
 	database-widgets/administrator-edit-widget.vala \
 	database-widgets/administrator-edit-dialog.vala \
+	database-widgets/find-time-record-dialog.vala \
 	database-widgets/add-time-record-assistant.vala \
+	database-widgets/total-deductions-dialog.vala \
 	widgets/dialog.vala \
-	widgets/find-dialog.vala \
 	widgets/password-dialog.vala \
 	widgets/preferences-dialog.vala \
 	widgets/sort-tree-view-dialog.vala \
@@ -136,7 +137,8 @@ ui_files = \
 	ui/mobilect-payroll-cpanel-administrators-ui.xml \
 	ui/mobilect-payroll-cpanel-holidays-ui.xml \
 	ui/mobilect-payroll-cpanel-report-ui.xml \
-	ui/mobilect-payroll-report-assistant-ui.xml
+	ui/mobilect-payroll-report-assistant-ui.xml \
+	ui/mobilect-payroll-add-time-record-assistant-ui.xml
 
 
 mobilect-payroll-win32-res.o: mobilect-payroll.rc

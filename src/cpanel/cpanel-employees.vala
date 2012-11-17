@@ -18,7 +18,7 @@
 
 
 using Gtk;
-using Gdk;
+using Pango;
 
 
 namespace Mobilect {
@@ -53,7 +53,7 @@ namespace Mobilect {
 					var employee2 = b.user_data as Employee;
 
 					return strcmp (employee1.get_name (),
-					               employee2.get_name ());
+										     employee2.get_name ());
 				});
 				sort.set_sort_func (EmployeeList.Columns.TIN, (model, a, b) => {
 					var employee1 = a.user_data as Employee;
@@ -84,7 +84,7 @@ namespace Mobilect {
 					var employee2 = b.user_data as Employee;
 
 					return strcmp (employee1.branch.name,
-					               employee2.branch.name);
+										     employee2.branch.name);
 				});
 
 
@@ -97,6 +97,8 @@ namespace Mobilect {
 
 				tree_view = new TreeView.with_model (sort);
 				tree_view.expand = true;
+				tree_view.fixed_height_mode = true;
+				tree_view.rules_hint = true;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.search_column = (int) EmployeeList.Columns.NAME;
@@ -120,20 +122,26 @@ namespace Mobilect {
 				TreeViewColumn column;
 				CellRendererText renderer;
 
-				column = new TreeViewColumn.with_attributes (_("Employee Name"),
-				                                             new CellRendererText (),
+				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
+				column = new TreeViewColumn.with_attributes (_("Employee Name"), renderer,
 				                                             "text", EmployeeList.Columns.NAME);
 				column.sort_column_id = EmployeeList.Columns.NAME;
 				column.expand = true;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 150;
 				tree_view.append_column (column);
 
 				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
 				column = new TreeViewColumn.with_attributes (_("Branch"), renderer);
 				column.sort_column_id = EmployeeList.Columns.BRANCH;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 80;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					TreeIter iter;
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
@@ -147,6 +155,8 @@ namespace Mobilect {
 				column.sort_column_id = EmployeeList.Columns.RATE;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 80;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					TreeIter iter;
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
@@ -160,6 +170,8 @@ namespace Mobilect {
 				column.sort_column_id = EmployeeList.Columns.DAYRATE;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 80;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					TreeIter iter;
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
@@ -173,6 +185,8 @@ namespace Mobilect {
 				column.sort_column_id = EmployeeList.Columns.HOURRATE;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 80;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					TreeIter iter;
 					(m as TreeModelSort).convert_iter_to_child_iter (out iter, i);
@@ -180,12 +194,15 @@ namespace Mobilect {
 				});
 				tree_view.append_column (column);
 
-				column = new TreeViewColumn.with_attributes (_("TIN Number"),
-				                                             new CellRendererText (),
+				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
+				column = new TreeViewColumn.with_attributes (_("TIN Number"), renderer,
 				                                             "text", EmployeeList.Columns.TIN);
 				column.sort_column_id = EmployeeList.Columns.TIN;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 100;
 				tree_view.append_column (column);
 
 
@@ -331,15 +348,18 @@ namespace Mobilect {
 
 				dialog.response.connect ((d, r) => {
 					if (r == ResponseType.ACCEPT) {
-						dialog.hide ();
-						database.add_employee (employee.lastname,
-						                       employee.firstname,
-						                       employee.middlename,
-						                       employee.tin,
-						                       password_entry.text,
-						                       employee.rate,
-						                       employee.branch);
-						dialog.destroy ();
+						try {
+							database.add_employee (employee.lastname,
+							                       employee.firstname,
+							                       employee.middlename,
+							                       employee.tin,
+							                       password_entry.text,
+							                       employee.rate,
+							                       employee.branch);
+							dialog.destroy ();
+						} catch (Error e) {
+							(dialog.transient_for as Window).show_error_dialog (_("Failed to add employee"), e.message);
+						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
 					}

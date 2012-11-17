@@ -31,7 +31,7 @@ namespace Mobilect {
 			public Filter filter { get; private set; }
 
 
-			public PayGroup (string name,
+			public PayGroup (string? name,
 			                 bool straight_time,
 			                 bool is_sunday_work,
 			                 MonthInfo.HolidayType holiday_type,
@@ -52,8 +52,13 @@ namespace Mobilect {
 
 			public Filter create_filter (PayPeriod period, Date start, Date end) {
 				var filter = this.filter.duplicate ();
-				filter.time_periods = period.time_periods;
-				filter.period = period.is_overtime? 1.0 : 4.0;
+				filter.time_periods = is_sunday_work?
+					period.time_periods_sunday : period.time_periods;
+				filter.enlist = period.is_overtime ||
+					straight_time ||
+					holiday_type != MonthInfo.HolidayType.NON_HOLIDAY ||
+					is_sunday_work;
+				filter.period = filter.enlist? 1.0 : 4.0;
 				filter.date_start = start;
 				filter.date_end = end;
 				return filter;

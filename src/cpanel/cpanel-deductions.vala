@@ -18,6 +18,7 @@
 
 
 using Gtk;
+using Pango;
 
 
 namespace Mobilect {
@@ -29,10 +30,15 @@ namespace Mobilect {
 			public const string ACTION = "cpanel-deductions";
 			public const string ACTION_SORT_BY = "cpanel-deductions-sort-by";
 			public const string ACTION_REFRESH = "cpanel-deductions-refresh";
+			public const string ACTION_TOTAL = "cpanel-deductions-total";
 
 			public PeriodSpinButton period_spin { get; private set; }
+			public ComboBox branch_combobox { public get; private set; }
 			public TreeView tree_view { get; private set; }
 			public TreeModelSort sort { get; private set; }
+
+			private TreeViewColumn tax_sss_column;
+			private TreeViewColumn pi_ph_column;
 
 			public Deductions deduction { get; private set; }
 
@@ -53,12 +59,18 @@ namespace Mobilect {
 				vbox.add (hbox);
 				hbox.show ();
 
+				var overlay = new Overlay ();
+				vbox.add (overlay);
+				overlay.show ();
+
 				var sw = new ScrolledWindow (null, null);
-				vbox.add (sw);
+				overlay.add (sw);
 				sw.show ();
 
 				tree_view = new TreeView ();
 				tree_view.expand = true;
+				tree_view.fixed_height_mode = true;
+				tree_view.rules_hint = true;
 				tree_view.set_search_equal_func ((m, c, k, i) => {
 					Value value;
 					m.get_value (i, c, out value);
@@ -75,10 +87,13 @@ namespace Mobilect {
 				                                 1, 10, 0);
 
 				renderer = new CellRendererText ();
+				renderer.ellipsize = EllipsizeMode.END;
 				column = new TreeViewColumn.with_attributes (_("Employee"), renderer);
 				column.expand = true;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 150;
 				column.sort_column_id = Deductions.Columns.EMPLOYEE;
 				column.set_cell_data_func (renderer, (c, r, m, i) => {
 					Value value;
@@ -96,17 +111,19 @@ namespace Mobilect {
 				renderer_spin.edited.connect ((r, p, n) => {
 					render_spin_edited (p, n, Deductions.Category.TAX);
 				});
-				column = new TreeViewColumn.with_attributes (_("Tax / SSS"), renderer_spin);
-				column.min_width = 100;
-				column.reorderable = true;
-				column.resizable = true;
-				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.TAX;
-				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
+				tax_sss_column = new TreeViewColumn.with_attributes (_("Tax / SSS"), renderer_spin);
+				tax_sss_column.min_width = 100;
+				tax_sss_column.reorderable = true;
+				tax_sss_column.resizable = true;
+				tax_sss_column.sizing = TreeViewColumnSizing.FIXED;
+				tax_sss_column.fixed_width = 50;
+				tax_sss_column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.TAX;
+				tax_sss_column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Deductions.Columns.NUM + Deductions.Category.TAX, out value);
 					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
-				tree_view.append_column (column);
+				tree_view.append_column (tax_sss_column);
 
 				renderer_spin = new CellRendererSpin ();
 				renderer_spin.adjustment = adjustment;
@@ -121,6 +138,8 @@ namespace Mobilect {
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.LOAN;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -138,17 +157,19 @@ namespace Mobilect {
 				renderer_spin.edited.connect ((r, p, n) => {
 					render_spin_edited (p, n, Deductions.Category.PAG_IBIG);
 				});
-				column = new TreeViewColumn.with_attributes (_("PAG-IBIG / PH"), renderer_spin);
-				column.min_width = 100;
-				column.reorderable = true;
-				column.resizable = true;
-				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.PAG_IBIG;
-				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
+				pi_ph_column = new TreeViewColumn.with_attributes (_("PAG-IBIG / PH"), renderer_spin);
+				pi_ph_column.min_width = 100;
+				pi_ph_column.reorderable = true;
+				pi_ph_column.resizable = true;
+				pi_ph_column.sizing = TreeViewColumnSizing.FIXED;
+				pi_ph_column.fixed_width = 50;
+				pi_ph_column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.PAG_IBIG;
+				pi_ph_column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
 					m.get_value (i, Deductions.Columns.NUM + Deductions.Category.PAG_IBIG, out value);
 					(r as CellRendererText).text = "%.2lf".printf ((double) value);
 				});
-				tree_view.append_column (column);
+				tree_view.append_column (pi_ph_column);
 
 				renderer_spin = new CellRendererSpin ();
 				renderer_spin.adjustment = adjustment;
@@ -163,6 +184,8 @@ namespace Mobilect {
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.SSS_LOAN;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -184,6 +207,8 @@ namespace Mobilect {
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.VALE;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -205,6 +230,8 @@ namespace Mobilect {
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.MOESALA_LOAN;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -226,6 +253,8 @@ namespace Mobilect {
 				column.min_width = 100;
 				column.reorderable = true;
 				column.resizable = true;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
 				column.sort_column_id = Deductions.Columns.NUM + Deductions.Category.MOESALA_SAVINGS;
 				column.set_cell_data_func (renderer_spin, (c, r, m, i) => {
 					Value value;
@@ -241,12 +270,29 @@ namespace Mobilect {
 
 
 				period_spin = new PeriodSpinButton ();
-				period_spin.value_changed.connect ((s) => {
-					update ();
-				});
+				period_spin.hexpand = true;
+				period_spin.value_changed.connect (update);
 				hbox.add (period_spin);
 				period_label.mnemonic_widget = period_spin;
 				period_spin.show ();
+
+
+				var branch_label = new Label.with_mnemonic (_("_Branch:"));
+				hbox.add (branch_label);
+				branch_label.show ();
+
+
+				branch_combobox = new ComboBox.with_model (this.cpanel.window.app.database.branch_list);
+				branch_combobox.hexpand = true;
+				branch_combobox.changed.connect (update);
+				hbox.add (branch_combobox);
+				branch_label.mnemonic_widget = branch_combobox;
+				branch_combobox.show ();
+
+				var branch_cell_renderer = new CellRendererText ();
+				branch_combobox.pack_start (branch_cell_renderer, true);
+				branch_combobox.add_attribute (branch_cell_renderer,
+				                               "text", BranchList.Columns.NAME);
 
 
 				pop_composite_child ();
@@ -277,6 +323,24 @@ namespace Mobilect {
 						callback = (a) => {
 							update ();
 						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_TOTAL,
+						stock_id = Stock.INFO,
+						label = _("_Total"),
+						tooltip = _("View the total of each deductions"),
+						callback = (a) => {
+							var dialog = new TotalDeductionsDialog (this.cpanel.window,
+							                                        deduction,
+							                                        period_spin.period);
+							dialog.response.connect ((d, r) => {
+								if (r == ResponseType.ACCEPT ||
+								    r == ResponseType.REJECT) {
+									d.destroy ();
+								}
+							});
+							dialog.show ();
+						}
 					}
 				};
 
@@ -297,8 +361,16 @@ namespace Mobilect {
 			}
 
 			public void update () {
-				deduction = new Deductions (this.cpanel.window.app.database,
-				                           (int) period_spin.period);
+				TreeIter iter;
+				Branch branch;
+
+				if (!branch_combobox.get_active_iter (out iter)) {
+					return;
+				}
+
+				branch_combobox.model.get (iter, BranchList.Columns.OBJECT, out branch);
+				deduction = new Deductions (this.cpanel.window.app.database.employee_list.get_subset_with_branch (branch),
+				                            period_spin.period);
 
 				sort = new TreeModelSort.with_model (deduction);
 				sort.set_sort_func (Deductions.Columns.EMPLOYEE, (model, a, b) => {
@@ -368,6 +440,16 @@ namespace Mobilect {
 
 				tree_view.model = sort;
 				tree_view.search_column = (int) Deductions.Columns.EMPLOYEE;
+
+				if (period_spin.period % 2 == 0) {
+					/* First period of month */
+					tax_sss_column.title = _("Tax");
+					pi_ph_column.title = _("PAG-IBIG");
+				} else {
+					/* Second period of month */
+					tax_sss_column.title = _("SSS Premiums");
+					pi_ph_column.title = _("PhilHealth");
+				}
 			}
 
 		}

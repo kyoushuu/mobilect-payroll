@@ -210,9 +210,12 @@ namespace Mobilect {
 
 				dialog.response.connect ((d, r) => {
 					if (r == ResponseType.ACCEPT) {
-						dialog.hide ();
-						database.add_branch (branch.name);
-						dialog.destroy ();
+						try {
+							database.add_branch (branch.name);
+							dialog.destroy ();
+						} catch (Error e) {
+							(dialog.transient_for as Window).show_error_dialog (_("Failed to add branch"), e.message);
+						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
 					}

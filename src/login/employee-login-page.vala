@@ -111,14 +111,7 @@ namespace Mobilect {
 
 						var employee = this.list.get_from_iter (iter);
 
-						if (employee.get_password_checksum () !=
-						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
-							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password"));
-
-						if (employee.get_open_time_records_num () > 0)
-							throw new ApplicationError.ALREADY_LOGGED_IN (_("You are already logged in."));
-
-						employee.log_employee_in ();
+						employee.log_in (this.password_entry.text);
 
 						var dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 						                                MessageType.INFO, ButtonsType.OK,
@@ -140,14 +133,7 @@ namespace Mobilect {
 
 						var employee = this.list.get_from_iter (iter);
 
-						if (employee.get_password_checksum () !=
-						    Checksum.compute_for_string (ChecksumType.SHA256, this.password_entry.text, -1))
-							throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
-
-						if (employee.get_open_time_records_num () < 1)
-							throw new ApplicationError.NOT_LOGGED_IN (_("Not logged in."));
-
-						employee.log_employee_out ();
+						employee.log_out (this.password_entry.text);
 
 						var dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
 						                                  MessageType.INFO, ButtonsType.OK,

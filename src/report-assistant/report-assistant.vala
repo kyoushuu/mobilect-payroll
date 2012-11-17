@@ -180,8 +180,8 @@ namespace Mobilect {
 								} else {
 									current_name = _("payroll-overtime_%s-%s.pdf");
 								}
-								dialog.set_current_name (current_name.printf (pr.format_date (start_date, "%Y%m%d"),
-								                                              pr.format_date (end_date, "%Y%m%d")));
+								dialog.set_current_name (current_name.printf (Report.format_date (start_date, "%Y%m%d"),
+								                                              Report.format_date (end_date, "%Y%m%d")));
 
 								if (dialog.run () == ResponseType.ACCEPT) {
 									dialog.hide ();
@@ -226,7 +226,11 @@ namespace Mobilect {
 					                                    new TimePeriod[] {
 															TimePeriod (Time (8,0), Time (12,0)),
 															TimePeriod (Time (13,0), Time (17,0))
-														});
+														},
+					                                    new TimePeriod[] {
+															TimePeriod (Time (8,0), Time (17,0))
+														}
+					                                    );
 					var period_5pm_10pm = new PayPeriod (_("5pm-10pm"),
 					                                     true,
 					                                     1.25,
@@ -249,12 +253,12 @@ namespace Mobilect {
 					};
 
 					var pay_groups = new PayGroup[] {
-						new PayGroup (_("Non-Holiday"),
+						new PayGroup (null,
 						              false,
 						              false,
 						              MonthInfo.HolidayType.NON_HOLIDAY,
 						              1.0),
-						new PayGroup (_("Sundays, Non-Holiday"),
+						new PayGroup (_("Sundays"),
 						              false,
 						              true,
 						              MonthInfo.HolidayType.NON_HOLIDAY,

@@ -238,10 +238,13 @@ namespace Mobilect {
 
 				dialog.response.connect ((d, r) => {
 					if (r == ResponseType.ACCEPT) {
-						dialog.hide ();
-						database.add_administrator (administrator.username,
-						                            password_entry.text);
-						dialog.destroy ();
+						try {
+							database.add_administrator (administrator.username,
+							                            password_entry.text);
+							dialog.destroy ();
+						} catch (Error e) {
+							(dialog.transient_for as Window).show_error_dialog (_("Failed to add administrator"), e.message);
+						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
 					}

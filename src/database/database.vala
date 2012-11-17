@@ -25,6 +25,13 @@ namespace Mobilect {
 
 	namespace Payroll {
 
+		public errordomain DatabaseError {
+			BRANCH_SAME_NAME_EXISTS,
+			ADMINISTRATOR_SAME_USERNAME_EXISTS,
+			EMPLOYEE_SAME_NAME_EXISTS,
+			TIME_RECORD_CONFLICT
+		}
+
 		public class Database : Object {
 
 			public Connection cnc { get; private set; }
@@ -163,8 +170,14 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_branch (string name) {
+			public void add_branch (string name) throws DatabaseError {
 				Set stmt_params, last_insert_row;
+
+				foreach (var branch in branch_list) {
+					if (branch.name == name) {
+						throw new DatabaseError.BRANCH_SAME_NAME_EXISTS (_("A branch with the same name exists in the database."));
+					}
+				}
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO branches (name)" +
@@ -199,8 +212,14 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_administrator (string username, string password) {
+			public void add_administrator (string username, string password) throws DatabaseError {
 				Set stmt_params, last_insert_row;
+
+				foreach (var administrator in administrator_list) {
+					if (administrator.username == username) {
+						throw new DatabaseError.ADMINISTRATOR_SAME_USERNAME_EXISTS (_("An administrator with the same username exists in the database."));
+					}
+				}
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO administrators (username, password)" +
@@ -236,11 +255,19 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate, Branch branch) {
+			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate, Branch branch) throws DatabaseError {
 				Set stmt_params, last_insert_row;
 
 				Value value_rate = rate;
 				Value value_branch_id = branch.id;
+
+				foreach (var employee in employee_list) {
+					if (employee.lastname == lastname &&
+					    employee.firstname == firstname &&
+					    employee.middlename == middlename) {
+						throw new DatabaseError.EMPLOYEE_SAME_NAME_EXISTS (_("An employee with the same name exists in the database."));
+					}
+				}
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate, branch_id)" +
@@ -271,7 +298,7 @@ namespace Mobilect {
 					end = start;
 				}
 
-				var stmt_str = "SELECT id, employee_id, start, end FROM time_records WHERE ";
+				var stmt_str = "SELECT id FROM time_records WHERE ";
 				if (start.get_year () == end.get_year ()) {
 					if (start.get_month () == end.get_month ()) {
 						if (start.get_day () == end.get_day ()) {
@@ -339,19 +366,72 @@ namespace Mobilect {
 					}
 				} catch (Error e) {
 					list = new TimeRecordList (this);
-					warning ("Failed to get time records fro database: %s", e.message);
+					warning ("Failed to get time records from database: %s", e.message);
 				}
 
 				return list;
 			}
 
-			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time) {
+			public TimeRecordList get_time_records_of_employee (Employee employee) requires (employee.database == this) {
+				var list = new TimeRecordList (this);
+
+				try {
+					Set stmt_params;
+					var stmt = cnc.parse_sql_string ("SELECT id FROM time_records" +
+					                                 "  WHERE employee_id=##employee_id::int",
+					                                 out stmt_params);
+
+					Value value = (int) employee.id;
+					stmt_params.get_holder ("employee_id").set_value (value);
+
+					var data_model = cnc.statement_execute_select (stmt, stmt_params);
+
+					for (int i = 0; i < data_model.get_n_rows (); i++) {
+						Value cell_data = data_model.get_value_at (0, i);
+						var time_record = new TimeRecord (cell_data.get_int (), this, null);
+
+						list.add (time_record);
+					}
+				} catch (Error e) {
+					list = new TimeRecordList (this);
+					warning ("Failed to get time records from database: %s", e.message);
+				}
+
+				return list;
+			}
+
+			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time) throws DatabaseError {
 				Set stmt_params;
 				Value value_id = employee_id;
 				Value value_year = (int) start.get_year ();
 				Value value_month = (int) start.get_month ();
 				Value value_day = (int) start.get_day_of_month ();
 				Value value_straight_time = (bool) straight_time;
+
+				if (end != null) {
+					Date startd = Date (), endd = Date ();
+					startd.set_dmy ((DateDay) start.get_day_of_month (),
+					                (DateMonth) start.get_month (),
+					                (DateYear) start.get_year ());
+					endd.set_dmy ((DateDay) end.get_day_of_month (),
+					              (DateMonth) end.get_month (),
+					              (DateYear) end.get_year ());
+
+					foreach (var time_record in get_time_records_within_date (startd, endd)) {
+						if (time_record.employee.id != employee_id) {
+							continue;
+						}
+
+						/* Check if the time records overlap */
+						if (time_record.end.compare (start) > 0 &&
+						    time_record.start.compare (end) < 0) {
+							throw new DatabaseError.TIME_RECORD_CONFLICT (_("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s"),
+							                                              time_record.employee.get_name (),
+							                                              time_record.start.format (_("%a, %d %b, %Y %I:%M %p")),
+							                                              time_record.end.format (_("%a, %d %b, %Y %I:%M %p")));
+						}
+					}
+				}
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end, straight_time)" +

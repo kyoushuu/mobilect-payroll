@@ -49,7 +49,7 @@ namespace Mobilect {
 						start_spin.set_date_time (value.start?? dt);
 						end_spin.set_date_time (value.end?? start_spin.get_date_time ());
 
-						var tr_null = (value.end == null);
+						var tr_null = (value.start != null && value.end == null);
 						open_end_check.active = tr_null;
 						end_spin.sensitive = !tr_null;
 
@@ -109,6 +109,7 @@ namespace Mobilect {
 				start_label.show ();
 
 				start_spin = new DateTimeSpinButton ();
+				start_spin.value_changed.connect (() => { end_spin.set_date_time (start_spin.get_date_time ()); });
 				start_spin.hexpand = true;
 				grid.attach_next_to (start_spin,
 				                     start_label,
@@ -136,8 +137,8 @@ namespace Mobilect {
 				open_end_check = new CheckButton.with_mnemonic (_("_Open end"));
 				open_end_check.hexpand = true;
 				open_end_check.toggled.connect ((t) => {
-															 end_spin.sensitive = !open_end_check.active;
-														 });
+										 end_spin.sensitive = !open_end_check.active;
+									 });
 				grid.attach_next_to (open_end_check,
 				                     end_label,
 				                     PositionType.BOTTOM,

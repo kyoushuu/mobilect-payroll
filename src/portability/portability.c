@@ -76,43 +76,88 @@ portability_show_file (GtkWidget *window,
 
 
 gchar *
-portability_format_money (gdouble number, gint decimal_places)
+portability_format_money (gdouble number, gboolean decimal)
 {
 	gboolean success;
-	gchar *format;
 	gchar buffer[64];
 
 #ifdef G_OS_WIN32
 	gchar *value;
+	gint size, i;
+	TCHAR *DecimalSep, *ThousandSep, *Grouping;
+	CURRENCYFMTA format;
 
-	format = g_strdup_printf ("%%.%dlf", decimal_places);
-	value = g_strdup_printf (format, number);
+	value = g_strdup_printf (decimal? "%lf" : "%.0lf", number);
 
-	success = GetNumberFormat (LOCALE_USER_DEFAULT, 0, value, NULL,
-	                           buffer, sizeof (buffer)) > 0;
-
-	if (success && decimal_places == 0)
+	if (decimal)
 	{
-		int size, i;
+		GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_ICURRDIGITS | LOCALE_RETURN_NUMBER,
+		                (LPTSTR) &format.NumDigits,
+		                sizeof (format.NumDigits) / sizeof (TCHAR));
+	}
+	else
+		format.NumDigits = 0;
 
-		size = strlen (buffer);
-		for (i = size - 1; i >= 0; i--)
-		{
-			if (!isdigit (buffer[i]))
-			{
-				buffer[i] = '\0';
+	GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_ILZERO | LOCALE_RETURN_NUMBER,
+	                (LPTSTR) &format.LeadingZero,
+	                sizeof (format.LeadingZero) / sizeof (TCHAR));
+
+	GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_INEGCURR | LOCALE_RETURN_NUMBER,
+	                (LPTSTR) &format.NegativeOrder,
+	                sizeof (format.NegativeOrder) / sizeof (TCHAR));
+
+	GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_ICURRENCY | LOCALE_RETURN_NUMBER,
+	                (LPTSTR) &format.PositiveOrder,
+	                sizeof (format.PositiveOrder) / sizeof (TCHAR));
+
+	size = GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_SMONDECIMALSEP, 0, 0);
+	DecimalSep = g_malloc (size * sizeof (TCHAR));
+	GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_SMONDECIMALSEP, DecimalSep, size);
+	format.lpDecimalSep = DecimalSep;
+
+	size = GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_SMONTHOUSANDSEP, 0, 0);
+	ThousandSep = g_malloc (size * sizeof (TCHAR));
+	GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_SMONTHOUSANDSEP, ThousandSep, size);
+	format.lpThousandSep = ThousandSep;
+
+	size = GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_SMONGROUPING, 0, 0);
+	Grouping = g_malloc (size * sizeof (TCHAR));
+	GetLocaleInfoA (LOCALE_USER_DEFAULT, LOCALE_SMONGROUPING, Grouping, size);
+
+	format.Grouping = 0;
+	for (i = 0; ; i++) {
+		if (Grouping[i] == '0') {
+			break;
+		} else if ('0' < Grouping[i] && Grouping[i] <= '9') {
+			format.Grouping *= 10;
+			format.Grouping += Grouping[i] - '0';
+
+			if (Grouping[++i] == '\0') {
+				format.Grouping *= 10;
+			} else if (Grouping[i] != ';') {
+				success = FALSE;
 				break;
 			}
+		} else {
+			success = FALSE;
+			break;
 		}
 	}
+	g_free (Grouping);
+
+	format.lpCurrencySymbol = "";
+
+	success = GetCurrencyFormatA (LOCALE_USER_DEFAULT, 0, value, &format,
+	                              buffer, sizeof (buffer)) > 0;
+
+	g_free (DecimalSep);
+	g_free (ThousandSep);
 
 	g_free (value);
 #else
-	format = g_strdup_printf ("%%!.%dn", decimal_places);
-	success = strfmon (buffer, sizeof (buffer), format, number) > 0;
+	success = strfmon (buffer, sizeof (buffer),
+	                   decimal? "%!n" : "%!.0n", number) > 0;
 #endif
-
-	g_free (format);
 
 	if (success)
 	{

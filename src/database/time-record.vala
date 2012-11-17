@@ -65,6 +65,15 @@ namespace Mobilect {
 				this.id = id;
 				this.database = database;
 
+				pull ();
+			}
+
+			public void close_now () {
+				end = new DateTime.now_local ();
+				update ();
+			}
+
+			public void pull () {
 				Value cell_data;
 				var time_val = TimeVal ();
 

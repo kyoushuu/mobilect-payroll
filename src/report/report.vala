@@ -70,6 +70,8 @@ namespace Mobilect {
 			protected double table_top;
 			protected double header_height;
 			protected double footer_height;
+			protected double table_header_line_height;
+			protected double table_content_line_height;
 			protected double table_header_height;
 
 			protected double title_font_height;
@@ -112,6 +114,8 @@ namespace Mobilect {
 				}
 			}
 
+			public abstract void process ();
+
 			public override void request_page_setup (PrintContext context, int page_nr, PageSetup setup) {
 				if (page_nr < pages_payroll && this is RegularReport) {
 					/* Print payroll in landscape */
@@ -142,6 +146,20 @@ namespace Mobilect {
 				}
 			}
 
+			public override void begin_print (PrintContext context) {
+				process ();
+
+				update_font_metrics (context);
+
+				/* Get height of header and footer */
+				table_top = (title_font_height * 2) + company_name_font_height + (padding * 6);
+				table_header_line_height = header_font_height + (padding * 2);
+				table_content_line_height = text_font_height + (padding * 2);
+				table_header_height = table_header_line_height * 2;
+				header_height = table_top + table_header_height;
+				footer_height = table_content_line_height * 10;
+			}
+
 			public void print_dialog (Gtk.Window window) throws Error {
 				run (PrintOperationAction.PRINT_DIALOG, window);
 			}
@@ -154,7 +172,7 @@ namespace Mobilect {
 				run (PrintOperationAction.EXPORT, window);
 			}
 
-			public string format_date (Date date, string format) {
+			public static string format_date (Date date, string format) {
 				char s[64];
 				date.strftime (s, format);
 				return (string) s;
@@ -177,10 +195,70 @@ namespace Mobilect {
 				}
 			}
 
+			internal string dates_to_string (LinkedList<Date?> dates) {
+				bool is_range = false;
+				Date start_date = Date (), last_date = Date (), last_added_date = Date ();
+				string result = null;
+
+				dates.sort ((a, b) => { return a.compare (b); });
+
+				foreach (var date in dates) {
+					if (last_date.valid () && date.compare (last_date) == 0) {
+						continue;
+					}
+
+					if (last_date.valid () &&
+					    date.get_julian () - last_date.get_julian () == 1) {
+						if (!is_range) {
+							is_range = true;
+							start_date = date;
+						}
+					} else {
+						if (is_range) {
+							is_range = false;
+
+							if (start_date.get_month () != last_date.get_month ()) {
+								result += format_date (last_date, _(" - %b %d"));
+							} else {
+								result += format_date (last_date, _("-%d"));
+							}
+
+							result += ", ";
+						} else {
+							if (result != null) {
+								result += ", ";
+							} else {
+								result = "";
+							}
+						}
+
+						if (!last_added_date.valid () ||
+						    last_added_date.get_month () != date.get_month ()) {
+							result += format_date (date, _("%b %d"));
+						} else {
+							result += format_date (date, _("%d"));
+						}
+
+						last_added_date = date;
+					}
+
+					last_date = date;
+				}
+
+				if (is_range) {
+					if (start_date.get_month () != last_date.get_month ()) {
+						result += format_date (last_date, _(" - %b %d"));
+					} else {
+						result += format_date (last_date, _("-%d"));
+					}
+				}
+
+				return result;
+			}
+
 			private inline double greater (double a, double b) { return a > b? a : b; }
 
 			internal void update_font_metrics (Gtk.PrintContext context) {
-
 				/* Get font height */
 				FontMetrics font_metrics;
 				var pcontext = context.create_pango_context ();
@@ -376,7 +454,7 @@ namespace Mobilect {
 				layout.set_alignment (Pango.Alignment.LEFT);
 
 				cr.move_to (x + padding, y + padding);
-				layout.set_markup (_("GROSS EARNINGS: rate/day/month P %'.2lf").printf (employee.rate_per_day), -1);
+				layout.set_markup (_("GROSS EARNINGS: rate/day/month P %s").printf (format_money (employee.rate_per_day)), -1);
 				cairo_show_layout (cr, layout);
 
 				if (this is RegularReport) {
@@ -385,7 +463,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/2), y + padding);
-					layout.set_markup (format_money_int ((int) earnings), -1);
+					layout.set_markup (format_money (Math.floor (earnings), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -415,7 +493,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/2), y + padding);
-					layout.set_markup (format_money_int ((int) earnings), -1);
+					layout.set_markup (format_money (Math.floor (earnings), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -490,7 +568,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/4), y + padding);
-					layout.set_markup (format_money_int ((int) deduction), -1);
+					layout.set_markup (format_money (Math.floor (deduction), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -524,7 +602,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/4), y + padding);
-					layout.set_markup (format_money_int ((int) deduction), -1);
+					layout.set_markup (format_money (Math.floor (deduction), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -562,7 +640,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/4), y + padding);
-					layout.set_markup (format_money_int ((int) deduction), -1);
+					layout.set_markup (format_money (Math.floor (deduction), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -597,7 +675,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/4), y + padding);
-					layout.set_markup (format_money_int ((int) deduction), -1);
+					layout.set_markup (format_money (Math.floor (deduction), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -632,7 +710,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/4), y + padding);
-					layout.set_markup (format_money_int ((int) deduction), -1);
+					layout.set_markup (format_money (Math.floor (deduction), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);
@@ -655,7 +733,7 @@ namespace Mobilect {
 					layout.set_alignment (Pango.Alignment.RIGHT);
 					layout.set_width (units_from_double ((width/6) - (padding * 2)));
 					cr.move_to (x + padding + (width/4), y + padding);
-					layout.set_markup (format_money_int ((int) total_deductions), -1);
+					layout.set_markup (format_money (Math.floor (total_deductions), false), -1);
 					cairo_show_layout (cr, layout);
 
 					layout.set_alignment (Pango.Alignment.LEFT);

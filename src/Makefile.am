@@ -47,9 +47,10 @@ mobilect_payroll_SOURCES = \
 	database-widgets/time-record-edit-dialog.vala \
 	database-widgets/administrator-edit-widget.vala \
 	database-widgets/administrator-edit-dialog.vala \
+	database-widgets/find-time-record-dialog.vala \
 	database-widgets/add-time-record-assistant.vala \
+	database-widgets/total-deductions-dialog.vala \
 	widgets/dialog.vala \
-	widgets/find-dialog.vala \
 	widgets/password-dialog.vala \
 	widgets/preferences-dialog.vala \
 	widgets/sort-tree-view-dialog.vala \
@@ -107,6 +108,8 @@ mobilect_payroll_VALAFLAGS = \
 	--pkg $(GEE_MODULE) \
 	--debug
 
+mobilect_payroll_LDFLAGS =
+
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \
 	$(GLIB_LIBS) \
@@ -119,7 +122,7 @@ mobilect_payroll_LDADD = \
 
 
 if NATIVE_WIN32
-mobilect_payroll_LDFLAGS = -mwindows -lshlwapi
+mobilect_payroll_LDFLAGS += -mwindows -lshlwapi
 mobilect_payroll_LDADD += mobilect-payroll-win32-res.o
 endif
 

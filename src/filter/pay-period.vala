@@ -51,6 +51,7 @@ namespace Mobilect {
 			 * skipping unpaid time (e.g. lunch break).
 			 */
 			public TimePeriod[] time_periods { get; private set; }
+			public TimePeriod[] time_periods_sunday { get; private set; }
 
 
 			/**
@@ -59,11 +60,13 @@ namespace Mobilect {
 			public PayPeriod (string name,
 			                  bool is_overtime,
 			                  double rate,
-			                  TimePeriod[] time_periods) {
+			                  TimePeriod[] time_periods,
+			                  TimePeriod[]? time_periods_sunday = null) {
 				this.name = name;
 				this.is_overtime = is_overtime;
 				this.rate = rate;
 				this.time_periods = time_periods;
+				this.time_periods_sunday = time_periods_sunday?? time_periods;
 			}
 
 		}

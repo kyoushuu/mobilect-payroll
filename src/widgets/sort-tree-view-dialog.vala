@@ -85,15 +85,15 @@ namespace Mobilect {
 
 
 				this.response.connect ((d, r) => {
-															 if (r == ResponseType.ACCEPT &&
-															     column_combo.active >= 0 &&
-															     this.tree_view.model is TreeSortable) {
-																 (this.tree_view.model as TreeSortable)
-																 .set_sort_column_id (tree_view.get_column (column_combo.active).sort_column_id,
-																                      ascending_check.active?
-																                      SortType.ASCENDING : SortType.DESCENDING);
-															 }
-														 });
+										 if (r == ResponseType.ACCEPT &&
+										     column_combo.active >= 0 &&
+										     this.tree_view.model is TreeSortable) {
+											 (this.tree_view.model as TreeSortable)
+											 .set_sort_column_id (tree_view.get_column (column_combo.active).sort_column_id,
+											                      ascending_check.active?
+											                      SortType.ASCENDING : SortType.DESCENDING);
+										 }
+									 });
 
 				this.tree_view = tree_view;
 			}

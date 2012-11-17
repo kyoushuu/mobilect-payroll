@@ -129,10 +129,14 @@ namespace Mobilect {
 							main_iteration ();
 						}
 
-						database.add_time_record (employee.id,
-							                      time_record.start,
-							                      time_record.end,
-							                      time_record.straight_time);
+						try {
+							database.add_time_record (employee.id,
+							                          time_record.start,
+							                          time_record.end,
+							                          time_record.straight_time);
+						} catch (Error e) {
+							parent_window.show_error_dialog (_("Failed to add time record"), e.message);
+						}
 
 						progress_bar.fraction = ++i / (double) list_size;
 					}

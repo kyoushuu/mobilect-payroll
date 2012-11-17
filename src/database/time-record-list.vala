@@ -103,14 +103,40 @@ namespace Mobilect {
 				return null;
 			}
 
-			public TimeRecord? get_with_employee_id (int employee_id) {
+			public TimeRecordList get_subset_with_branch (Branch branch) requires (branch.database == database) {
+				var list = new TimeRecordList (database);
+
 				foreach (var time_record in this) {
-					if (time_record.employee_id == employee_id) {
-						return time_record;
+					if (time_record.employee.branch == branch) {
+						list.add (time_record);
 					}
 				}
 
-				return null;
+				return list;
+			}
+
+			public TimeRecordList get_subset_with_employee (Employee employee) requires (employee.database == database) {
+				var list = new TimeRecordList (database);
+
+				foreach (var time_record in this) {
+					if (time_record.employee == employee) {
+						list.add (time_record);
+					}
+				}
+
+				return list;
+			}
+
+			public TimeRecordList get_subset_open () {
+				var list = new TimeRecordList (database);
+
+				foreach (var time_record in this) {
+					if (time_record.end == null) {
+						list.add (time_record);
+					}
+				}
+
+				return list;
 			}
 
 

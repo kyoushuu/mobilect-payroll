@@ -30,6 +30,7 @@ namespace Mobilect {
 
 			public RadioButton regular_radio { get; private set; }
 			public RadioButton overtime_radio { get; private set; }
+			public RadioButton irregular_radio { get; private set; }
 			public DateSpinButton start_spin { get; private set; }
 			public DateSpinButton end_spin { get; private set; }
 			public ComboBox branch_combobox { get; private set; }
@@ -43,7 +44,7 @@ namespace Mobilect {
 				push_composite_child ();
 
 
-				var label = new Label (_("Select the branch, type and date for the report below.\n\nFor regular reports, the start date should be the 1st or 15th day of the month, with the end date 16th or last day of the month, respectively."));
+				var label = new Label (_("Select the branch, type and date for the report below.\n\nFor semi-monthly reports, the start date should be the 1st or 15th day of the month, with the end date 16th or last day of the month, respectively."));
 				label.wrap = true;
 				label.xalign = 0.0f;
 				this.add (label);
@@ -61,7 +62,7 @@ namespace Mobilect {
 				grid.add (type_label);
 				type_label.show ();
 
-				regular_radio = new RadioButton.with_mnemonic (null, _("_Regular"));
+				regular_radio = new RadioButton.with_mnemonic (null, _("_Semi-Monthly"));
 				regular_radio.toggled.connect (changed);
 				grid.attach_next_to (regular_radio,
 				                     type_label,
@@ -69,13 +70,21 @@ namespace Mobilect {
 				                     1, 1);
 				regular_radio.show ();
 
-				overtime_radio = new RadioButton.with_mnemonic_from_widget (regular_radio, _("_Overtime"));
+				overtime_radio = new RadioButton.with_mnemonic_from_widget (regular_radio, _("Monthly _Overtime"));
 				overtime_radio.toggled.connect (changed);
 				grid.attach_next_to (overtime_radio,
 				                     regular_radio,
 				                     PositionType.BOTTOM,
 				                     1, 1);
 				overtime_radio.show ();
+
+				irregular_radio = new RadioButton.with_mnemonic_from_widget (overtime_radio, _("Weekly _Overtime"));
+				irregular_radio.toggled.connect (changed);
+				grid.attach_next_to (irregular_radio,
+				                     overtime_radio,
+				                     PositionType.BOTTOM,
+				                     1, 1);
+				irregular_radio.show ();
 
 				var period_label = new Label.with_mnemonic (_("_Period:"));
 				period_label.xalign = 0.0f;
@@ -124,27 +133,10 @@ namespace Mobilect {
 
 
 				/* Set default period */
-				var date = new DateTime.now_local ().add_days (-12);
-				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
-
-				DateDay last_day;
-				if (period == 0) {
-					last_day = 15;
-				} else {
-					last_day = 31;
-					while (!Date.valid_dmy (last_day,
-					                        (DateMonth) date.get_month (),
-					                        (DateYear) date.get_year ())) {
-						last_day--;
-					}
-				}
-
-				start_spin.set_dmy ((15 * period) + 1,
-				                    date.get_month (),
-				                    date.get_year ());
-				end_spin.set_dmy (last_day,
-				                  date.get_month (),
-				                  date.get_year ());
+				Date start, end;
+				get_current_period (out start, out end);
+				start_spin.date = start;
+				end_spin.date = end;
 
 				/* Set default branch */
 				TreeIter iter;
@@ -153,7 +145,9 @@ namespace Mobilect {
 				if (branch_combobox.model.get_iter_first (out iter)) {
 					branch_combobox.set_active_iter (iter);
 					branch_combobox.model.get (iter, BranchList.Columns.OBJECT, out branch);
-					list = assistant.parent_window.app.database.employee_list.get_subset_with_branch (branch);
+					list = assistant.parent_window.app.database.employee_list
+						.get_subset_with_branch (branch)
+						.get_subset_is_regular (true);
 				}
 			}
 
@@ -167,7 +161,9 @@ namespace Mobilect {
 
 				if (branch_combobox.get_active_iter (out iter)) {
 					branch_combobox.model.get (iter, BranchList.Columns.OBJECT, out branch);
-					list = assistant.parent_window.app.database.employee_list.get_subset_with_branch (branch);
+					list = assistant.parent_window.app.database.employee_list
+						.get_subset_with_branch (branch)
+						.get_subset_is_regular (!irregular_radio.active);
 				} else {
 					assistant.set_page_complete (this, false);
 					return;

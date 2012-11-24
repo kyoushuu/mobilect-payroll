@@ -196,25 +196,13 @@ namespace Mobilect {
 						tooltip = _("Find time records"),
 						callback = (a) => {
 							/* Set period */
-							var date = new DateTime.now_local ().add_days (-12);
-							var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
 
-							DateDay last_day;
-							if (period == 0) {
-								last_day = 15;
-							} else {
-								last_day = 31;
-								while (!Date.valid_dmy (last_day,
-								                        (DateMonth) date.get_month (),
-								                        (DateYear) date.get_year ())) {
-									last_day--;
-								}
-							}
-
+							Date start, end;
+							get_current_period (out start, out end);
 
 							var dialog = new FindTimeRecordDialog (this.cpanel.window);
-							dialog.set_start_dmy ((15 * period) + 1, date.get_month (), date.get_year ());
-							dialog.set_end_dmy (last_day, date.get_month (), date.get_year ());
+							dialog.set_dates (start, end);
+
 							dialog.response.connect ((d, r) => {
 								if (r == ResponseType.ACCEPT) {
 									d.hide ();
@@ -323,7 +311,8 @@ namespace Mobilect {
 				dialog.response.connect ((d, r) => {
 					if (r == ResponseType.ACCEPT) {
 						if (time_record.employee == null) {
-							this.cpanel.window.show_error_dialog (_("No employee selected"),
+							this.cpanel.window.show_error_dialog (dialog,
+							                                      _("No employee selected"),
 							                                      _("Select at least one employee first."));
 
 							return;
@@ -335,11 +324,12 @@ namespace Mobilect {
 							database.add_time_record (time_record.employee_id,
 							                          time_record.start,
 							                          time_record.end,
-							                          time_record.straight_time);
+							                          time_record.straight_time,
+							                          time_record.include_break);
 
 							dialog.destroy ();
 						} catch (Error e) {
-							(dialog.transient_for as Window).show_error_dialog (_("Failed to add time record"), e.message);
+							(dialog.transient_for as Window).show_error_dialog (dialog, _("Failed to add time record"), e.message);
 						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
@@ -412,10 +402,11 @@ namespace Mobilect {
 								/* Check if the time records overlap */
 								if (t.end.compare (time_record.start) > 0 &&
 								    t.start.compare (time_record.end) < 0) {
-									this.cpanel.window.show_error_dialog (_("Cannot save time record"),
-										                                    _("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s").printf (t.employee.get_name (),
-										                                    t.start.format (_("%a, %d %b, %Y %I:%M %p")),
-										                                    t.end.format (_("%a, %d %b, %Y %I:%M %p"))));
+									this.cpanel.window.show_error_dialog (dialog,
+									                                      _("Cannot save time record"),
+									                                      _("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s").printf (t.employee.get_name (),
+									                                      t.start.format (_("%a, %d %b, %Y %I:%M %p")),
+									                                      t.end.format (_("%a, %d %b, %Y %I:%M %p"))));
 
 									time_record.pull ();
 

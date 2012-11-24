@@ -48,12 +48,14 @@ namespace Mobilect {
 				filter.holiday_type = holiday_type;
 				filter.sunday_work = is_sunday_work;
 				filter.straight_time = straight_time;
+				filter.include_break = is_sunday_work;
 			}
 
 			public Filter create_filter (PayPeriod period, Date start, Date end) {
 				var filter = this.filter.duplicate ();
-				filter.time_periods = is_sunday_work?
-					period.time_periods_sunday : period.time_periods;
+
+				filter.time_periods = period.time_periods;
+				filter.time_periods_break = period.time_periods_break;
 				filter.enlist = period.is_overtime ||
 					straight_time ||
 					holiday_type != MonthInfo.HolidayType.NON_HOLIDAY ||
@@ -61,6 +63,7 @@ namespace Mobilect {
 				filter.period = filter.enlist? 1.0 : 4.0;
 				filter.date_start = start;
 				filter.date_end = end;
+
 				return filter;
 			}
 

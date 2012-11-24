@@ -35,6 +35,7 @@ namespace Mobilect {
 
 			public CheckButton open_end_check { public get; private set; }
 			public CheckButton straight_time_check { public get; private set; }
+			public CheckButton include_break_check { public get; private set; }
 
 			private TimeRecord _time_record;
 			public TimeRecord time_record {
@@ -54,6 +55,7 @@ namespace Mobilect {
 						end_spin.sensitive = !tr_null;
 
 						straight_time_check.active = value.straight_time;
+						include_break_check.active = value.include_break;
 
 						var employees = time_record.database.employee_list;
 						employee_combobox.model = employees;
@@ -155,6 +157,15 @@ namespace Mobilect {
 				straight_time_check.show ();
 
 
+				include_break_check = new CheckButton.with_mnemonic (_("Include lunch break (Sundays only)"));
+				include_break_check.hexpand = true;
+				grid.attach_next_to (include_break_check,
+				                     straight_time_check,
+				                     PositionType.BOTTOM,
+				                     2, 1);
+				include_break_check.show ();
+
+
 				pop_composite_child ();
 
 
@@ -174,6 +185,7 @@ namespace Mobilect {
 					this._time_record.start = this.start_spin.get_date_time ();
 					this._time_record.end = (this.open_end_check.active)? null : this.end_spin.get_date_time ();
 					this._time_record.straight_time = straight_time_check.active;
+					this._time_record.include_break = include_break_check.active;
 				}
 			}
 

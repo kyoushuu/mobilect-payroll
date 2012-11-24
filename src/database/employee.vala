@@ -38,9 +38,16 @@ namespace Mobilect {
 			public string firstname { get; set; }
 			public string middlename { get; set; }
 			public string tin { get; set; }
+			public bool regular { default = true; get; set; }
 			public int rate { get; set; }
-			public double rate_per_day { get { return rate / 26.0; } }
-			public double rate_per_hour { get { return rate / (26.0 * 8.0); } }
+			public double rate_per_day {
+				get { return rate / 26.0; }
+				set { rate = (int) (value * 26.0); }
+			}
+			public double rate_per_hour {
+				get { return rate / (26.0 * 8.0); }
+				set { rate = (int) (value * 26.0 * 8.0); }
+			}
 
 			private Branch _branch;
 			public Branch branch {
@@ -81,7 +88,7 @@ namespace Mobilect {
 				if (id != 0) {
 					try {
 						/* Get employee data from database */
-						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename, tin, rate, branch_id" +
+						var stmt = database.cnc.parse_sql_string ("SELECT lastname, firstname, middlename, tin, rate, branch_id, regular" +
 						                                          "  FROM employees" +
 						                                          "  WHERE id=##id::int",
 						                                          out stmt_params);
@@ -109,6 +116,9 @@ namespace Mobilect {
 							var cell_data_branch_id = data_model.get_value_at (5, 0);
 							this.branch_id = (int) cell_data_branch_id;
 						}
+
+						var cell_data_regular = data_model.get_value_at (6, 0);
+						this.regular = (bool) cell_data_regular;
 					} catch (Error e) {
 						warning ("Failed to get employee data from database: %s", e.message);
 					}
@@ -147,7 +157,7 @@ namespace Mobilect {
 					throw new EmployeeLoginError.ALREADY_LOGGED_IN (_("You are already logged in."));
 
 				try {
-					database.add_time_record (this.id, new DateTime.now_local (), null, false);
+					database.add_time_record (this.id, new DateTime.now_local (), null, false, true);
 				} catch (Error e) {
 					warning ("Failed to add time record of employee to database: %s", e.message);
 				}
@@ -203,7 +213,7 @@ namespace Mobilect {
 
 						/* Check time record against each affected dates */
 						foreach (var date in filter.get_affected_dates (database)) {
-							foreach (var period in filter.time_periods) {
+							foreach (var period in filter.get_time_periods_with_break (time_record.include_break)) {
 								time_start = period.start;
 								time_end = period.end;
 
@@ -281,6 +291,7 @@ namespace Mobilect {
 				Value value_id = this.id;
 				Value value_rate = this.rate;
 				Value value_branch_id = this.branch.id;
+				Value value_regular = this.regular;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
@@ -289,7 +300,8 @@ namespace Mobilect {
 					                                          "    middlename=##middlename::string," +
 					                                          "    tin=##tin::string," +
 					                                          "    rate=##rate::int," +
-					                                          "    branch_id=##branch_id::int" +
+					                                          "    branch_id=##branch_id::int," +
+					                                          "    regular=##regular::boolean" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
@@ -299,6 +311,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("tin").set_value_str (database.dh_string, this.tin);
 					stmt_params.get_holder ("rate").set_value (value_rate);
 					stmt_params.get_holder ("branch_id").set_value (value_branch_id);
+					stmt_params.get_holder ("regular").set_value (value_regular);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					warning ("Failed to update employee in database: %s", e.message);

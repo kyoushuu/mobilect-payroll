@@ -32,7 +32,7 @@ namespace Mobilect {
 					date.set_julian ((uint) this.value);
 					return date;
 				}
-				protected set {
+				public set {
 					if (value.valid ()) {
 						this.value = value.get_julian ();
 					}

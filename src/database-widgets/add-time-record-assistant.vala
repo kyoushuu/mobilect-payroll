@@ -32,6 +32,7 @@ namespace Mobilect {
 				WELCOME,
 				BASIC_INFO,
 				SELECT_EMPLOYEES,
+				SELECT_DATES,
 				CONFIRM,
 				APPLY,
 				FINISH,
@@ -75,13 +76,20 @@ namespace Mobilect {
 				insert_page (page, Pages.BASIC_INFO);
 				set_page_type (page, AssistantPageType.CONTENT);
 				set_page_title (page, _("Basic Information"));
-				set_page_complete (page, true);
+				set_page_complete (page, false);	// Date is invalid by default
 				page.show ();
 
 				page = new SelectEmployeesPage (this);
 				insert_page (page, Pages.SELECT_EMPLOYEES);
 				set_page_type (page, AssistantPageType.CONTENT);
 				set_page_title (page, _("Select Employees"));
+				set_page_complete (page, true);
+				page.show ();
+
+				page = new SelectDatesPage (this);
+				insert_page (page, Pages.SELECT_DATES);
+				set_page_type (page, AssistantPageType.CONTENT);
+				set_page_title (page, _("Select Dates"));
 				set_page_complete (page, true);
 				page.show ();
 
@@ -107,10 +115,21 @@ namespace Mobilect {
 				page.show ();
 			}
 
+			private struct BoundaryDate {
+				public DateTime start;
+				public DateTime? end;
+
+				public BoundaryDate (DateTime start, DateTime? end) {
+					this.start = start;
+					this.end = end;
+				}
+			}
+
 			public override void apply () {
 				Idle.add (() => {
-					var select_employees_page = get_nth_page (Pages.SELECT_EMPLOYEES) as SelectEmployeesPage;
 					var basic_info_page = get_nth_page (Pages.BASIC_INFO) as BasicInfoPage;
+					var select_employees_page = get_nth_page (Pages.SELECT_EMPLOYEES) as SelectEmployeesPage;
+					var select_dates_page = get_nth_page (Pages.SELECT_DATES) as SelectDatesPage;
 					var apply_page = get_nth_page (Pages.APPLY) as ApplyPage;
 
 					basic_info_page.widget.save ();
@@ -122,23 +141,73 @@ namespace Mobilect {
 					var list_size = list.size;
 					int i = 0;
 
-					foreach (var employee in list) {
-						progress_bar.text = "Adding time record for %s".printf (employee.get_name ());
 
-						while (Gtk.events_pending ()) {
-							main_iteration ();
+					/* Get dates affected */
+					MonthInfo month_info = null;
+					var dates = new BoundaryDate[0];
+
+					if (select_dates_page.multiple_radio.active) {
+						TimeSpan diff = 0;
+						if (time_record.end != null) {
+							diff = time_record.end.difference (time_record.start);
 						}
 
-						try {
-							database.add_time_record (employee.id,
-							                          time_record.start,
-							                          time_record.end,
-							                          time_record.straight_time);
-						} catch (Error e) {
-							parent_window.show_error_dialog (_("Failed to add time record"), e.message);
-						}
+						var date_start = select_dates_page.start_spin.date;
+						var date_end = select_dates_page.end_spin.date;
 
-						progress_bar.fraction = ++i / (double) list_size;
+						for (var date = date_start; date.compare (date_end) <= 0; date.add_days (1)) {
+							if (month_info == null ||
+								month_info.month != date.get_month () ||
+								month_info.year != date.get_year ()) {
+								month_info = new MonthInfo (database,
+											                date.get_year (),
+											                date.get_month ());
+							}
+
+							if (month_info.get_day_type (date.get_day ()) != MonthInfo.HolidayType.NON_HOLIDAY) {
+								continue;
+							}
+
+							if (month_info.get_weekday (date.get_day ()) == DateWeekday.SUNDAY) {
+								continue;
+							}
+
+							var curr_start = new DateTime.local (date.get_year (),
+							                                     date.get_month (),
+							                                     date.get_day (),
+							                                     time_record.start.get_hour (),
+							                                     time_record.start.get_minute (),
+							                                     time_record.start.get_seconds ());
+							dates += BoundaryDate (curr_start, diff > 0? curr_start.add (diff) : null);
+						}
+					} else {
+						dates += BoundaryDate (time_record.start, time_record.end);
+					}
+
+					int steps = dates.length * list_size;
+
+					foreach (var date in dates) {
+						var date_str = date.start.format ("%d %B, %Y");
+
+						foreach (var employee in list) {
+							progress_bar.text = "Adding time record of %s for %s".printf (employee.get_name (), date_str);
+
+							while (Gtk.events_pending ()) {
+								main_iteration ();
+							}
+
+							try {
+								database.add_time_record (employee.id,
+										                  date.start,
+										                  date.end,
+										                  time_record.straight_time,
+										                  time_record.include_break);
+							} catch (Error e) {
+								this.parent_window.show_error_dialog (this, _("Failed to add time record"), e.message);
+							}
+
+							progress_bar.fraction = ++i / (double) steps;
+						}
 					}
 
 					progress_bar.text = _("Finished");
@@ -300,7 +369,9 @@ namespace Mobilect {
 					push_composite_child ();
 
 
-					var label = new Label (_("Select employees to get the desired time record."));
+					var label = new Label (_("Select employees to get the desired time record. <b>Note that only regular employees are selected by default.</b>"));
+					label.use_markup = true;
+					label.wrap = true;
 					label.xalign = 0.0f;
 					this.add (label);
 					label.show ();
@@ -390,6 +461,10 @@ namespace Mobilect {
 				public override void prepare () {
 					list = (assistant.get_nth_page (Pages.BASIC_INFO) as BasicInfoPage).list;
 
+					foreach (var employee in list) {
+						list.set_is_enabled (employee, employee.regular);
+					}
+
 					sort = new TreeModelSort.with_model (this.list);
 					sort.set_sort_func (EmployeeList.Columns.NAME,
 					                    (model, a, b) => {
@@ -421,6 +496,118 @@ namespace Mobilect {
 
 			}
 
+			public class SelectDatesPage : Page {
+
+				public Grid grid { get; private set; }
+
+				public RadioButton single_radio { public get; private set; }
+				public RadioButton multiple_radio { public get; private set; }
+				public Label start_label { public get; private set; }
+				public DateSpinButton start_spin { public get; private set; }
+				public Label end_label { public get; private set; }
+				public DateSpinButton end_spin { public get; private set; }
+				public EmployeeList list { public get; private set; }
+
+
+				public SelectDatesPage (AddTimeRecordAssistant assistant) {
+					base (assistant);
+
+
+					push_composite_child ();
+
+
+					var label = new Label (_("Select the start dates to create records for. <b>Holidays and Sundays will be skipped when a range is specified.</b>"));
+					label.use_markup = true;
+					label.wrap = true;
+					label.xalign = 0.0f;
+					this.add (label);
+					label.show ();
+
+
+					grid = new Grid ();
+					grid.orientation = Orientation.VERTICAL;
+					grid.row_homogeneous = true;
+					grid.row_spacing = 3;
+					grid.column_spacing = 12;
+					this.add (grid);
+					grid.show ();
+
+					single_radio = new RadioButton.with_mnemonic (null, _("Create records with a _single date"));
+					single_radio.toggled.connect (changed);
+					grid.attach (single_radio,
+					             0, 0,
+					             2, 1);
+					single_radio.show ();
+
+					multiple_radio = new RadioButton.with_mnemonic_from_widget (single_radio, _("Create multiple records with dates in range (inclusive)."));
+					multiple_radio.toggled.connect (changed);
+					grid.attach_next_to (multiple_radio,
+					                     single_radio,
+					                     PositionType.BOTTOM,
+					                     2, 1);
+					multiple_radio.show ();
+
+
+					start_label = new Label.with_mnemonic (_("S_tart:"));
+					start_label.xalign = 0.0f;
+					grid.add (start_label);
+					start_label.show ();
+
+					start_spin = new DateSpinButton ();
+					start_spin.value_changed.connect (() => { end_spin.date = start_spin.date; });
+					start_spin.hexpand = true;
+					grid.attach_next_to (start_spin,
+					                     start_label,
+					                     PositionType.RIGHT,
+					                     1, 1);
+					start_label.mnemonic_widget = start_spin;
+					start_spin.show ();
+
+
+					end_label = new Label.with_mnemonic (_("E_nd:"));
+					end_label.xalign = 0.0f;
+					grid.add (end_label);
+					end_label.show ();
+
+					end_spin = new DateSpinButton ();
+					end_spin.hexpand = true;
+					grid.attach_next_to (end_spin,
+					                     end_label,
+					                     PositionType.RIGHT,
+					                     1, 1);
+					end_label.mnemonic_widget = end_spin;
+					end_spin.show ();
+
+
+					pop_composite_child ();
+
+
+					/* Set defaults */
+					single_radio.active = true;
+					start_label.sensitive = false;
+					start_spin.sensitive = false;
+					end_label.sensitive = false;
+					end_spin.sensitive = false;
+				}
+
+				public void changed () {
+					var sensitive = multiple_radio.active;
+					start_label.sensitive = sensitive;
+					start_spin.sensitive = sensitive;
+					end_label.sensitive = sensitive;
+					end_spin.sensitive = sensitive;
+
+					if (assistant.get_current_page () < 0) {
+						return;
+					}
+
+					assistant.set_page_complete (this,
+					                             !sensitive ||
+					                             start_spin.date.compare (end_spin.date) <= 0);
+				}
+
+			}
+
 			public class ConfirmPage : Page {
 
 				public ConfirmPage (AddTimeRecordAssistant assistant) {
@@ -432,6 +619,7 @@ namespace Mobilect {
 
 					var label = new Label (_("The Assistant is now ready to add the time records to the database.\n\nPress \"Apply\" to apply changes."));
 					label.xalign = 0.0f;
+					label.wrap = true;
 					this.add (label);
 					label.show ();
 
@@ -454,6 +642,7 @@ namespace Mobilect {
 
 					var label = new Label (_("Adding the time records to the database..."));
 					label.xalign = 0.0f;
+					label.wrap = true;
 					this.add (label);
 					label.show ();
 
@@ -485,6 +674,7 @@ namespace Mobilect {
 
 					var label = new Label (_("The time records are successfully added to database."));
 					label.xalign = 0.0f;
+					label.wrap = true;
 					this.add (label);
 					label.show ();
 

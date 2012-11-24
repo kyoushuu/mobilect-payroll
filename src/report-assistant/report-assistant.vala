@@ -32,6 +32,7 @@ namespace Mobilect {
 				WELCOME,
 				BASIC_INFO,
 				SELECT_EMPLOYEES,
+				SELECT_COMPONENTS,
 				FOOTER_INFO,
 				PAGE_SETUP,
 				CONFIRM,
@@ -93,6 +94,13 @@ namespace Mobilect {
 				set_page_complete (page, true);
 				page.show ();
 
+				page = new ReportAssistantSelectComponentsPage (this);
+				insert_page (page, Pages.SELECT_COMPONENTS);
+				set_page_type (page, AssistantPageType.CONTENT);
+				set_page_title (page, _("Select Components"));
+				set_page_complete (page, true);
+				page.show ();
+
 				page = new ReportAssistantFooterInfoPage (this);
 				insert_page (page, Pages.FOOTER_INFO);
 				set_page_type (page, AssistantPageType.CONTENT);
@@ -133,10 +141,12 @@ namespace Mobilect {
 				Idle.add (() => {
 					var basic_info_page = get_nth_page (ReportAssistant.Pages.BASIC_INFO) as ReportAssistantBasicInfoPage;
 					var select_employees_page = get_nth_page (ReportAssistant.Pages.SELECT_EMPLOYEES) as ReportAssistantSelectEmployeesPage;
+					var select_components_page = get_nth_page (ReportAssistant.Pages.SELECT_COMPONENTS) as ReportAssistantSelectComponentsPage;
 					var confirm_page = get_nth_page (ReportAssistant.Pages.CONFIRM) as ReportAssistantConfirmPage;
 					var apply_page = get_nth_page (ReportAssistant.Pages.APPLY) as ReportAssistantApplyPage;
 
 					var is_regular = basic_info_page.regular_radio.active;
+					var is_monthly = basic_info_page.overtime_radio.active;
 					var start_date = basic_info_page.start_spin.date;
 					var end_date = basic_info_page.end_spin.date;
 
@@ -150,9 +160,12 @@ namespace Mobilect {
 
 					try {
 						var pr = create_report (is_regular,
+						                        is_monthly,
 						                        start_date,
 						                        end_date,
 						                        select_employees_page.list.get_subset (true));
+						pr.payroll = select_components_page.payroll_check.active;
+						pr.payslip = select_components_page.payslip_check.active;
 						pr.status_changed.connect ((o) => {
 													progress_bar.text = pr.status_string;
 												});
@@ -176,12 +189,14 @@ namespace Mobilect {
 
 								string current_name;
 								if (is_regular) {
-									current_name = _("payroll-regular_%s-%s.pdf");
+									current_name = _("payroll-semi-monthly-%s-%s.pdf");
+								} else if (is_monthly) {
+									current_name = _("payroll-monthly-overtime_%s-%s.pdf");
 								} else {
-									current_name = _("payroll-overtime_%s-%s.pdf");
+									current_name = _("payroll-weekly-overtime_%s-%s.pdf");
 								}
-								dialog.set_current_name (current_name.printf (Report.format_date (start_date, "%Y%m%d"),
-								                                              Report.format_date (end_date, "%Y%m%d")));
+								dialog.set_current_name (current_name.printf (format_date (start_date, "%Y%m%d"),
+								                                              format_date (end_date, "%Y%m%d")));
 
 								if (dialog.run () == ResponseType.ACCEPT) {
 									dialog.hide ();
@@ -201,7 +216,8 @@ namespace Mobilect {
 								break;
 						}
 					} catch (Error e) {
-						parent_window.show_error_dialog (_("Failed to print report"),
+						parent_window.show_error_dialog (this,
+						                                 _("Failed to print report"),
 						                                 e.message);
 					}
 
@@ -213,7 +229,7 @@ namespace Mobilect {
 				});
 			}
 
-			private Report create_report (bool regular, Date start_date, Date end_date, EmployeeList employees) throws ReportError, RegularReportError {
+			private Report create_report (bool regular, bool monthly, Date start_date, Date end_date, EmployeeList employees) throws ReportError, RegularReportError {
 				Report pr;
 
 				if (regular) {
@@ -246,13 +262,10 @@ namespace Mobilect {
 															 TimePeriod (Time (0,0), Time (6,0))
 														 });
 
-					var pay_periods = new PayPeriod[] {
-						period_8am_5pm,
-						period_5pm_10pm,
-						period_10pm_6am
-					};
 
-					var pay_groups = new PayGroup[] {
+					pr = new OvertimeReport (start_date, end_date);
+
+					(pr as OvertimeReport).pay_groups = new PayGroup[] {
 						new PayGroup (null,
 						              false,
 						              false,
@@ -289,13 +302,17 @@ namespace Mobilect {
 						              MonthInfo.HolidayType.NON_HOLIDAY, /* Ignored */
 						              1.0)
 					};
+					(pr as OvertimeReport).pay_periods = new PayPeriod[] {
+						period_8am_5pm,
+						period_5pm_10pm,
+						period_10pm_6am
+					};
 
-
-					pr = new OvertimeReport (start_date, end_date);
-					pr.title = _("MONTHLY OVERTIME PAYROLL");
-
-					(pr as OvertimeReport).pay_groups = pay_groups;
-					(pr as OvertimeReport).pay_periods = pay_periods;
+					if (monthly) {
+						pr.title = _("MONTHLY OVERTIME PAYROLL");
+					} else {
+						pr.title = _("WEEKLY OVERTIME PAYROLL");
+					}
 				}
 
 				pr.employees = employees;
@@ -334,7 +351,8 @@ namespace Mobilect {
 											  try {
 												  o.get_error ();
 											  } catch (Error e) {
-												  parent_window.show_error_dialog (_("Failed to print report"),
+												  parent_window.show_error_dialog (this,
+												                                   _("Failed to print report"),
 												                                   e.message);
 											  }
 										  } else if (r == PrintOperationResult.APPLY) {
@@ -343,7 +361,8 @@ namespace Mobilect {
 												  print_settings = pr.print_settings;
 												  print_settings.to_file (parent_window.app.settings.print_settings);
 											  } catch (Error e) {
-												  parent_window.show_error_dialog (_("Failed to save print settings"),
+												  parent_window.show_error_dialog (this,
+												                                   _("Failed to save print settings"),
 												                                   e.message);
 											  }
 										  }

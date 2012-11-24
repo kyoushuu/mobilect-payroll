@@ -243,7 +243,7 @@ namespace Mobilect {
 							                            password_entry.text);
 							dialog.destroy ();
 						} catch (Error e) {
-							(dialog.transient_for as Window).show_error_dialog (_("Failed to add administrator"), e.message);
+							(dialog.transient_for as Window).show_error_dialog (dialog, _("Failed to add administrator"), e.message);
 						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();
@@ -262,7 +262,8 @@ namespace Mobilect {
 				}
 
 				if (this.list.size - selected_count < 1) {
-					this.cpanel.window.show_error_dialog (ngettext ("Can't remove selected administrator",
+					this.cpanel.window.show_error_dialog (null,
+					                                      ngettext ("Can't remove selected administrator",
 					                                                "Can't remove selected administrators",
 					                                                selected_count),
 					                                      _("There should be at least one administrator."));

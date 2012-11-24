@@ -3,7 +3,7 @@
   <info>
     <link type="guide" xref="index"/>
 
-    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-11-17" status="draft"/>
     <credit type="author copyright">
       <name>Arnel A. Borja</name>
       <email>kyoushuu@yahoo.com</email>
@@ -25,7 +25,7 @@
 
   <p>Use the Control Panel to manage employees and time records.</p>
 
-  <p>After adding an account for an employee to the database, the employee can log in using the <gui style="group">Employee Log In</gui> page shown by <app>Mobilect Payroll</app> on startup.</p>
+  <p>After adding an account for an employee to the database, the employee can log in using the <gui style="group">Employee Log In</gui> page shown by <app>Mobilect Payroll</app> on startup.  This is disabled by default, and could be enabled using the Preferences dialog.</p>
 
   <p>To start using <app>Mobilect Payroll</app>, log in to the Control Panel using the default administrator account (username and password is "admin") then change its password.  Add employees to the database afterwards.</p>
 

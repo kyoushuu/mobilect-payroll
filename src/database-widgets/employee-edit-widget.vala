@@ -34,7 +34,9 @@ namespace Mobilect {
 			public Entry firstname_entry { public get; private set; }
 			public Entry middlename_entry { public get; private set; }
 			public Entry tin_entry { public get; private set; }
+			private Label rate_label { public get; private set; }
 			public SpinButton rate_spin { public get; private set; }
+			public CheckButton regular_check { public get; private set; }
 
 			private Employee _employee;
 			public Employee employee {
@@ -49,7 +51,15 @@ namespace Mobilect {
 						firstname_entry.text = value.firstname?? "";
 						middlename_entry.text = value.middlename?? "";
 						tin_entry.text = value.tin?? "";
-						rate_spin.value = value.rate;
+						regular_check.active = value.regular;
+
+						if (value.regular) {
+							rate_label.set_text_with_mnemonic (_("_Rate:"));
+							rate_spin.value = value.rate;
+						} else {
+							rate_label.set_text_with_mnemonic (_("_Rate (per day):"));
+							rate_spin.value = value.rate_per_day;
+						}
 
 						var branches = employee.database.branch_list;
 						branch_combobox.model = branches;
@@ -151,7 +161,7 @@ namespace Mobilect {
 				tin_entry.show ();
 
 
-				var rate_label = new Label.with_mnemonic (_("_Rate:"));
+				rate_label = new Label.with_mnemonic (_("_Rate:"));
 				rate_label.xalign = 0.0f;
 				grid.add (rate_label);
 				rate_label.show ();
@@ -189,6 +199,23 @@ namespace Mobilect {
 				                               "text", BranchList.Columns.NAME);
 
 
+				regular_check = new CheckButton.with_mnemonic (_("Re_gular"));
+				regular_check.toggled.connect ((t) => {
+					if (regular_check.active) {
+						rate_label.set_text_with_mnemonic (_("_Rate:"));
+						rate_spin.value = _employee.rate;
+					} else {
+						rate_label.set_text_with_mnemonic (_("_Rate (per day):"));
+						rate_spin.value = _employee.rate_per_day;
+					}
+				});
+				grid.attach_next_to (regular_check,
+				                     branch_label,
+				                     PositionType.BOTTOM,
+				                     2, 1);
+				regular_check.show ();
+
+
 				pop_composite_child ();
 
 
@@ -204,7 +231,13 @@ namespace Mobilect {
 					this._employee.firstname = this.firstname_entry.text;
 					this._employee.middlename = this.middlename_entry.text;
 					this._employee.tin = this.tin_entry.text;
-					this._employee.rate = this.rate_spin.get_value_as_int ();
+					this._employee.regular = this.regular_check.active;
+
+					if (this._employee.regular) {
+						this._employee.rate = this.rate_spin.get_value_as_int ();
+					} else {
+						this._employee.rate_per_day = (double) this.rate_spin.get_value_as_int ();
+					}
 
 					if (this.branch_combobox.get_active_iter (out iter)) {
 						this.branch_combobox.model.get (iter, BranchList.Columns.OBJECT, out branch);

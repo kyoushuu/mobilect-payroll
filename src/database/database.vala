@@ -70,7 +70,8 @@ namespace Mobilect {
 				             "  tin string not null," +
 				             "  password string not null," +
 				             "  rate integer," +
-				             "  branch_id integer" +
+				             "  branch_id integer," +
+				             "  regular boolean" +
 				             ")");
 
 				/* Create time_records table if doesn't exists */
@@ -82,7 +83,8 @@ namespace Mobilect {
 				             "  day integer," +
 				             "  start timestamp not null," +
 				             "  end timestamp," +
-				             "  straight_time boolean" +
+				             "  straight_time boolean," +
+				             "  include_break boolean" +
 				             ")");
 
 				/* Create deductions table if doesn't exists */
@@ -255,11 +257,12 @@ namespace Mobilect {
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate, Branch branch) throws DatabaseError {
+			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate, Branch branch, bool regular) throws DatabaseError {
 				Set stmt_params, last_insert_row;
 
 				Value value_rate = rate;
 				Value value_branch_id = branch.id;
+				Value value_regular = regular;
 
 				foreach (var employee in employee_list) {
 					if (employee.lastname == lastname &&
@@ -270,8 +273,8 @@ namespace Mobilect {
 				}
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate, branch_id)" +
-					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##tin::string, ##password::string, ##rate::int, ##branch_id::int)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate, branch_id, regular)" +
+					                                 "  VALUES (##lastname::string, ##firstname::string, ##middlename::string, ##tin::string, ##password::string, ##rate::int, ##branch_id::int, ##regular::boolean)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("lastname").set_value_str (null, lastname);
 					stmt_params.get_holder ("firstname").set_value_str (null, firstname);
@@ -280,6 +283,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					stmt_params.get_holder ("rate").set_value (value_rate);
 					stmt_params.get_holder ("branch_id").set_value (value_branch_id);
+					stmt_params.get_holder ("regular").set_value (value_regular);
 					cnc.statement_execute_non_select (stmt, stmt_params, out last_insert_row);
 					if (last_insert_row != null) {
 						employee_list.add (new Employee (last_insert_row.get_holder_value ("+0").get_int (), this));
@@ -400,13 +404,14 @@ namespace Mobilect {
 				return list;
 			}
 
-			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time) throws DatabaseError {
+			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time, bool include_break) throws DatabaseError {
 				Set stmt_params;
 				Value value_id = employee_id;
 				Value value_year = (int) start.get_year ();
 				Value value_month = (int) start.get_month ();
 				Value value_day = (int) start.get_day_of_month ();
 				Value value_straight_time = (bool) straight_time;
+				Value value_include_break = (bool) include_break;
 
 				if (end != null) {
 					Date startd = Date (), endd = Date ();
@@ -434,8 +439,8 @@ namespace Mobilect {
 				}
 
 				try {
-					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end, straight_time)" +
-					                                 "  VALUES (##employee_id::int, ##year::int, ##month::int, ##day::int, ##start::string, ##end::string::null, ##straight_time::boolean)",
+					var stmt = cnc.parse_sql_string ("INSERT INTO time_records (employee_id, year, month, day, start, end, straight_time, include_break)" +
+					                                 "  VALUES (##employee_id::int, ##year::int, ##month::int, ##day::int, ##start::string, ##end::string::null, ##straight_time::boolean, ##include_break::boolean)",
 					                                 out stmt_params);
 					stmt_params.get_holder ("employee_id").set_value (value_id);
 					stmt_params.get_holder ("year").set_value (value_year);
@@ -444,6 +449,7 @@ namespace Mobilect {
 					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.format ("%F %T"));
 					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
 					stmt_params.get_holder ("straight_time").set_value (value_straight_time);
+					stmt_params.get_holder ("include_break").set_value (value_include_break);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					warning ("Failed to add time record to database: %s", e.message);

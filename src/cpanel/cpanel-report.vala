@@ -52,7 +52,8 @@ namespace Mobilect {
 					try {
 						page_setup = new PageSetup.from_file (this.cpanel.window.app.settings.page_setup);
 					} catch (Error e) {
-						this.cpanel.window.show_error_dialog (_("Failed to load page setup"),
+						this.cpanel.window.show_error_dialog (null,
+						                                      _("Failed to load page setup"),
 						                                      e.message);
 					}
 				} else {
@@ -65,7 +66,8 @@ namespace Mobilect {
 					try {
 						print_settings = new PrintSettings.from_file (this.cpanel.window.app.settings.print_settings);
 					} catch (Error e) {
-						this.cpanel.window.show_error_dialog (_("Failed to load print settings"),
+						this.cpanel.window.show_error_dialog (null,
+						                                      _("Failed to load print settings"),
 						                                      e.message);
 					}
 				} else {
@@ -103,7 +105,8 @@ namespace Mobilect {
 
 								print_settings.to_file (this.cpanel.window.app.settings.print_settings);
 							} catch (Error e) {
-								this.cpanel.window.show_error_dialog (_("Failed to save page setup and print settings"),
+								this.cpanel.window.show_error_dialog (null,
+								                                      _("Failed to save page setup and print settings"),
 								                                      e.message);
 							}
 						}

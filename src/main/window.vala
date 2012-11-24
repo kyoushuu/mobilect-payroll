@@ -171,10 +171,10 @@ namespace Mobilect {
 				box.add (toolbar);
 
 				/* Bind toolbar visibility to setting */
-				this.app.settings.main.bind ("toolbar-visible",
+				this.app.settings.view.bind ("toolbar-visible",
 				                             toolbar,
 				                             "visible", SettingsBindFlags.DEFAULT);
-				this.app.settings.main.bind ("toolbar-visible",
+				this.app.settings.view.bind ("toolbar-visible",
 				                             action_group.get_action (ACTION_TOOLBAR),
 				                             "active", SettingsBindFlags.DEFAULT);
 
@@ -220,10 +220,10 @@ namespace Mobilect {
 				statusbar.show ();
 
 				/* Bind toolbar visibility to setting */
-				this.app.settings.main.bind ("statusbar-visible",
+				this.app.settings.view.bind ("statusbar-visible",
 				                             statusbar,
 				                             "visible", SettingsBindFlags.DEFAULT);
-				this.app.settings.main.bind ("statusbar-visible",
+				this.app.settings.view.bind ("statusbar-visible",
 				                             action_group.get_action (ACTION_STATUSBAR),
 				                             "active", SettingsBindFlags.DEFAULT);
 
@@ -251,8 +251,8 @@ namespace Mobilect {
 				}
 			}
 
-			public void show_error_dialog (string primary, string secondary) {
-				var dialog = new MessageDialog (this, DialogFlags.MODAL,
+			public void show_error_dialog (Gtk.Window? parent = null, string primary, string secondary) {
+				var dialog = new MessageDialog (parent?? this, DialogFlags.MODAL,
 				                                MessageType.ERROR, ButtonsType.OK,
 				                                primary);
 				dialog.secondary_text = secondary;
@@ -277,7 +277,7 @@ namespace Mobilect {
 						          CURRENT_TIME);
 					}
 				} catch (Error e) {
-					show_error_dialog (_("Failed to display the help"), e.message);
+					show_error_dialog (null, _("Failed to display the help"), e.message);
 				}
 			}
 

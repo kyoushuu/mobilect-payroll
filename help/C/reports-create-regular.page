@@ -1,11 +1,11 @@
 <page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="reports-create-regular">
 
   <info>
-    <link type="guide" xref="index#reports-section" group="regular"/>
+    <link type="guide" xref="index#reports-section" group="create"/>
 
-    <desc>Create payroll and payslips for regular salary</desc>
+    <desc>Create payroll and payslips</desc>
 
-    <revision version="0.1.0" pkgversion="0.1.0" date="2012-08-10" status="draft"/>
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-11-24" status="draft"/>
     <credit type="author copyright">
       <name>Arnel A. Borja</name>
       <email>kyoushuu@yahoo.com</email>
@@ -13,25 +13,19 @@
     </credit>
   </info>
 
-  <title>Create a Regular Report</title>
+  <title>Create a Report</title>
 
-  <p>To create a regular report:</p>
+  <p>To create a report:</p>
   <steps>
     <item><p>Log in to the Control Panel.</p></item>
     <item><p>Click the <gui style="tab">Report</gui> tab.</p></item>
-    <item><p>Select <gui style="radiobutton">Regular</gui> as type.</p></item>
-    <item><p>Set the start and end date in the <gui style="input">Period</gui> field.</p></item>
-    <item><p>You may now:</p>
-             <list>
-               <item><p>Select <guiseq><gui style="menu">File</gui><gui style="menuitem">Save</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>S</key></keyseq>, or click <gui style="button">Save</gui> in the toolbar to save the report as a PDF file.</p></item>
-               <item><p>Select <guiseq><gui style="menu">File</gui><gui style="menuitem">Print Preview</gui></guiseq>, or press <keyseq><key>Shift</key><key>Ctrl</key><key>P</key></keyseq>, or click <gui style="button">Print Preview</gui> in the toolbar to view the report.</p></item>
-               <item><p>Select <guiseq><gui style="menu">File</gui><gui style="menuitem">Print</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>P</key></keyseq>, or click <gui style="button">Print</gui> in the toolbar to print the report.</p></item>
-             </list>
-    </item>
+    <item><p>Select <guiseq><gui style="menu">File</gui><gui style="menuitem">New</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>N</key></keyseq>, or click <gui style="button">New</gui> in the toolbar to save the report as a PDF file.</p></item>
+    <item><p>Follow the instructions of the Report Assistant.</p></item>
   </steps>
 
   <note style="important">
-    <p>The start and end date should either be the first and 15th day of the same month, or the 16th and last day of the same month.</p>
+    <p>In regular reports, the start and end date should either be the first and 15th day of the same month, or the 16th and last day of the same month.</p>
+    <p>The end date should always be after the start date.</p>
   </note>
 
 </page>

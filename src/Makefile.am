@@ -75,6 +75,7 @@ mobilect_payroll_SOURCES = \
 	report-assistant/report-assistant-welcome-page.vala \
 	report-assistant/report-assistant-basic-info-page.vala \
 	report-assistant/report-assistant-select-employees-page.vala \
+	report-assistant/report-assistant-select-components-page.vala \
 	report-assistant/report-assistant-footer-info-page.vala \
 	report-assistant/report-assistant-page-setup-page.vala \
 	report-assistant/report-assistant-confirm-page.vala \
@@ -85,6 +86,7 @@ mobilect_payroll_SOURCES = \
 	datetime/date-spin-button.vala \
 	datetime/date-time-spin-button.vala \
 	datetime/period-spin-button.vala \
+	datetime/utils.vala \
 	filter/filter.vala \
 	filter/pay-group.vala \
 	filter/pay-period.vala \

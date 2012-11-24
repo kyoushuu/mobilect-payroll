@@ -111,7 +111,7 @@ namespace Mobilect {
 						this.username_entry.text = "";
 						this.password_entry.text = "";
 					} catch (Error e) {
-						this.window.show_error_dialog (_("Failed to log in"), e.message);
+						this.window.show_error_dialog (null, _("Failed to log in"), e.message);
 					}
 				});
 

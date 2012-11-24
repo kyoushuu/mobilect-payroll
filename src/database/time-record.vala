@@ -57,6 +57,7 @@ namespace Mobilect {
 			public DateTime end { get; set; }
 
 			public bool straight_time { get; set; }
+			public bool include_break { default = true; get; set; }
 
 			internal weak Database database { get; private set; }
 			internal weak TimeRecordList list { get; set; }
@@ -83,7 +84,7 @@ namespace Mobilect {
 				if (id != 0) {
 					/* Get data from database */
 					try {
-						var stmt = database.cnc.parse_sql_string ("SELECT employee_id, start, end, straight_time" +
+						var stmt = database.cnc.parse_sql_string ("SELECT employee_id, start, end, straight_time, include_break" +
 						                                          "  FROM time_records" +
 						                                          "  WHERE id=##id::int",
 						                                          out stmt_params);
@@ -109,6 +110,9 @@ namespace Mobilect {
 
 						cell_data = data_model.get_value_at (3, 0);
 						this.straight_time = (bool) cell_data;
+
+						cell_data = data_model.get_value_at (4, 0);
+						this.include_break = (bool) cell_data;
 					} catch (Error e) {
 						warning ("Failed to get time record data from database: %s", e.message);
 					}
@@ -123,6 +127,7 @@ namespace Mobilect {
 				Value value_month = (int) start.get_month ();
 				Value value_day = (int) start.get_day_of_month ();
 				Value value_straight_time = this.straight_time;
+				Value value_include_break = this.include_break;
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("UPDATE time_records" +
@@ -132,7 +137,8 @@ namespace Mobilect {
 					                                          "      day=##day::int," +
 					                                          "      start=##start::string," +
 					                                          "      end=##end::string::null," +
-					                                          "      straight_time=##straight_time::boolean" +
+					                                          "      straight_time=##straight_time::boolean," +
+					                                          "      include_break=##include_break::boolean" +
 					                                          "  WHERE id=##id::int",
 					                                          out stmt_params);
 					stmt_params.get_holder ("id").set_value (value_id);
@@ -145,6 +151,7 @@ namespace Mobilect {
 					                                              this.end != null?
 					                                              this.end.format ("%F %T") : null);
 					stmt_params.get_holder ("straight_time").set_value (value_straight_time);
+					stmt_params.get_holder ("include_break").set_value (value_include_break);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
 					warning ("Failed to update time record in database: %s", e.message);

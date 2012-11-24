@@ -81,7 +81,7 @@ namespace Mobilect {
 				}
 
 				private double earnings;
-				public double get_earnings_in_rate (double rate) {
+				public double get_earnings_in_rate (double rate, bool regular) {
 					if (earnings == 0) {
 						earnings = 0;
 
@@ -89,7 +89,8 @@ namespace Mobilect {
 							/* Remove paid parts from regular */
 							if (period.pay_period.is_overtime ||
 							    pay_group.straight_time ||
-							    pay_group.is_sunday_work) {
+							    pay_group.is_sunday_work ||
+							    (!regular && pay_group.holiday_type != MonthInfo.HolidayType.NON_HOLIDAY)) {
 								earnings += pay_group.rate * period.get_earnings_in_rate (rate);
 							} else {
 								earnings += (pay_group.rate - 1) * period.get_earnings_in_rate (rate);
@@ -134,7 +135,7 @@ namespace Mobilect {
 							_earnings = 0;
 
 							foreach (var group in groups) {
-								_earnings += group.get_earnings_in_rate (employee.rate_per_hour);
+								_earnings += group.get_earnings_in_rate (employee.rate_per_hour, employee.regular);
 							}
 						}
 
@@ -220,6 +221,7 @@ namespace Mobilect {
 
 
 				var dpadding = padding * 2;
+				int curr_line, curr_lines;
 
 
 				payslip_height = context.get_height ();
@@ -229,59 +231,90 @@ namespace Mobilect {
 				payroll_width = payslip_width;
 
 
-				/* Name, Rate and Hourly Rate */
-				table_width = name_column_width +
-					rate_column_width +
-					hourly_rate_column_width;
+				if (payroll) {
+					/* Name, Rate and Hourly Rate */
+					table_width = name_column_width +
+						rate_column_width +
+						hourly_rate_column_width;
 
-				/* Hour and Subtotal per pay period */
-				table_width += (hour_column_width + subtotal_column_width) * pay_periods.length;
+					/* Hour and Subtotal per pay period */
+					table_width += (hour_column_width + subtotal_column_width) * pay_periods.length;
 
-				/* Total and Signature */
-				table_width += total_column_width;
-				table_width += signature_column_width;
-
-
-				name_column_width += payroll_width - table_width - index_column_width - total_hour_column_width;
-				table_width = payroll_width - index_column_width - total_hour_column_width;
+					/* Total and Signature */
+					table_width += total_column_width;
+					table_width += signature_column_width;
 
 
-				lines_per_page = (int) Math.floor ((payroll_height - header_height) / table_content_line_height);
+					name_column_width += payroll_width - table_width - index_column_width - total_hour_column_width;
+					table_width = payroll_width - index_column_width - total_hour_column_width;
 
-				num_lines = 0;
-				foreach (var emp_pay in employee_data) {
-					num_lines += (emp_pay.groups.size * 2) + 1;
+
+					lines_per_page = (int) Math.floor ((payroll_height - header_height) / table_content_line_height);
+
+					num_lines = 0;
+					curr_line = 0;
+					curr_lines = 0;
+					pages_payroll = 1;
+					foreach (var emp_pay in employee_data) {
+						curr_lines = (emp_pay.groups.size * 2) + 1;
+						num_lines += curr_lines;
+
+						if (curr_line + curr_lines < lines_per_page) {
+							curr_line += curr_lines;
+						} else {
+							curr_line = curr_lines;
+							pages_payroll++;
+						}
+					}
+
+					if (curr_line + 2 >= lines_per_page) {
+						curr_line = 2;
+						pages_payroll++;
+					} else {
+						curr_line += 4;
+					}
+
+					if (curr_line + 5 >= lines_per_page) {
+						pages_payroll++;
+					}
 				}
 
-				if (continuous) {
-					payslip_per_page = employee_data.size;
-					payslip_height = payslip_per_page * get_payslip_height ();
-				} else {
-					payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+				if (payslip) {
+					if (continuous) {
+						payslip_per_page = employee_data.size;
+						payslip_height = payslip_per_page * get_payslip_height ();
+					} else {
+						payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+					}
+
+					pages_payslip = (int) Math.ceil ((double) employee_data.size / payslip_per_page);
 				}
 
 
-				/* Note: +12 for footer */
-				pages_payroll = (int) Math.ceil ((double) (num_lines + 12) / lines_per_page);
-				pages_payslip = (int) Math.ceil ((double) employee_data.size / payslip_per_page);
 				set_n_pages (pages_payroll + pages_payslip);
 
 
 				double table_y, x, y = 0;
-				int page_line = 0, curr_line = 0;
+				int page_line = 0;
+				curr_line = 0;
 				int surface = 0;
 				double period_column_width = hour_column_width + subtotal_column_width;
 
 				Cairo.Context cr = null;
 				Pango.Layout layout = null;
-				int id = 0;
 
-				surfaces = new Surface[pages_payroll];
-				foreach (var employee in employee_data) {
-					int groups_size = employee.groups.size;
-					for (int employee_line = 0; employee_line < (groups_size * 2) + 1; employee_line++)
-					{
+				if (payroll) {
+					surfaces = new Surface[pages_payroll];
+					for (var id = 0; id < employee_data.size; id++) {
+						var employee = employee_data.get (id);
 						var table_header_line_height = table_header_height/2;
+
+						var lines = (employee.groups.size * 2) + 1;
+
+						if (page_line + lines >= lines_per_page) {
+							page_line = 0;
+							surface++;
+						}
 
 						if (page_line == 0) {
 							/* Create page */
@@ -364,7 +397,7 @@ namespace Mobilect {
 								x += subtotal_column_width;
 							}
 
-							/* Total */
+//							/* Total */
 //							cr.move_to (x, table_top + padding);
 //							layout.set_width (units_from_double (total_column_width - dpadding));
 //							layout.set_markup (_("TOTAL\nAMOUNT"), -1);
@@ -381,164 +414,171 @@ namespace Mobilect {
 							y = table_y;
 						}
 
-						if (employee_line == 0) {
-							/* Index */
-							cr.move_to (padding, y + padding);
 
-							layout.set_width (units_from_double (index_column_width - dpadding));
-							layout.set_font_description (emp_number_font);
-							layout.set_alignment (Pango.Alignment.RIGHT);
+						/* Index */
+						cr.move_to (padding, y + padding);
 
-							layout.set_markup ("%d".printf (id + 1), -1);
-							cairo_show_layout (cr, layout);
+						layout.set_width (units_from_double (index_column_width - dpadding));
+						layout.set_font_description (emp_number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
 
-
-							var layout_height = layout.get_height ();
+						layout.set_markup ("%d".printf (id + 1), -1);
+						cairo_show_layout (cr, layout);
 
 
-							/* Name */
-							cr.move_to (index_column_width + padding, y + padding);
+						var layout_height = layout.get_height ();
 
-							layout.set_width (units_from_double (name_column_width - dpadding));
+
+						/* Name */
+						cr.move_to (index_column_width + padding, y + padding);
+
+						layout.set_width (units_from_double (name_column_width - dpadding));
+						layout.set_font_description (text_font);
+						layout.set_alignment (Pango.Alignment.LEFT);
+						layout.set_height (units_from_double (table_content_line_height * 3));
+
+						layout.set_markup (employee.employee.get_name ().up (), -1);
+						cairo_show_layout (cr, layout);
+
+
+						/* TIN Number */
+						cr.rel_move_to (0, layout.get_line_count () * table_content_line_height);
+
+						layout.set_font_description (number_font);
+						layout.set_alignment (Pango.Alignment.CENTER);
+						layout.set_height (units_from_double (table_content_line_height));
+
+						layout.set_markup (employee.employee.tin, -1);
+
+						cairo_show_layout (cr, layout);
+
+
+						layout.set_height (layout_height);
+
+
+						/* Rate */
+						cr.move_to (index_column_width + name_column_width + padding, y + padding);
+
+						layout.set_width (units_from_double (rate_column_width - dpadding));
+						layout.set_font_description (number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+
+						layout.set_markup (format_money ((double) employee.employee.rate), -1);
+						cairo_show_layout (cr, layout);
+
+
+						/* Rate per Hour */
+						cr.rel_move_to (rate_column_width, 0);
+
+						layout.set_width (units_from_double (hourly_rate_column_width - dpadding));
+						layout.set_font_description (number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+
+						layout.set_markup ("%.2lf".printf (employee.employee.rate_per_hour), -1);
+						cairo_show_layout (cr, layout);
+
+
+						/* Total Hours */
+						cr.move_to (index_column_width + table_width + padding, y + padding);
+
+						layout.set_width (units_from_double (total_hour_column_width - dpadding));
+						layout.set_font_description (number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+
+						layout.set_markup ("%d".printf (employee.total_hours), -1);
+						cairo_show_layout (cr, layout);
+
+
+						foreach (var group in employee.groups) {
+							x = index_column_width + name_column_width +
+								rate_column_width + hourly_rate_column_width +
+								padding;
+
+							/* Pay Group name */
+							cr.move_to (x, y + padding);
+
+							layout.set_width (units_from_double ((period_column_width * pay_periods.length) - dpadding));
 							layout.set_font_description (text_font);
-							layout.set_alignment (Pango.Alignment.LEFT);
-							layout.set_height (units_from_double (table_content_line_height * 3));
-
-							layout.set_markup (employee.employee.get_name ().up (), -1);
-							cairo_show_layout (cr, layout);
-
-
-							/* TIN Number */
-							cr.rel_move_to (0, layout.get_line_count () * table_content_line_height);
-
-							layout.set_font_description (number_font);
 							layout.set_alignment (Pango.Alignment.CENTER);
-							layout.set_height (units_from_double (table_content_line_height));
 
-							layout.set_markup (employee.employee.tin, -1);
-
+							layout.set_markup (group.pay_group.name != null?
+							                   _("%s (%s)").printf (group.pay_group.name, dates_to_string (group.dates).up ()) : dates_to_string (group.dates).up (), -1);
 							cairo_show_layout (cr, layout);
 
 
-							layout.set_height (layout_height);
+							cr.rel_move_to (period_column_width * pay_periods.length, 0);
 
-
-							/* Rate */
-							cr.move_to (index_column_width + name_column_width + padding, y + padding);
-
-							layout.set_width (units_from_double (rate_column_width - dpadding));
-							layout.set_font_description (number_font);
-							layout.set_alignment (Pango.Alignment.RIGHT);
-
-							layout.set_markup (format_money ((double) employee.employee.rate), -1);
-							cairo_show_layout (cr, layout);
-
-
-							/* Rate per Hour */
-							cr.rel_move_to (rate_column_width, 0);
-
-							layout.set_width (units_from_double (hourly_rate_column_width - dpadding));
-							layout.set_font_description (number_font);
-							layout.set_alignment (Pango.Alignment.RIGHT);
-
-							layout.set_markup ("%.2lf".printf (employee.employee.rate_per_hour), -1);
-							cairo_show_layout (cr, layout);
-
-
-							/* Total Hours */
-							cr.move_to (index_column_width + table_width + padding, y + padding);
-
-							layout.set_width (units_from_double (total_hour_column_width - dpadding));
-							layout.set_font_description (number_font);
-							layout.set_alignment (Pango.Alignment.RIGHT);
-
-							layout.set_markup ("%d".printf (employee.total_hours), -1);
-							cairo_show_layout (cr, layout);
-						}
-
-
-						x = index_column_width + name_column_width +
-							rate_column_width + hourly_rate_column_width +
-							padding;
-
-						if (employee_line < groups_size * 2) {
-							var group = employee.groups.get (employee_line/2);
-
-							/* Pay Group */
-							if (employee_line % 2 == 0) {
-								/* Pay Group name */
-								cr.move_to (x, y + padding);
-
-								layout.set_width (units_from_double ((period_column_width * pay_periods.length) - dpadding));
-								layout.set_font_description (text_font);
-								layout.set_alignment (Pango.Alignment.CENTER);
-
-								layout.set_markup (group.pay_group.name != null?
-								                   _("%s (%s)").printf (group.pay_group.name, dates_to_string (group.dates).up ()) : dates_to_string (group.dates).up (), -1);
-								cairo_show_layout (cr, layout);
-
-
-								cr.rel_move_to (period_column_width * pay_periods.length, 0);
-
-								if (group.pay_group.rate > 1.0) {
-									layout.set_width (units_from_double (total_column_width - dpadding));
-									layout.set_markup (_("(+%.0lf%%)").printf ((group.pay_group.rate - 1) * 100), -1);
-									cairo_show_layout (cr, layout);
-								}
-							} else {
-								/* Pay Periods */
-								foreach (var period in group.periods) {
-									if (period.hours > 0 &&
-									    (period.pay_period.is_overtime ||
-									     group.pay_group.straight_time ||
-									     group.pay_group.holiday_type != MonthInfo.HolidayType.NON_HOLIDAY ||
-									     group.pay_group.is_sunday_work)) {
-										/* Hours */
-										cr.move_to (x, y + padding);
-
-										layout.set_width (units_from_double (hour_column_width - dpadding));
-										layout.set_font_description (number_font);
-										layout.set_alignment (Pango.Alignment.RIGHT);
-
-										layout.set_markup (period.hours.to_string (), -1);
-										cairo_show_layout (cr, layout);
-
-
-										/* Earnings */
-										cr.move_to (x + hour_column_width, y + padding);
-
-										layout.set_width (units_from_double (subtotal_column_width - dpadding));
-										layout.set_font_description (number_font);
-										layout.set_alignment (Pango.Alignment.RIGHT);
-
-										layout.set_markup (format_money (period.get_earnings_in_rate (employee.employee.rate_per_hour)), -1);
-										cairo_show_layout (cr, layout);
-
-
-										cr.move_to (x + hour_column_width - padding, y);
-										cr.rel_line_to (0, table_content_line_height);
-									}
-
-									cr.move_to (x + period_column_width - padding, y);
-									cr.rel_line_to (0, table_content_line_height);
-
-									cr.set_line_width (cell_border);
-									cr.stroke ();
-
-
-									x += period_column_width;
-								}
-
-								/* Group Total */
-								cr.move_to (x, y + padding);
-
+							if (group.pay_group.rate > 1.0) {
 								layout.set_width (units_from_double (total_column_width - dpadding));
-								layout.set_font_description (number_font);
-								layout.set_alignment (Pango.Alignment.RIGHT);
-
-								layout.set_markup (format_money (group.get_earnings_in_rate (employee.employee.rate_per_hour)), -1);
+								layout.set_markup (_("(+%.0lf%%)").printf ((group.pay_group.rate - 1) * 100), -1);
 								cairo_show_layout (cr, layout);
 							}
+
+
+							y += table_content_line_height;
+
+							cr.move_to (index_column_width + name_column_width +
+							            rate_column_width + hourly_rate_column_width,
+							            y);
+							cr.rel_line_to ((period_column_width * pay_periods.length) + total_column_width, 0);
+
+							cr.set_line_width (cell_border);
+							cr.stroke ();
+
+
+							/* Pay Periods */
+							foreach (var period in group.periods) {
+								if (period.hours > 0 &&
+								    (period.pay_period.is_overtime ||
+								     group.pay_group.straight_time ||
+								     group.pay_group.holiday_type != MonthInfo.HolidayType.NON_HOLIDAY ||
+								     group.pay_group.is_sunday_work)) {
+									/* Hours */
+									cr.move_to (x, y + padding);
+
+									layout.set_width (units_from_double (hour_column_width - dpadding));
+									layout.set_font_description (number_font);
+									layout.set_alignment (Pango.Alignment.RIGHT);
+
+									layout.set_markup (period.hours.to_string (), -1);
+									cairo_show_layout (cr, layout);
+
+
+									/* Earnings */
+									cr.move_to (x + hour_column_width, y + padding);
+
+									layout.set_width (units_from_double (subtotal_column_width - dpadding));
+									layout.set_font_description (number_font);
+									layout.set_alignment (Pango.Alignment.RIGHT);
+
+									layout.set_markup (format_money (period.get_earnings_in_rate (employee.employee.rate_per_hour)), -1);
+									cairo_show_layout (cr, layout);
+
+
+									cr.move_to (x + hour_column_width - padding, y);
+									cr.rel_line_to (0, table_content_line_height);
+								}
+
+								cr.move_to (x + period_column_width - padding, y);
+								cr.rel_line_to (0, table_content_line_height);
+
+								cr.set_line_width (cell_border);
+								cr.stroke ();
+
+
+								x += period_column_width;
+							}
+
+
+							/* Group Total */
+							cr.move_to (x, y + padding);
+
+							layout.set_width (units_from_double (total_column_width - dpadding));
+							layout.set_font_description (number_font);
+							layout.set_alignment (Pango.Alignment.RIGHT);
+
+							layout.set_markup (format_money (group.get_earnings_in_rate (employee.employee.rate_per_hour, employee.employee.regular)), -1);
+							cairo_show_layout (cr, layout);
 
 
 							cr.move_to (index_column_width + name_column_width +
@@ -548,41 +588,51 @@ namespace Mobilect {
 
 							cr.set_line_width (cell_border);
 							cr.stroke ();
-						} else {
-							/* Employee Total */
-							cr.move_to (x, y + padding);
 
-							layout.set_width (units_from_double ((period_column_width * pay_periods.length) - dpadding));
-							layout.set_font_description (text_font);
-							layout.set_alignment (Pango.Alignment.CENTER);
-
-							layout.set_markup (_("<b>TOTAL AMOUNT</b>"), -1);
-							cairo_show_layout (cr, layout);
-
-
-							cr.rel_move_to (period_column_width * pay_periods.length, 0);
-
-							layout.set_width (units_from_double (total_column_width - dpadding));
-							layout.set_font_description (emp_number_font);
-							layout.set_alignment (Pango.Alignment.RIGHT);
-
-							layout.set_markup (format_money (employee.earnings), -1);
-							cairo_show_layout (cr, layout);
-
-
-							cr.move_to (index_column_width, y + table_content_line_height);
-							cr.rel_line_to (table_width, 0);
-
-							cr.set_line_width (cell_border);
-							cr.stroke ();
+							y += table_content_line_height;
 						}
 
 
-						page_line++;
-						curr_line++;
+						/* Employee Total */
+						cr.move_to (index_column_width + name_column_width +
+						            rate_column_width + hourly_rate_column_width +
+						            padding,
+						            y + padding);
+
+						layout.set_width (units_from_double ((period_column_width * pay_periods.length) - dpadding));
+						layout.set_font_description (text_font);
+						layout.set_alignment (Pango.Alignment.CENTER);
+
+						layout.set_markup (_("<b>TOTAL AMOUNT</b>"), -1);
+						cairo_show_layout (cr, layout);
+
+
+						cr.rel_move_to (period_column_width * pay_periods.length, 0);
+
+						layout.set_width (units_from_double (total_column_width - dpadding));
+						layout.set_font_description (emp_number_font);
+						layout.set_alignment (Pango.Alignment.RIGHT);
+
+						layout.set_markup (format_money (employee.earnings), -1);
+						cairo_show_layout (cr, layout);
+
+
+						cr.move_to (index_column_width, y + table_content_line_height);
+						cr.rel_line_to (table_width, 0);
+
+						cr.set_line_width (cell_border);
+						cr.stroke ();
+
 						y += table_content_line_height;
 
-						if (page_line >= lines_per_page || curr_line == num_lines) {
+
+						page_line += lines;
+						curr_line += lines;
+
+						if (page_line >= lines_per_page ||  // Last line used
+						    curr_line == num_lines ||		// Last employee on all pages
+						    (id < employee_data.size - 1 && // Last employee on current page
+						     (employee_data.get (id+1).groups.size * 2) + 1 + page_line >= lines_per_page)) {
 							double table_content_height = (page_line * table_content_line_height);
 
 							/* Draw table lines */
@@ -654,25 +704,36 @@ namespace Mobilect {
 							cr.stroke ();
 						}
 
-						if (page_line >= lines_per_page) {
-							page_line = 0;
-							surface++;
-						}
+
+						step ();
 					}
 
-					id++;
-					step ();
-				}
+					y += table_content_line_height;
 
-				if (cr != null) {
-					surface = pages_payroll - 1;
+
+					/* Total Overtime */
+					if (page_line + 2 >= lines_per_page) {
+						page_line = 2;
+						y = 0;
+						surface++;
+
+						surfaces[surface] = new Surface.similar (context.get_cairo_context ().get_target (), Content.COLOR_ALPHA,
+						                                         (int) Math.ceil (payroll_width),
+						                                         (int) Math.ceil (payroll_height));
+						cr = new Cairo.Context (surfaces[surface]);
+
+						layout = context.create_pango_layout ();
+						layout.get_context ().set_font_map (CairoFontMap.new_for_font_type (FontType.FT));
+						layout.set_wrap (Pango.WrapMode.WORD_CHAR);
+						layout.set_ellipsize (EllipsizeMode.END);
+					} else {
+						page_line += 4;
+					}
 
 					double total_earnings = 0;
 					foreach (var emp_pay in employee_data) {
 						total_earnings += emp_pay.earnings;
 					}
-
-					y += table_content_line_height;
 
 					layout.set_width (units_from_double (total_column_width - dpadding));
 					layout.set_font_description (emp_number_font);
@@ -706,10 +767,27 @@ namespace Mobilect {
 					layout.set_markup (_("<b>TOTAL OVERTIME:</b>"), -1);
 					cairo_show_layout (cr, layout);
 
+					y += table_content_line_height * 3;
+
+
+					/* Prepared and Approved by */
+					if (page_line + 5 >= lines_per_page) {
+						page_line = 0;
+						y = 0;
+						surface++;
+
+						surfaces[surface] = new Surface.similar (context.get_cairo_context ().get_target (), Content.COLOR_ALPHA,
+						                                         (int) Math.ceil (payroll_width),
+						                                         (int) Math.ceil (payroll_height));
+						cr = new Cairo.Context (surfaces[surface]);
+
+						layout = context.create_pango_layout ();
+						layout.get_context ().set_font_map (CairoFontMap.new_for_font_type (FontType.FT));
+						layout.set_wrap (Pango.WrapMode.WORD_CHAR);
+						layout.set_ellipsize (EllipsizeMode.END);
+					}
 
 					int layout_width;
-
-					y += table_content_line_height * 3;
 
 					/* Prepared by */
 					cr.move_to (index_column_width, y);

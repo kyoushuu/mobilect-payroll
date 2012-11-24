@@ -47,6 +47,7 @@ namespace Mobilect {
 				DAYRATE,
 				HOURRATE,
 				BRANCH,
+				REGULAR,
 				ENABLED,
 				NUM
 			}
@@ -155,6 +156,8 @@ namespace Mobilect {
 						return typeof (int);
 					case Columns.BRANCH:
 						return typeof (Branch);
+					case Columns.REGULAR:
+						return typeof (bool);
 					case Columns.ENABLED:
 						return typeof (bool);
 					default:
@@ -222,6 +225,9 @@ namespace Mobilect {
 						break;
 					case Columns.BRANCH:
 						value = employee.branch;
+						break;
+					case Columns.REGULAR:
+						value = employee.regular;
 						break;
 					case Columns.ENABLED:
 						value = enabled.get (employee);
@@ -366,6 +372,18 @@ namespace Mobilect {
 
 				foreach (var employee in this) {
 					if (employee.branch == branch) {
+						list.add (employee);
+					}
+				}
+
+				return list;
+			}
+
+			public EmployeeList get_subset_is_regular (bool regular) {
+				var list = new EmployeeList (this.database);
+
+				foreach (var employee in this) {
+					if (employee.regular == regular) {
 						list.add (employee);
 					}
 				}

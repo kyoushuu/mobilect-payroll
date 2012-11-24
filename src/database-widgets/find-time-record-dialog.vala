@@ -169,6 +169,11 @@ namespace Mobilect {
 				changed ();
 			}
 
+			public void set_dates (Date start, Date end) {
+				start_spin.date = start;
+				end_spin.date = end;
+			}
+
 			public Date get_start_date () {
 				return start_spin.date;
 			}

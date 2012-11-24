@@ -30,11 +30,13 @@ namespace Mobilect {
 			public Date date_end = Date ();
 
 			public TimePeriod[] time_periods { get; set; }
+			public TimePeriod[] time_periods_break { get; set; }
 
 			public bool use_holiday_type = false;
 			public MonthInfo.HolidayType holiday_type;
 			public bool sunday_work = false;
 			public bool straight_time = false;
+			public bool include_break = false;
 			public double period = 4.0;
 			public bool enlist = false;
 
@@ -45,6 +47,14 @@ namespace Mobilect {
 
 
 			public Filter () {
+			}
+
+			public TimePeriod[] get_time_periods_with_break (bool include_break) {
+				if (this.include_break && include_break) {
+					return time_periods_break;
+				} else {
+					return time_periods;
+				}
 			}
 
 			public Date[] get_affected_dates (Database database) {
@@ -135,11 +145,18 @@ namespace Mobilect {
 					filter.time_periods[i] = this.time_periods[i];
 				}
 
+				filter.time_periods_break = new TimePeriod[this.time_periods_break.length];
+				for (int i = 0; i < this.time_periods_break.length; i++) {
+					filter.time_periods_break[i] = this.time_periods_break[i];
+				}
+
 				filter.use_holiday_type = use_holiday_type;
 				filter.holiday_type = holiday_type;
 				filter.sunday_work = sunday_work;
 				filter.straight_time = straight_time;
+				filter.include_break = include_break;
 				filter.period = period;
+				filter.enlist = enlist;
 
 				return filter;
 			}
@@ -155,6 +172,16 @@ namespace Mobilect {
 					}
 				}
 
+				if (filter.time_periods_break.length != this.time_periods_break.length) {
+					return false;
+				}
+
+				for (int i = 0; i < this.time_periods_break.length; i++) {
+					if (this.time_periods_break[i].is_equal (filter.time_periods_break[i]) == false) {
+						return false;
+					}
+				}
+
 				return
 					filter.date_start.compare (this.date_start) == 0 &&
 					filter.date_end.compare (this.date_end) == 0 &&
@@ -162,7 +189,9 @@ namespace Mobilect {
 					filter.holiday_type == this.holiday_type &&
 					filter.sunday_work == this.sunday_work &&
 					filter.straight_time == this.straight_time &&
-					filter.period == this.period;
+					filter.include_break == this.include_break &&
+					filter.period == this.period &&
+					filter.enlist == this.enlist;
 			}
 
 		}

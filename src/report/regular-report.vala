@@ -56,8 +56,6 @@ namespace Mobilect {
 
 			private int days;
 			private Filter filter_nh;
-			private Filter filter_rh;
-			private Filter filter_sh;
 
 			private double[,] cells;
 
@@ -103,12 +101,6 @@ namespace Mobilect {
 					TimePeriod (Time (8,0), Time (12,0)),
 					TimePeriod (Time (13,0), Time (17,0))
 				};
-
-				filter_rh = filter_nh.duplicate ();
-				filter_rh.holiday_type = MonthInfo.HolidayType.REGULAR_HOLIDAY;
-
-				filter_sh = filter_nh.duplicate ();
-				filter_sh.holiday_type = MonthInfo.HolidayType.SPECIAL_HOLIDAY;
 			}
 
 			public override void process () {
@@ -133,11 +125,9 @@ namespace Mobilect {
 					var employee = (employees as ArrayList<Employee>).get (i);
 
 					double days_wo_pay = days - (employee.get_hours (filter_nh)/8);
-					double holidays_w_pay = (employee.get_hours (filter_rh) + employee.get_hours (filter_sh))/8;
 
 					/* Half-month salary - (salary per day times days without pay) */
-					/* Include holiday regular hours with pay */
-					double salary = (employee.rate/2) + (employee.rate_per_day * (holidays_w_pay - days_wo_pay));
+					double salary = (employee.rate/2) - (employee.rate_per_day * days_wo_pay);
 					if (salary < 0) {
 						salary = 0;
 					}
@@ -147,7 +137,7 @@ namespace Mobilect {
 					double deduction = 0;
 
 					/* Days Present */
-					cells[size, Columns.DAYS] += cells[i, Columns.DAYS] = days - days_wo_pay + holidays_w_pay;
+					cells[size, Columns.DAYS] += cells[i, Columns.DAYS] = days - days_wo_pay;
 
 					/* Rates */
 					cells[size, Columns.RATE] += cells[i, Columns.RATE] = employee.rate;
@@ -190,31 +180,37 @@ namespace Mobilect {
 				payroll_width = payslip_height;
 
 
-				var temp = index_column_width + name_column_width +
-					total_column_width + day_column_width +
-					(number_column_width * 9) +
-					total_column_width + signature_column_width;
-				name_column_width += payroll_width - temp;
+				if (payroll) {
+					var temp = index_column_width + name_column_width +
+						total_column_width + day_column_width +
+						(number_column_width * 9) +
+						total_column_width + signature_column_width;
+					name_column_width += payroll_width - temp;
 
+					lines_per_page = (int) Math.floor ((payroll_height - header_height) / table_content_line_height);
+					lines_per_page -= lines_per_page % 2;
 
-				if (continuous) {
-					payslip_per_page = employees.size;
-					payslip_height = payslip_per_page * get_payslip_height ();
-				} else {
 					payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+
+					num_lines = employees.size * 2;
+
+					/* Note: +12 for footer */
+					pages_payroll = (int) Math.ceil ((double) (num_lines + 12) / lines_per_page);
 				}
 
 
-				lines_per_page = (int) Math.floor ((payroll_height - header_height) / table_content_line_height);
-				lines_per_page -= lines_per_page % 2;
+				if (payslip) {
+					if (continuous) {
+						payslip_per_page = employees.size;
+						payslip_height = payslip_per_page * get_payslip_height ();
+					} else {
+						payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+					}
 
-				payslip_per_page = (int) Math.floor (payslip_height / get_payslip_height ());
+					pages_payslip = (int) Math.ceil ((double) employees.size / payslip_per_page);
+				}
 
-				num_lines = employees.size * 2;
 
-				/* Note: +12 for footer */
-				pages_payroll = (int) Math.ceil ((double) (num_lines + 12) / lines_per_page);
-				pages_payslip = (int) Math.ceil ((double) employees.size / payslip_per_page);
 				set_n_pages (pages_payroll + pages_payslip);
 			}
 

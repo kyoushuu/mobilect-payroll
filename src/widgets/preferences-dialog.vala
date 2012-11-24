@@ -57,6 +57,16 @@ namespace Mobilect {
 				view_grid.show ();
 
 
+				var toolbar_check = new CheckButton.with_mnemonic (_("Show _toolbar"));
+				view_grid.add (toolbar_check);
+				toolbar_check.show ();
+
+
+				var statusbar_check = new CheckButton.with_mnemonic (_("Show _statusbar"));
+				view_grid.add (statusbar_check);
+				statusbar_check.show ();
+
+
 				var employee_login_check = new CheckButton.with_mnemonic (_("_Enable employee log in"));
 				view_grid.add (employee_login_check);
 				employee_login_check.show ();
@@ -162,6 +172,12 @@ namespace Mobilect {
 
 				/* Bind to settings */
 				var view_settings = parent.app.settings.view;
+				view_settings.bind ("statusbar-visible",
+				                    statusbar_check,
+				                    "active", SettingsBindFlags.DEFAULT);
+				view_settings.bind ("toolbar-visible",
+				                    toolbar_check,
+				                    "active", SettingsBindFlags.DEFAULT);
 				view_settings.bind ("employee-log-in",
 				                    employee_login_check,
 				                    "active", SettingsBindFlags.DEFAULT);

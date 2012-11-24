@@ -84,21 +84,6 @@ namespace Mobilect {
 				action_group.add_actions (actions, this);
 				window.ui_manager.insert_action_group (action_group, -1);
 
-				var date = new DateTime.now_local ();
-				var period = (int) Math.round ((date.get_day_of_month () - 1) / 30.0);
-
-				DateDay last_day;
-				if (period == 0) {
-					last_day = 15;
-				} else {
-					last_day = 31;
-					while (!Date.valid_dmy (last_day,
-					                        (DateMonth) date.get_month (),
-					                        (DateYear) date.get_year ())) {
-						last_day--;
-					}
-				}
-
 				this.add_page (new CPanelEmployees (this), _("Employees"));
 				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
 				this.add_page (new CPanelDeductions (this), _("Deductions"));

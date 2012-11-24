@@ -4,6 +4,16 @@
 
     <child name="report" schema="com.mobilectpower.payroll.report"/>
 
+    <key type="s" name="database-provider">
+      <default>'SQLite'</default>
+      <_summary>Database Provider</_summary>
+      <_description>GNOME Data Access provider to use for the database. Usually SQLite or SQLCipher.</_description>
+    </key>
+
+  </schema>
+
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.view" path="/com/mobilectpower/payroll/view/">
+
     <key type="b" name="toolbar-visible">
       <default>true</default>
       <_summary>Toolbar is Visible</_summary>
@@ -15,16 +25,6 @@
       <_summary>Statusbar is Visible</_summary>
       <_description>Whether the statusbar should be visible.</_description>
     </key>
-
-    <key type="s" name="database-provider">
-      <default>'SQLite'</default>
-      <_summary>Database Provider</_summary>
-      <_description>GNOME Data Access provider to use for the database. Usually SQLite or SQLCipher.</_description>
-    </key>
-
-  </schema>
-
-  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.view" path="/com/mobilectpower/payroll/view/">
 
     <key type="b" name="employee-log-in">
       <default>false</default>

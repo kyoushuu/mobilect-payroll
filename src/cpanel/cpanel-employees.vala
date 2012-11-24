@@ -65,6 +65,14 @@ namespace Mobilect {
 					var employee1 = a.user_data as Employee;
 					var employee2 = b.user_data as Employee;
 
+					if (employee1.regular != employee2.regular) {
+						if (employee2.regular) {
+							return -1;
+						} else {
+							return 1;
+						}
+					}
+
 					return employee1.rate - employee2.rate;
 				});
 				sort.set_sort_func (EmployeeList.Columns.DAYRATE, (model, a, b) => {
@@ -151,7 +159,8 @@ namespace Mobilect {
 
 				renderer = new CellRendererText ();
 				renderer.xalign = 1;
-				column = new TreeViewColumn.with_attributes (_("Monthly Rate"), renderer);
+				column = new TreeViewColumn.with_attributes (_("Monthly Rate"), renderer,
+				                                             "visible", EmployeeList.Columns.REGULAR);
 				column.sort_column_id = EmployeeList.Columns.RATE;
 				column.reorderable = true;
 				column.resizable = true;
@@ -355,10 +364,11 @@ namespace Mobilect {
 							                       employee.tin,
 							                       password_entry.text,
 							                       employee.rate,
-							                       employee.branch);
+							                       employee.branch,
+							                       employee.regular);
 							dialog.destroy ();
 						} catch (Error e) {
-							(dialog.transient_for as Window).show_error_dialog (_("Failed to add employee"), e.message);
+							(dialog.transient_for as Window).show_error_dialog (dialog, _("Failed to add employee"), e.message);
 						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();

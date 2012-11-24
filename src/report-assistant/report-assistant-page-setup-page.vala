@@ -52,7 +52,8 @@ namespace Mobilect {
 
 						assistant.print_settings.to_file (assistant.parent_window.app.settings.print_settings);
 					} catch (Error e) {
-						assistant.parent_window.show_error_dialog (_("Failed to save page setup and print settings"),
+						assistant.parent_window.show_error_dialog (assistant,
+						                                           _("Failed to save page setup and print settings"),
 						                                           e.message);
 					}
 				});

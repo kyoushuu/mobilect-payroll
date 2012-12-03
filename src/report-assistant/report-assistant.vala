@@ -159,23 +159,40 @@ namespace Mobilect {
 					var p = model.get_path (iter);
 
 					try {
+						var list = select_employees_page.list.get_subset (true);
+						list.sort ((a, b) => {
+							var employee1 = a as Employee;
+							var employee2 = b as Employee;
+
+							if (employee1.regular != employee2.regular) {
+								if (employee1.regular) {
+									return -1;
+								} else {
+									return 1;
+								}
+							}
+
+							return strcmp (employee1.get_name (),
+							               employee2.get_name ());
+						});
+
 						var pr = create_report (is_regular,
 						                        is_monthly,
 						                        start_date,
 						                        end_date,
-						                        select_employees_page.list.get_subset (true));
+						                        list);
 						pr.payroll = select_components_page.payroll_check.active;
 						pr.payslip = select_components_page.payslip_check.active;
 						pr.status_changed.connect ((o) => {
-													progress_bar.text = pr.status_string;
-												});
+							progress_bar.text = pr.status_string;
+						});
 						pr.step.connect (() => {
-													progress_bar.pulse ();
+							progress_bar.pulse ();
 
-													while (Gtk.events_pending ()) {
-														main_iteration ();
-													}
-												});
+							while (Gtk.events_pending ()) {
+								main_iteration ();
+							}
+						});
 
 						switch (p.get_indices ()[0]) {
 							case ReportAssistantConfirmPage.Actions.SAVE:

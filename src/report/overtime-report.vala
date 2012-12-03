@@ -397,7 +397,7 @@ namespace Mobilect {
 								x += subtotal_column_width;
 							}
 
-//							/* Total */
+							/* Total */
 //							cr.move_to (x, table_top + padding);
 //							layout.set_width (units_from_double (total_column_width - dpadding));
 //							layout.set_markup (_("TOTAL\nAMOUNT"), -1);

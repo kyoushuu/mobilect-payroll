@@ -72,6 +72,21 @@ namespace Mobilect {
 						return false;
 					}
 
+					/* Get cell in coordinate */
+					TreePath path;
+					if (!tree_view.get_path_at_pos ((int) e.x, (int) e.y, out path,
+					                                null, null, null)) {
+						return false;
+					}
+
+					/* Is cell selected */
+					var selection = tree_view.get_selection ();
+					if (!selection.path_is_selected (path)) {
+						selection.unselect_all ();
+						selection.select_path (path);
+					}
+
+					/* Show popup on cell under mouse */
 					return show_popup (3, e.time);
 				});
 				tree_view.popup_menu.connect ((w) => {
@@ -128,6 +143,24 @@ namespace Mobilect {
 					var dt = list.get_from_iter (iter).end;
 					(r as CellRendererText).text = (dt != null)? dt.format (_("%a, %d %b, %Y %I:%M %p")) : _("Open");
 				});
+				tree_view.append_column (column);
+
+				column = new TreeViewColumn.with_attributes (_("Straight Time"), new CellRendererToggle (),
+				                                             "active", TimeRecordList.Columns.STRAIGHT_TIME);
+				column.sort_column_id = TimeRecordList.Columns.STRAIGHT_TIME;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
+				column.reorderable = true;
+				column.resizable = true;
+				tree_view.append_column (column);
+
+				column = new TreeViewColumn.with_attributes (_("Include Break"), new CellRendererToggle (),
+				                                             "active", TimeRecordList.Columns.INCLUDE_BREAK);
+				column.sort_column_id = TimeRecordList.Columns.INCLUDE_BREAK;
+				column.sizing = TreeViewColumnSizing.FIXED;
+				column.fixed_width = 50;
+				column.reorderable = true;
+				column.resizable = true;
 				tree_view.append_column (column);
 
 
@@ -196,7 +229,6 @@ namespace Mobilect {
 						tooltip = _("Find time records"),
 						callback = (a) => {
 							/* Set period */
-
 							Date start, end;
 							get_current_period (out start, out end);
 
@@ -404,9 +436,10 @@ namespace Mobilect {
 								    t.start.compare (time_record.end) < 0) {
 									this.cpanel.window.show_error_dialog (dialog,
 									                                      _("Cannot save time record"),
-									                                      _("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s").printf (t.employee.get_name (),
-									                                      t.start.format (_("%a, %d %b, %Y %I:%M %p")),
-									                                      t.end.format (_("%a, %d %b, %Y %I:%M %p"))));
+									                                      _("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s")
+									                                      .printf (t.employee.get_name (),
+									                                               t.start.format (_("%a, %d %b, %Y %I:%M %p")),
+									                                               t.end.format (_("%a, %d %b, %Y %I:%M %p"))));
 
 									time_record.pull ();
 
@@ -427,13 +460,14 @@ namespace Mobilect {
 			}
 
 			private bool show_popup (uint button, uint32 time) {
-				/* Has any selected rows? */
-				if (tree_view.get_selection ().count_selected_rows () <= 0) {
+				/* Check if a row is selected */
+				if (tree_view.get_selection ().count_selected_rows () < 1) {
 					return false;
 				}
 
 				var menu = cpanel.window.ui_manager.get_widget ("/popup-time-records") as Gtk.Menu;
 				menu.popup (null, null, null, button, time);
+
 				return true;
 			}
 
@@ -472,6 +506,30 @@ namespace Mobilect {
 						return -1;
 					} else {
 						return 0;
+					}
+				});
+				sort.set_sort_func (TimeRecordList.Columns.STRAIGHT_TIME, (model, a, b) => {
+					var time_record1 = a.user_data as TimeRecord;
+					var time_record2 = b.user_data as TimeRecord;
+
+					if (time_record1.straight_time == time_record2.straight_time) {
+						return 0;
+					} else if (time_record1.straight_time) {
+						return 1;
+					} else {
+						return -1;
+					}
+				});
+				sort.set_sort_func (TimeRecordList.Columns.INCLUDE_BREAK, (model, a, b) => {
+					var time_record1 = a.user_data as TimeRecord;
+					var time_record2 = b.user_data as TimeRecord;
+
+					if (time_record1.include_break == time_record2.include_break) {
+						return 0;
+					} else if (time_record1.include_break) {
+						return 1;
+					} else {
+						return -1;
 					}
 				});
 				this.tree_view.model = sort;

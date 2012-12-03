@@ -139,6 +139,21 @@ namespace Mobilect {
 				list = (assistant.get_nth_page (ReportAssistant.Pages.BASIC_INFO) as ReportAssistantBasicInfoPage).list;
 
 				sort = new TreeModelSort.with_model (this.list);
+				sort.set_default_sort_func ((model, a, b) => {
+					var employee1 = a.user_data as Employee;
+					var employee2 = b.user_data as Employee;
+
+					if (employee1.regular != employee2.regular) {
+						if (employee1.regular) {
+							return -1;
+						} else {
+							return 1;
+						}
+					}
+
+					return strcmp (employee1.get_name (),
+					               employee2.get_name ());
+				});
 				sort.set_sort_func (EmployeeList.Columns.NAME,
 				                    (model, a, b) => {
 										var employee1 = a.user_data as Employee;

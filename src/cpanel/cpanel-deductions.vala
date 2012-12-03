@@ -18,6 +18,7 @@
 
 
 using Gtk;
+using Gdk;
 using Pango;
 
 
@@ -34,6 +35,7 @@ namespace Mobilect {
 
 			public PeriodSpinButton period_spin { get; private set; }
 			public ComboBox branch_combobox { public get; private set; }
+			public Label empty_label { public get; private set; }
 			public TreeView tree_view { get; private set; }
 			public TreeModelSort sort { get; private set; }
 
@@ -63,6 +65,15 @@ namespace Mobilect {
 				vbox.add (overlay);
 				overlay.show ();
 
+				empty_label = new Label (_("<big><b>No branch selected</b></big>\nSelect a branch to view deductions."));
+				empty_label.use_markup = true;
+				empty_label.justify = Justification.CENTER;
+				empty_label.expand = true;
+				empty_label.halign = Align.FILL;
+				empty_label.valign = Align.FILL;
+				overlay.add_overlay (empty_label);
+				empty_label.show ();
+
 				var sw = new ScrolledWindow (null, null);
 				overlay.add (sw);
 				sw.show ();
@@ -71,6 +82,54 @@ namespace Mobilect {
 				tree_view.expand = true;
 				tree_view.fixed_height_mode = true;
 				tree_view.rules_hint = true;
+				tree_view.add_events (EventMask.KEY_PRESS_MASK);
+				tree_view.key_press_event.connect ((w, e) => {
+					var ek = (EventKey) e;
+
+					/* Check if Tab or Shift+Tab is pressed */
+					if ((ModifierType.MODIFIER_MASK & ~ModifierType.SHIFT_MASK & ek.state) == 0 &&
+					    (ek.keyval == Key.Tab || ek.keyval == Key.ISO_Left_Tab)) {
+						TreePath path;
+						TreeViewColumn column;
+
+						/* Get current column */
+						tree_view.get_cursor (out path, out column);
+
+						/* Get next column */
+						var columns = tree_view.get_n_columns ();
+						if (column != null) {
+							for (int i = 0; i < columns; i++) {
+								if (column == tree_view.get_column (i)) {
+									if ((ModifierType.MODIFIER_MASK & ek.state) == 0) {
+										/* Move to first editable column if last */
+										if (++i >= columns) {
+											i = 1;
+										}
+									} else {
+										/* Move to last editable column if first */
+										if (--i <= 0) {
+											i = (int) columns - 1;
+										}
+									}
+
+									/* Change to next column */
+									column = tree_view.get_column (i);
+									break;
+								}
+							}
+						} else {
+							column = tree_view.get_column (0);
+						}
+
+						/* Move to next column */
+						tree_view.set_cursor (path, column, true);
+						tree_view.scroll_to_cell (path, column, true, 0.5f, 0.5f);
+
+						return true;
+					}
+
+					return false;
+				});
 				tree_view.set_search_equal_func ((m, c, k, i) => {
 					Value value;
 					m.get_value (i, c, out value);
@@ -362,17 +421,37 @@ namespace Mobilect {
 
 			public void update () {
 				TreeIter iter;
-				Branch branch;
 
 				if (!branch_combobox.get_active_iter (out iter)) {
+					empty_label.show ();
 					return;
+				} else {
+					empty_label.hide ();
 				}
 
-				branch_combobox.model.get (iter, BranchList.Columns.OBJECT, out branch);
-				deduction = new Deductions (this.cpanel.window.app.database.employee_list.get_subset_with_branch (branch),
+				var database = this.cpanel.window.app.database;
+
+				var branch = database.branch_list.get_from_iter (iter);
+				deduction = new Deductions (database.employee_list.get_subset_with_branch (branch).get_subset_is_regular (true),
 				                            period_spin.period);
 
 				sort = new TreeModelSort.with_model (deduction);
+				sort.set_default_sort_func ((model, a, b) => {
+					Value employee1, employee2;
+					model.get_value (a, Deductions.Columns.EMPLOYEE, out employee1);
+					model.get_value (b, Deductions.Columns.EMPLOYEE, out employee2);
+
+					if ((employee1 as Employee).regular != (employee2 as Employee).regular) {
+						if ((employee1 as Employee).regular) {
+							return -1;
+						} else {
+							return 1;
+						}
+					}
+
+					return strcmp ((employee1 as Employee).get_name (),
+					               (employee2 as Employee).get_name ());
+				});
 				sort.set_sort_func (Deductions.Columns.EMPLOYEE, (model, a, b) => {
 					Value employee1, employee2;
 					model.get_value (a, Deductions.Columns.EMPLOYEE, out employee1);

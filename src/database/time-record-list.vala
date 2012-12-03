@@ -38,6 +38,8 @@ namespace Mobilect {
 				EMPLOYEE,
 				START,
 				END,
+				STRAIGHT_TIME,
+				INCLUDE_BREAK,
 				NUM
 			}
 
@@ -150,9 +152,11 @@ namespace Mobilect {
 					case Columns.EMPLOYEE:
 						return typeof (Employee);
 					case Columns.START:
-						return typeof (DateTime);
 					case Columns.END:
 						return typeof (DateTime);
+					case Columns.STRAIGHT_TIME:
+					case Columns.INCLUDE_BREAK:
+						return typeof (bool);
 					default:
 						return Type.INVALID;
 				}
@@ -200,6 +204,12 @@ namespace Mobilect {
 						break;
 					case Columns.END:
 						value = time_record.end;
+						break;
+					case Columns.STRAIGHT_TIME:
+						value = time_record.straight_time;
+						break;
+					case Columns.INCLUDE_BREAK:
+						value = time_record.include_break;
 						break;
 					default:
 						value = Value (Type.INVALID);

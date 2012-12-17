@@ -139,8 +139,8 @@ namespace Mobilect {
 				open_end_check = new CheckButton.with_mnemonic (_("_Open end"));
 				open_end_check.hexpand = true;
 				open_end_check.toggled.connect ((t) => {
-										 end_spin.sensitive = !open_end_check.active;
-									 });
+					end_spin.sensitive = !open_end_check.active;
+				});
 				grid.attach_next_to (open_end_check,
 				                     end_label,
 				                     PositionType.BOTTOM,

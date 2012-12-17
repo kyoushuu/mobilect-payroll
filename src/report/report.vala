@@ -18,6 +18,7 @@
 
 
 using Gtk;
+using Gdk;
 using Pango;
 using Cairo;
 using Gee;
@@ -762,6 +763,19 @@ namespace Mobilect {
 				cr.rel_line_to ((width/2) - padding_payslip - units_to_double (layout_width), 0);
 				cr.set_line_width (1);
 				cr.stroke ();
+			}
+
+			public override bool preview (PrintOperationPreview preview,
+			                              PrintContext context,
+			                              Gtk.Window parent) {
+
+				var window = new PrintPreviewWindow (this, preview, context, parent);
+
+				preview.ready.connect ((context) => {
+					window.show ();
+				});
+
+				return true;
 			}
 
 		}

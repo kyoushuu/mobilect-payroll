@@ -94,36 +94,34 @@ namespace Mobilect {
 
 				branch_check = new CheckButton.with_mnemonic (_("_Branch:"));
 				branch_check.active = false;
-				branch_check.toggled.connect ((t) =>
-				                              {
-												  branch_combobox.sensitive = t.active;
-												  employee_check.sensitive = t.active && branch_combobox.active >= 0;
-												  employee_combobox.sensitive = employee_check.sensitive && employee_check.active;
+				branch_check.toggled.connect ((t) => {
+					branch_combobox.sensitive = t.active;
+					employee_check.sensitive = t.active && branch_combobox.active >= 0;
+					employee_combobox.sensitive = employee_check.sensitive && employee_check.active;
 
-												  changed ();
-											  });
+					changed ();
+				});
 				grid.add (branch_check);
 				branch_check.show ();
 
 				branch_combobox = new ComboBox.with_model (parent.app.database.branch_list);
 				branch_combobox.hexpand = true;
 				branch_combobox.sensitive = false;
-				branch_combobox.changed.connect ((w) =>
-				                                 {
-													 TreeIter iter;
-													 if (branch_combobox.get_active_iter (out iter)) {
-														 employee_combobox.model = parent.app.database.employee_list.
-															 get_subset_with_branch (parent.app.database.branch_list.
-															                         get_from_iter (iter));
-														 employee_combobox.active = -1;
-														 employee_check.sensitive = true;
+				branch_combobox.changed.connect ((w) => {
+					TreeIter iter;
+					if (branch_combobox.get_active_iter (out iter)) {
+						employee_combobox.model = parent.app.database.employee_list.
+							get_subset_with_branch (parent.app.database.branch_list.
+							                        get_from_iter (iter));
+						employee_combobox.active = -1;
+						employee_check.sensitive = true;
 
-														 changed ();
-													 } else {
-														 employee_check.sensitive = false;
-														 employee_combobox.sensitive = false;
-													 }
-												 });
+						changed ();
+					} else {
+						employee_check.sensitive = false;
+						employee_combobox.sensitive = false;
+					}
+				});
 				grid.attach_next_to (branch_combobox,
 				                     branch_check,
 				                     PositionType.RIGHT,
@@ -138,12 +136,11 @@ namespace Mobilect {
 
 				employee_check = new CheckButton.with_mnemonic (_("E_mployee:"));
 				employee_check.sensitive = false;
-				employee_check.toggled.connect ((t) =>
-				                                {
-													employee_combobox.sensitive = t.active;
+				employee_check.toggled.connect ((t) => {
+					employee_combobox.sensitive = t.active;
 
-													changed ();
-												});
+					changed ();
+				});
 				grid.add (employee_check);
 				employee_check.show ();
 

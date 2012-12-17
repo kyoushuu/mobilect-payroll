@@ -78,6 +78,10 @@ namespace Mobilect {
 				tree_view = new TreeView.with_model (actions);
 				tree_view.expand = true;
 				tree_view.headers_visible = false;
+				tree_view.row_activated.connect ((t, p, c) => {
+					assistant.apply ();
+					assistant.next_page ();
+				});
 				sw.add (tree_view);
 				tree_view.show ();
 

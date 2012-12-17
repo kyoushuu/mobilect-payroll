@@ -242,6 +242,8 @@ namespace Mobilect {
 					apply_page.progress_bar.text = _("Finished");
 					this.set_page_complete (apply_page, true);
 
+					this.next_page ();
+
 					return false;
 				});
 			}
@@ -360,37 +362,37 @@ namespace Mobilect {
 				/* Show status in statusbar */
 				uint context_id = parent_window.statusbar.get_context_id ("report-assistant");
 				pr.status_changed.connect ((o) => {
-										  parent_window.statusbar.push (context_id, _("Report: %s").printf (pr.status_string));
-									  });
+					parent_window.statusbar.push (context_id, _("Report: %s").printf (pr.status_string));
+				});
 				pr.done.connect ((o, r) => {
-										  if (r == PrintOperationResult.ERROR) {
-											  /* Show error */
-											  try {
-												  o.get_error ();
-											  } catch (Error e) {
-												  parent_window.show_error_dialog (this,
-												                                   _("Failed to print report"),
-												                                   e.message);
-											  }
-										  } else if (r == PrintOperationResult.APPLY) {
-											  /* Save print settings */
-											  try {
-												  print_settings = pr.print_settings;
-												  print_settings.to_file (parent_window.app.settings.print_settings);
-											  } catch (Error e) {
-												  parent_window.show_error_dialog (this,
-												                                   _("Failed to save print settings"),
-												                                   e.message);
-											  }
-										  }
+					if (r == PrintOperationResult.ERROR) {
+						/* Show error */
+						try {
+							o.get_error ();
+						} catch (Error e) {
+							parent_window.show_error_dialog (this,
+							                                 _("Failed to print report"),
+							                                 e.message);
+						}
+					} else if (r == PrintOperationResult.APPLY) {
+						/* Save print settings */
+						try {
+							print_settings = pr.print_settings;
+							print_settings.to_file (parent_window.app.settings.print_settings);
+						} catch (Error e) {
+							parent_window.show_error_dialog (this,
+							                                 _("Failed to save print settings"),
+							                                 e.message);
+						}
+					}
 
-										  /* Remove messages after 5 seconds */
-										  Timeout.add_seconds (5, () => {
-																					   parent_window.statusbar.remove_all (context_id);
-																					   return false;
-																				   });
+					/* Remove messages after 5 seconds */
+					Timeout.add_seconds (5, () => {
+						parent_window.statusbar.remove_all (context_id);
+						return false;
+					});
 
-									  });
+				});
 
 				return pr;
 			}

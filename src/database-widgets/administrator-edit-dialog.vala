@@ -49,9 +49,9 @@ namespace Mobilect {
 				widget = new AdministratorEditWidget (administrator);
 				widget.border_width = 5;
 				widget.username_entry.changed.connect ((e) => {
-														set_response_sensitive (ResponseType.ACCEPT,
-														                        widget.username_entry.text_length > 0);
-													});
+					set_response_sensitive (ResponseType.ACCEPT,
+					                        widget.username_entry.text_length > 0);
+				});
 				widget.username_entry.changed ();
 				content_area.add (widget);
 
@@ -61,10 +61,10 @@ namespace Mobilect {
 
 
 				response.connect ((response_id) => {
-														if (response_id == ResponseType.ACCEPT) {
-															this.widget.save ();
-														}
-													});
+					if (response_id == ResponseType.ACCEPT) {
+						this.widget.save ();
+					}
+				});
 			}
 		}
 

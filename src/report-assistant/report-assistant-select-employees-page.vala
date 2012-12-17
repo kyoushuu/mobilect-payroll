@@ -81,13 +81,13 @@ namespace Mobilect {
 
 				var renderer = new CellRendererToggle ();
 				renderer.toggled.connect ((renderer, path) => {
-									  TreeIter iter, iterSort;
-									  Value value;
-									  sort.get_iter_from_string (out iterSort, path);
-									  sort.convert_iter_to_child_iter (out iter, iterSort);
-									  list.get_value (iter, EmployeeList.Columns.OBJECT, out value);
-									  list.set_is_enabled (value as Employee, !renderer.active);
-								  });
+					TreeIter iter, iterSort;
+					Value value;
+					sort.get_iter_from_string (out iterSort, path);
+					sort.convert_iter_to_child_iter (out iter, iterSort);
+					list.get_value (iter, EmployeeList.Columns.OBJECT, out value);
+					list.set_is_enabled (value as Employee, !renderer.active);
+				});
 
 				column = new TreeViewColumn.with_attributes (_("Include"),
 				                                             renderer,

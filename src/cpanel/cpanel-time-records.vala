@@ -350,7 +350,28 @@ namespace Mobilect {
 							return;
 						}
 
-						dialog.hide ();
+						/* Warn if time record spans over 24 hours */
+						if (time_record.end != null &&
+						    time_record.end.difference (time_record.start) > TimeSpan.HOUR * 24) {
+							var warning_dialog = new MessageDialog (dialog,
+							                                        DialogFlags.MODAL,
+							                                        MessageType.WARNING,
+							                                        ButtonsType.NONE,
+							                                        _("Are you sure about the start and end dates?"));
+							warning_dialog.secondary_text = _("The time record spans over 24 hours.");
+							warning_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+							                            Stock.ADD, ResponseType.ACCEPT);
+							warning_dialog.set_alternative_button_order (ResponseType.ACCEPT, ResponseType.REJECT);
+
+							var response = warning_dialog.run ();
+							warning_dialog.destroy ();
+
+							if (response == ResponseType.REJECT) {
+								time_record.pull ();
+
+								return;
+							}
+						}
 
 						try {
 							database.add_time_record (time_record.employee_id,
@@ -426,6 +447,29 @@ namespace Mobilect {
 					dialog.action = Stock.SAVE;
 					dialog.response.connect ((d, r) => {
 						if (r == ResponseType.ACCEPT) {
+							/* Warn if time record spans over 24 hours */
+							if (time_record.end != null &&
+							    time_record.end.difference (time_record.start) > TimeSpan.HOUR * 24) {
+								var warning_dialog = new MessageDialog (dialog,
+								                                        DialogFlags.MODAL,
+								                                        MessageType.WARNING,
+								                                        ButtonsType.NONE,
+								                                        _("Are you sure about the start and end dates?"));
+								warning_dialog.secondary_text = _("The time record spans over 24 hours.");
+								warning_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+								                            Stock.SAVE, ResponseType.ACCEPT);
+								warning_dialog.set_alternative_button_order (ResponseType.ACCEPT, ResponseType.REJECT);
+
+								var response = warning_dialog.run ();
+								warning_dialog.destroy ();
+
+								if (response == ResponseType.REJECT) {
+									time_record.pull ();
+
+									return;
+								}
+							}
+
 							foreach (var t in time_record.database.get_time_records_of_employee (time_record.employee)) {
 								if (t.id == time_record.id) {
 									continue;

@@ -84,11 +84,11 @@ namespace Mobilect {
 						callback = (a) => {
 							var assistant = new ReportAssistant (this.cpanel.window, page_setup, print_settings);
 							assistant.cancel.connect ((assistant) => {
-														assistant.destroy ();
-													});
+								assistant.destroy ();
+							});
 							assistant.close.connect ((assistant) => {
-														assistant.destroy ();
-													});
+								assistant.destroy ();
+							});
 							assistant.show ();
 						}
 					},

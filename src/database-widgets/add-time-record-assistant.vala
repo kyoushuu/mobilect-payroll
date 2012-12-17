@@ -51,8 +51,8 @@ namespace Mobilect {
 
 				this.parent_window = parent;
 				this.prepare.connect ((a, p) => {
-							(p as Page).prepare ();
-						});
+					(p as Page).prepare ();
+				});
 
 				this.ui_manager = new UIManager ();
 				try {
@@ -387,16 +387,16 @@ namespace Mobilect {
 					tree_view.rubber_banding = true;
 					tree_view.search_column = (int) EmployeeList.Columns.NAME;
 					tree_view.button_press_event.connect ((w, e) => {
-										  /* Is not right-click? */
-										  if (e.button != 3) {
-											  return false;
-										  }
+						/* Is not right-click? */
+						if (e.button != 3) {
+							return false;
+						}
 
-										  return show_popup (3, e.time);
-									  });
+						return show_popup (3, e.time);
+					});
 					tree_view.popup_menu.connect ((w) => {
-										  return show_popup (0, get_current_event_time ());
-									  });
+						return show_popup (0, get_current_event_time ());
+					});
 					sw.add (tree_view);
 					tree_view.show ();
 

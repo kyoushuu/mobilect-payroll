@@ -60,12 +60,11 @@ namespace Mobilect {
 				pop_composite_child ();
 
 
-				response.connect ((response_id) =>
-				                  {
-									  if (response_id == ResponseType.ACCEPT) {
-										  this.widget.save ();
-									  }
-								  });
+				response.connect ((response_id) => {
+					if (response_id == ResponseType.ACCEPT) {
+						this.widget.save ();
+					}
+				});
 			}
 
 			private void changed () {

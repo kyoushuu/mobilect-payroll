@@ -205,7 +205,7 @@ namespace Mobilect {
 							                                     tree_view);
 							dialog.response.connect ((d, r) => {
 								if (r == ResponseType.ACCEPT ||
-										r == ResponseType.REJECT) {
+								    r == ResponseType.REJECT) {
 									d.destroy ();
 								}
 							});

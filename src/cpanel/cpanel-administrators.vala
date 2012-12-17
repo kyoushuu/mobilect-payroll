@@ -202,7 +202,7 @@ namespace Mobilect {
 				this.action_group.get_action (ACTION_PROPERTIES).sensitive = false;
 				this.action_group.get_action (ACTION_PASSWORD).sensitive = false;
 				tree_view.get_selection ().changed.connect ((s) => {
-				var selected = tree_view.get_selection ().count_selected_rows () > 0;
+					var selected = tree_view.get_selection ().count_selected_rows () > 0;
 					this.action_group.get_action (ACTION_REMOVE).sensitive = selected;
 					this.action_group.get_action (ACTION_PROPERTIES).sensitive = selected;
 					this.action_group.get_action (ACTION_PASSWORD).sensitive = selected;

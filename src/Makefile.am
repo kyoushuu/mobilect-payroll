@@ -101,7 +101,6 @@ mobilect_payroll_VALAFLAGS = \
 	--vapidir=$(top_srcdir)/vapi \
 	--pkg gtk+-3.0 \
 	--pkg gdk-3.0 \
-	--pkg gdk-pixbuf-2.0 \
 	--pkg glib-2.0 \
 	--pkg gobject-2.0 \
 	--pkg pango \

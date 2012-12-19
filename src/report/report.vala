@@ -769,7 +769,7 @@ namespace Mobilect {
 			                              PrintContext context,
 			                              Gtk.Window parent) {
 
-				var window = new PrintPreviewWindow (this, preview, context, parent);
+				var window = new PrintPreviewWindow (this, context, parent);
 
 				preview.ready.connect ((context) => {
 					window.show ();

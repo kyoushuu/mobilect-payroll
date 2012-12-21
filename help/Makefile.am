@@ -26,7 +26,6 @@ HELP_FILES = \
 	administrators-remove.page \
 	administrators-edit.page \
 	administrators-change-password.page \
-	reports-create-regular.page \
-	reports-create-overtime.page \
+	reports-create.page \
 	reports-set-fonts.page \
 	reports-set-holidays.page

@@ -29,9 +29,14 @@
     <p>You may also right-click on the list to show the context menu instead, where you could select <gui style="menuitem">Properties</gui> to edit the currently selected time records.</p>
   </note>
 
+  <note style="tip">
+    <p>The end date automatically changes to match the start date when the start date is changed to make editing easier.</p>
+    <p>You should set the start date first to take advantage of this feature.</p>
+    <p>You may also type the date as mm/dd/yy or other forms of denoting a date, depending on the current locale settings of your computer.</p>
+  </note>
+
   <note style="important">
     <p>A time record should always have an employee owner. Also, unless it has an open end, the end date and time should be after the start date and time.</p>
-    <p>The end date automatically changes to match the start date when the start date is changed to make editing easier.</p>
   </note>
 
 </page>

@@ -45,7 +45,6 @@ namespace Mobilect {
 				progress_bar = new ProgressBar ();
 				progress_bar.ellipsize = EllipsizeMode.END;
 				progress_bar.show_text = true;
-				progress_bar.text = _("Please wait...");
 				this.pack_end (progress_bar, true, false);
 				progress_bar.show ();
 
@@ -55,6 +54,10 @@ namespace Mobilect {
 
 			public override void prepare () {
 				assistant.commit ();
+				assistant.set_page_complete (this, false);
+
+				progress_bar.fraction = 0.0;
+				progress_bar.text = _("Please wait...");
 			}
 
 		}

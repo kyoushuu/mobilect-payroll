@@ -261,6 +261,9 @@ namespace Mobilect {
 					cr.set_source_rgb (1, 1, 1);
 					cr.paint ();
 					cr.set_source_rgb (0, 0, 0);
+					cr.rectangle (1, 1, page_width - 2, page_height - 2);
+					cr.set_line_width (2);
+					cr.stroke ();
 					context.set_cairo_context (cr, screen_dpi, screen_dpi);
 				});
 
@@ -283,9 +286,15 @@ namespace Mobilect {
 			}
 
 			private void show_page () {
-				image.pixbuf = current_pixbuf.scale_simple ((int) (pixbuf_width * zoom),
-				                                            (int) (pixbuf_height * zoom),
-				                                            InterpType.BILINEAR);
+				/* Scale if necessary */
+				if (Math.fabs (zoom - 1.0) < double.EPSILON) {
+					image.pixbuf = current_pixbuf;
+				} else {
+					image.pixbuf = current_pixbuf.scale_simple ((int) (pixbuf_width * zoom),
+					                                            (int) (pixbuf_height * zoom),
+					                                            InterpType.BILINEAR);
+				}
+
 				pagenum_entry.text = (current_page + 1).to_string ();
 				pagenum_label.label = _("(%d of %d)").printf (current_page + 1, op.n_pages);
 			}

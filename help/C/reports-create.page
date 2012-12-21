@@ -1,11 +1,11 @@
-<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="reports-create-regular">
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="reports-create">
 
   <info>
     <link type="guide" xref="index#reports-section" group="create"/>
 
     <desc>Create payroll and payslips</desc>
 
-    <revision version="0.1.0" pkgversion="0.1.0" date="2012-11-24" status="draft"/>
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-12-19" status="draft"/>
     <credit type="author copyright">
       <name>Arnel A. Borja</name>
       <email>kyoushuu@yahoo.com</email>
@@ -26,6 +26,10 @@
   <note style="important">
     <p>In regular reports, the start and end date should either be the first and 15th day of the same month, or the 16th and last day of the same month.</p>
     <p>The end date should always be after the start date.</p>
+  </note>
+
+  <note style="important">
+    <p>In overtime reports, make sure that holidays are properly set before creating the report.</p>
   </note>
 
 </page>

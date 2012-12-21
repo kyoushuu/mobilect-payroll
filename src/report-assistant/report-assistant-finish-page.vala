@@ -33,10 +33,17 @@ namespace Mobilect {
 				push_composite_child ();
 
 
-				var label = new Label (_("The report has been successfully created."));
+				var label = new Label (_("The report has been successfully created.\n\nClick the button below to select another action."));
 				label.xalign = 0.0f;
 				this.add (label);
 				label.show ();
+
+				var button = new Button.with_label (_("Select another action"));
+				button.clicked.connect (() => {
+					assistant.set_current_page (ReportAssistant.Pages.CONFIRM);
+				});
+				this.add (button);
+				button.show ();
 
 				pop_composite_child ();
 			}

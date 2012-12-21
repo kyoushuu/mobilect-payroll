@@ -242,7 +242,8 @@ namespace Mobilect {
 					push_composite_child ();
 
 
-					var label = new Label (_("Welcome to the Add Time Record Assistant.\n\nPress \"Forward\" to continue."));
+					var label = new Label (_("Welcome to the Add Time Record Assistant.\n\nPlease check first if the holidays are set properly before using this assistant to ensure that time records will be added properly.\n\nPress \"Forward\" to continue."));
+					label.wrap = true;
 					label.xalign = 0.0f;
 					this.add (label);
 					label.show ();

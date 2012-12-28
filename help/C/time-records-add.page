@@ -28,4 +28,14 @@
     <p>The end date automatically changes to match the start date when the start date is changed to make editing easier.</p>
   </note>
 
+  <title>Add Multiple Time Records</title>
+
+  <p>To add multiple time records:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Time Records</gui> tab.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Add Multiple</gui></guiseq>, or press <keyseq><key>Shift</key><key>Ctrl</key><key>I</key></keyseq> in the toolbar.</p></item>
+    <item><p>Follow the instructions of the Add Time Record Assistant.</p></item>
+  </steps>
+
 </page>

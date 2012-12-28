@@ -80,6 +80,10 @@ namespace Mobilect {
 				Set stmt_params;
 				Value value_id = this.id;
 
+				foreach (var employee in database.employee_list.get_subset_with_branch (this)) {
+					employee.remove ();
+				}
+
 				if (list != null) {
 					list.remove (this);
 				}

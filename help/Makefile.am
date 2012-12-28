@@ -13,6 +13,9 @@ HELP_FILES = \
 	control-panel-logout.page \
 	control-panel-change-preferences.page \
 	control-panel-sort-view.page \
+	branches-add.page \
+	branches-remove.page \
+	branches-edit.page \
 	employees-add.page \
 	employees-remove.page \
 	employees-edit.page \

@@ -1,0 +1,30 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="branches-add">
+
+  <info>
+    <link type="guide" xref="index#branches-section" group="add"/>
+
+    <desc>Add a new branch to the database</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-12-28" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Add a Branch</title>
+
+  <p>To add a new branch:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Branches</gui> tab.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Add</gui></guiseq>, or press <keyseq><key>Ctrl</key><key>I</key></keyseq>, or click <gui style="button">Add</gui> in the toolbar.</p></item>
+    <item><p>Enter the name, then click <gui style="button">Save</gui>.</p></item>
+  </steps>
+
+  <note style="important">
+    <p>The name is required.</p>
+  </note>
+
+</page>

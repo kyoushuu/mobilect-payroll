@@ -23,6 +23,10 @@
     <title>Using the Control Panel</title>
   </section>
 
+  <section id="branches-section" style="2column" groups="add remove edit others">
+    <title>Managing Branches</title>
+  </section>
+
   <section id="employees-section" style="2column" groups="add remove edit change-password others">
     <title>Managing Employees</title>
   </section>

@@ -55,6 +55,7 @@ mobilect_payroll_SOURCES = \
 	widgets/preferences-dialog.vala \
 	widgets/print-preview-window.vala \
 	widgets/sort-tree-view-dialog.vala \
+	widgets/surface-draw-widget.vala \
 	login/login-page.vala \
 	login/employee-login-page.vala \
 	login/admin-login-page.vala \
@@ -141,8 +142,7 @@ ui_files = \
 	ui/mobilect-payroll-cpanel-holidays-ui.xml \
 	ui/mobilect-payroll-cpanel-report-ui.xml \
 	ui/mobilect-payroll-report-assistant-ui.xml \
-	ui/mobilect-payroll-add-time-record-assistant-ui.xml \
-	ui/mobilect-payroll-print-preview-ui.xml
+	ui/mobilect-payroll-add-time-record-assistant-ui.xml
 
 
 mobilect-payroll-win32-res.o: mobilect-payroll.rc

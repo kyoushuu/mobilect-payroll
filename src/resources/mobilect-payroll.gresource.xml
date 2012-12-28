@@ -12,6 +12,5 @@
     <file preprocess="xml-stripblanks">mobilect-payroll-cpanel-report-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-report-assistant-ui.xml</file>
     <file preprocess="xml-stripblanks">mobilect-payroll-add-time-record-assistant-ui.xml</file>
-    <file preprocess="xml-stripblanks">mobilect-payroll-print-preview-ui.xml</file>
   </gresource>
 </gresources>

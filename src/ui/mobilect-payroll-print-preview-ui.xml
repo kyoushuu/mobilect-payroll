@@ -1,6 +1,0 @@
-<ui>
-  <toolbar name="toolbar">
-    <toolitem name="Previous" action="print-preview-previous" />
-    <toolitem name="Next" action="print-preview-next" />
-  </toolbar>
-</ui>

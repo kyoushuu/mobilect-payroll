@@ -1,0 +1,36 @@
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="branches-edit">
+
+  <info>
+    <link type="guide" xref="index#branches-section" group="edit"/>
+
+    <desc>Change the properties of a branch</desc>
+
+    <revision version="0.1.0" pkgversion="0.1.0" date="2012-12-28" status="draft"/>
+    <credit type="author copyright">
+      <name>Arnel A. Borja</name>
+      <email>kyoushuu@yahoo.com</email>
+      <years>2012</years>
+    </credit>
+  </info>
+
+  <title>Edit a Branch</title>
+
+  <p>To edit the properties of a branch:</p>
+  <steps>
+    <item><p>Log in to the Control Panel.</p></item>
+    <item><p>Click the <gui style="tab">Branches</gui> tab.</p></item>
+    <item><p>Select the branch you want to change the properties from the list.</p></item>
+    <item><p>Select <guiseq><gui style="menu">Edit</gui><gui style="menuitem">Properties</gui></guiseq>, or press <key>Return</key>, or click <gui style="button">Properties</gui> in the toolbar.</p></item>
+    <item><p>Edit the properties you want to change, then click <gui style="button">Save</gui>.</p></item>
+  </steps>
+
+  <note style="tip">
+    <p>You may select multiple branches by dragging, or clicking each one while pressing <key>Ctrl</key>.</p>
+    <p>You may also right-click on the list to show the context menu instead, where you could select <gui style="menuitem">Properties</gui> to edit the currently selected branches.</p>
+  </note>
+
+  <note style="important">
+    <p>The name is required.</p>
+  </note>
+
+</page>

@@ -32,7 +32,7 @@ namespace Mobilect {
 			public PrintOperation op { get; private set; }
 			public PrintContext context { get; private set; }
 
-			public Image image { get; private set; }
+			public SurfaceDrawWidget image { get; private set; }
 			public Entry pagenum_entry { get; private set; }
 			public Label pagenum_label { get; private set; }
 
@@ -40,12 +40,8 @@ namespace Mobilect {
 			public double page_width { get; private set; }
 			public double page_height { get; private set; }
 
-			public Pixbuf current_pixbuf { get; private set; }
-			public int pixbuf_width { get; private set; }
-			public int pixbuf_height { get; private set; }
-			public double zoom { get; private set; default = 1.0; }
-
 			private double screen_dpi;
+			private ulong handler;
 
 
 			public PrintPreviewWindow (PrintOperation op, PrintContext context, Gtk.Window parent) {
@@ -86,7 +82,9 @@ namespace Mobilect {
 				sw.add (viewport);
 				viewport.show ();
 
-				image = new Image ();
+				image = new SurfaceDrawWidget ();
+				image.halign = Align.CENTER;
+				image.valign = Align.CENTER;
 				viewport.add (image);
 				image.show ();
 
@@ -153,7 +151,7 @@ namespace Mobilect {
 				/* Zoom toolitems */
 				var zoom100_toolbutton = new ToolButton.from_stock (Stock.ZOOM_100);
 				zoom100_toolbutton.clicked.connect (() => {
-					zoom = 1.0;
+					image.zoom = 1.0;
 					show_page ();
 				});
 				toolbar.insert (zoom100_toolbutton, -1);
@@ -161,9 +159,9 @@ namespace Mobilect {
 
 				var zoomfit_toolbutton = new ToolButton.from_stock (Stock.ZOOM_FIT);
 				zoomfit_toolbutton.clicked.connect (() => {
-					var width_zoomfit = sw.get_allocated_width () / (double) pixbuf_width;
-					var height_zoomfit = sw.get_allocated_height () / (double) pixbuf_height;
-					zoom = width_zoomfit < height_zoomfit? width_zoomfit : height_zoomfit;
+					var width_zoomfit = sw.get_allocated_width () / page_width;
+					var height_zoomfit = sw.get_allocated_height () / page_height;
+					image.zoom = width_zoomfit < height_zoomfit? width_zoomfit : height_zoomfit;
 					show_page ();
 				});
 				toolbar.insert (zoomfit_toolbutton, -1);
@@ -171,15 +169,15 @@ namespace Mobilect {
 
 				var zoomin_toolbutton = new ToolButton.from_stock (Stock.ZOOM_IN);
 				zoomin_toolbutton.clicked.connect (() => {
-					if (zoom < 4.0) {
-						if (zoom >= 2.0) {
-							zoom += 1.0;
-						} else if (zoom >= 1.0) {
-							zoom += 0.25;
-						} else if (zoom >= 0.5) {
-							zoom += 0.15;
+					if (image.zoom < 4.0) {
+						if (image.zoom >= 2.0) {
+							image.zoom += 1.0;
+						} else if (image.zoom >= 1.0) {
+							image.zoom += 0.25;
+						} else if (image.zoom >= 0.5) {
+							image.zoom += 0.15;
 						} else {
-							zoom += 0.10;
+							image.zoom += 0.10;
 						}
 						show_page ();
 					}
@@ -189,15 +187,15 @@ namespace Mobilect {
 
 				var zoomout_toolbutton = new ToolButton.from_stock (Stock.ZOOM_OUT);
 				zoomout_toolbutton.clicked.connect (() => {
-					if (zoom > 0.2) {
-						if (zoom >= 3.0) {
-							zoom -= 1.0;
-						} else if (zoom >= 1.25) {
-							zoom -= 0.25;
-						} else if (zoom >= 0.65) {
-							zoom -= 0.15;
+					if (image.zoom > 0.2) {
+						if (image.zoom >= 3.0) {
+							image.zoom -= 1.0;
+						} else if (image.zoom >= 1.25) {
+							image.zoom -= 0.25;
+						} else if (image.zoom >= 0.65) {
+							image.zoom -= 0.15;
 						} else {
-							zoom -= 0.10;
+							image.zoom -= 0.10;
 						}
 						show_page ();
 					}
@@ -238,11 +236,13 @@ namespace Mobilect {
 					page_width = page_setup.get_paper_width (Unit.POINTS) * (screen_dpi / 72);
 					page_height = page_setup.get_paper_height (Unit.POINTS) * (screen_dpi / 72);
 
-					double longest = page_width > page_height? page_width : page_height;
-					var surface = new ImageSurface (Format.ARGB32,
-					                                (int) (longest),
-					                                (int) (longest));
-					surface.set_fallback_resolution (300, 300);
+					var extents = Cairo.Rectangle ();
+					extents.x = extents.y = 0;
+					extents.width = page_width;
+					extents.height = page_height;
+
+					var surface = new RecordingSurface (Content.COLOR_ALPHA, extents);
+					surface.set_fallback_resolution (screen_dpi, screen_dpi);
 
 					context.set_cairo_context (new Cairo.Context (surface), screen_dpi, screen_dpi);
 				}
@@ -252,18 +252,18 @@ namespace Mobilect {
 					page_width = curr_page_setup.get_paper_width (Unit.POINTS) * (screen_dpi / 72);
 					page_height = curr_page_setup.get_paper_height (Unit.POINTS) * (screen_dpi / 72);
 
-					var surface = new ImageSurface (Format.ARGB32,
-					                                (int) page_width,
-					                                (int) page_height);
-					surface.set_fallback_resolution (300, 300);
+					var extents = Cairo.Rectangle ();
+					extents.x = extents.y = 0;
+					extents.width = page_width;
+					extents.height = page_height;
+
+					var surface = new RecordingSurface (Content.COLOR_ALPHA, extents);
+					surface.set_fallback_resolution (screen_dpi, screen_dpi);
 
 					var cr = new Cairo.Context (surface);
 					cr.set_source_rgb (1, 1, 1);
 					cr.paint ();
 					cr.set_source_rgb (0, 0, 0);
-					cr.rectangle (1, 1, page_width - 2, page_height - 2);
-					cr.set_line_width (2);
-					cr.stroke ();
 					context.set_cairo_context (cr, screen_dpi, screen_dpi);
 				});
 
@@ -277,24 +277,11 @@ namespace Mobilect {
 			private void render () {
 				op.render_page (current_page);
 
-				var surface = (ImageSurface) context.get_cairo_context ().get_target ();
-				pixbuf_width =  surface.get_width ();
-				pixbuf_height = surface.get_height ();
-
-				current_pixbuf = pixbuf_get_from_surface (surface, 0, 0,
-				                                          pixbuf_width, pixbuf_height);
+				var surface = (RecordingSurface) context.get_cairo_context ().get_target ();
+				image.set_cairo_surface (surface, page_width, page_height);
 			}
 
 			private void show_page () {
-				/* Scale if necessary */
-				if (Math.fabs (zoom - 1.0) < double.EPSILON) {
-					image.pixbuf = current_pixbuf;
-				} else {
-					image.pixbuf = current_pixbuf.scale_simple ((int) (pixbuf_width * zoom),
-					                                            (int) (pixbuf_height * zoom),
-					                                            InterpType.BILINEAR);
-				}
-
 				pagenum_entry.text = (current_page + 1).to_string ();
 				pagenum_label.label = _("(%d of %d)").printf (current_page + 1, op.n_pages);
 			}
@@ -313,11 +300,11 @@ namespace Mobilect {
 			private void screen_changed_handler (Widget widget, Screen previous_screen) {
 				/* Remove update from previous screen */
 				if (previous_screen != null) {
-					SignalHandler.disconnect_by_func (previous_screen, (void *) set_screen_dpi, this);
+					previous_screen.disconnect (handler);
 				}
 
 				/* Update when screen size changes */
-				get_screen ().size_changed.connect (set_screen_dpi);
+				handler = get_screen ().size_changed.connect (set_screen_dpi);
 			}
 
 		}

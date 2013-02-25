@@ -157,7 +157,7 @@ namespace Mobilect {
 					throw new EmployeeLoginError.ALREADY_LOGGED_IN (_("You are already logged in."));
 
 				try {
-					database.add_time_record (this.id, new DateTime.now_local (), null, false, true);
+					database.add_time_record (this.id, new DateTime.now_local (), null, false, true, false);
 				} catch (Error e) {
 					warning ("Failed to add time record of employee to database: %s", e.message);
 				}

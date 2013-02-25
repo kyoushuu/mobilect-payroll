@@ -305,6 +305,174 @@ namespace Mobilect {
 
 				if (payroll) {
 					surfaces = new Surface[pages_payroll];
+					if (employee_data.size == 0) {
+						/* Create page if empty */
+						surfaces[surface] = new Surface.similar (context.get_cairo_context ().get_target (), Content.COLOR_ALPHA,
+						                                         (int) Math.ceil (payroll_width),
+						                                         (int) Math.ceil (payroll_height));
+						cr = new Cairo.Context (surfaces[surface]);
+
+						layout = context.create_pango_layout ();
+						layout.get_context ().set_font_map (CairoFontMap.new_for_font_type (FontType.FT));
+						layout.set_wrap (Pango.WrapMode.WORD_CHAR);
+						layout.set_ellipsize (EllipsizeMode.END);
+
+
+						/* Print out headers */
+
+						/* Title */
+						layout.set_font_description (title_font);
+						layout.set_width (units_from_double (payroll_width));
+
+						cr.move_to (0, padding);
+						layout.set_alignment (Pango.Alignment.CENTER);
+						layout.set_markup (@"<u>$title</u>", -1);
+						cairo_show_layout (cr, layout);
+
+						/* Company Name */
+						layout.set_font_description (company_name_font);
+						layout.set_width (units_from_double (payroll_width/2));
+
+						cr.rel_move_to (index_column_width, (title_font_height + dpadding)*2);
+						layout.set_alignment (Pango.Alignment.LEFT);
+						layout.set_markup (_("<span foreground=\"blue\">M<span foreground=\"red\">O</span>BILECT POWER CORPORATION</span>"), -1);
+						cairo_show_layout (cr, layout);
+
+
+						x = index_column_width + padding;
+						layout.set_font_description (header_font);
+						layout.set_alignment (Pango.Alignment.CENTER);
+
+						/* Name */
+						cr.move_to (x, table_top + padding);
+						layout.set_width (units_from_double (name_column_width - dpadding));
+						layout.set_markup (_("NAME OF\nEMPLOYEE"), -1);
+						cairo_show_layout (cr, layout);
+						x += name_column_width;
+
+						/* Rate */
+						cr.move_to (x, table_top + padding);
+						layout.set_width (units_from_double (rate_column_width - dpadding));
+						layout.set_markup (_("RATE"), -1);
+						cairo_show_layout (cr, layout);
+						x += rate_column_width;
+
+						/* Hourly Rate */
+						cr.move_to (x, table_top + padding);
+						layout.set_width (units_from_double (hourly_rate_column_width - dpadding));
+						layout.set_markup (_("per\nHour"), -1);
+						cairo_show_layout (cr, layout);
+						x += hourly_rate_column_width;
+
+						foreach (var pay_period in pay_periods) {
+							/* Percentage */
+							cr.move_to (x, table_top + table_header_line_height + padding);
+							layout.set_width (units_from_double (hour_column_width + subtotal_column_width - dpadding));
+							layout.set_markup (pay_period.rate > 1.0? _("(+%.0lf%%)").printf ((pay_period.rate - 1.0) * 100) : _("(Reg.)"), -1);
+							cairo_show_layout (cr, layout);
+
+							/* Hour */
+							cr.move_to (x, table_top + padding);
+							layout.set_width (units_from_double (hour_column_width - dpadding));
+							layout.set_markup (_("Hrs."), -1);
+							cairo_show_layout (cr, layout);
+							x += hour_column_width;
+
+							/* Subtotal */
+							cr.move_to (x, table_top + padding);
+							layout.set_width (units_from_double (subtotal_column_width - dpadding));
+							layout.set_markup (pay_period.name, -1);
+							cairo_show_layout (cr, layout);
+							x += subtotal_column_width;
+						}
+
+						/* Total */
+//						cr.move_to (x, table_top + padding);
+//						layout.set_width (units_from_double (total_column_width - dpadding));
+//						layout.set_markup (_("TOTAL\nAMOUNT"), -1);
+//						cairo_show_layout (cr, layout);
+						x += total_column_width;
+
+						/* Signature */
+						cr.move_to (x, table_top + padding);
+						layout.set_width (units_from_double (signature_column_width - dpadding));
+						layout.set_markup (_("SIGNATURE"), -1);
+						cairo_show_layout (cr, layout);
+
+						table_y = header_height;
+						y = table_y;
+
+
+						double table_content_height = (page_line * table_content_line_height);
+
+						/* Draw table lines */
+						cr.rectangle (index_column_width + (table_border / 2),
+						              table_top,
+						              table_width - table_border,
+						              table_content_height + table_header_height);
+						cr.set_line_width (table_border);
+						cr.stroke ();
+
+						/* Vertical */
+						x = index_column_width + name_column_width +
+							rate_column_width + hourly_rate_column_width;
+						double x0 = 0;
+
+						foreach (var pay_period in pay_periods) {
+							/* Hour and Subtotal */
+							x0 = x;
+							x += hour_column_width + subtotal_column_width;
+
+							cr.move_to (x0, table_top + table_header_line_height);
+							cr.rel_line_to (x - x0, 0);
+
+							cr.move_to (x, table_top);
+							cr.rel_line_to (0, table_header_line_height * 2);
+						}
+
+						cr.set_line_width (cell_border);
+						cr.stroke ();
+
+						/* Horizontal */
+						cr.move_to (index_column_width, table_top + table_header_height);
+						cr.rel_line_to (table_width, 0);
+
+						cr.set_line_width (table_border);
+						cr.stroke ();
+
+						/* Vertical */
+
+						/* Name */
+						x = index_column_width + name_column_width;
+						cr.move_to (x, table_top);
+						cr.rel_line_to (0, table_content_height + table_header_height);
+
+						/* Rate */
+						x += rate_column_width;
+						cr.move_to (x, table_top);
+						cr.rel_line_to (0, table_content_height + table_header_height);
+
+						cr.set_line_width (cell_border);
+						cr.stroke ();
+
+						/* Hourly Rate */
+						x += hourly_rate_column_width;
+						cr.move_to (x, table_top);
+						cr.rel_line_to (0, table_content_height + table_header_height);
+
+						/* Periods */
+						x += period_column_width * pay_periods.length;
+						cr.move_to (x, table_top);
+						cr.rel_line_to (0, table_content_height + table_header_height);
+
+						/* Total */
+						x += total_column_width;
+						cr.move_to (x, table_top);
+						cr.rel_line_to (0, table_content_height + table_header_height);
+
+						cr.set_line_width (table_border);
+						cr.stroke ();
+					}
 					for (var id = 0; id < employee_data.size; id++) {
 						var employee = employee_data.get (id);
 						var table_header_line_height = table_header_height/2;

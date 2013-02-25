@@ -2,5 +2,6 @@
 ## Created by Anjuta
 
 EXTRA_DIST = \
+	cairo-extension.vapi \
 	libgda-5.0.vapi
 

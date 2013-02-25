@@ -43,7 +43,11 @@ namespace Mobilect {
 				base.startup ();
 
 				try {
-					database = new Database (this);
+					/* Create config directory with permission 0754 */
+					var db_dir = Path.build_filename (Environment.get_user_config_dir (), PACKAGE);
+					DirUtils.create_with_parents (db_dir, 0754);
+
+					database = new Database ("%s://DB_DIR=%s;DB_NAME=%s".printf (settings.main.get_string ("database-provider"), db_dir, PACKAGE));
 				} catch (Error e) {
 					var e_dialog = new MessageDialog (null, DialogFlags.MODAL,
 					                                  MessageType.ERROR, ButtonsType.OK,

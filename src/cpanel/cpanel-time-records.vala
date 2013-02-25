@@ -378,11 +378,38 @@ namespace Mobilect {
 							                          time_record.start,
 							                          time_record.end,
 							                          time_record.straight_time,
-							                          time_record.include_break);
+							                          time_record.include_break,
+							                          false);
 
 							dialog.destroy ();
 						} catch (Error e) {
-							(dialog.transient_for as Window).show_error_dialog (dialog, _("Failed to add time record"), e.message);
+							if (e is DatabaseError.TIME_RECORD_CONFLICT) {
+								var e_dialog = new MessageDialog (null, DialogFlags.MODAL,
+								                                  MessageType.ERROR, ButtonsType.NONE,
+								                                  _("Failed to add time record"));
+								e_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+								                      _("Merge"), ResponseType.ACCEPT);
+								e_dialog.secondary_text = _("Conflict with another time record found. Delete older one and merge its time with the new one?");
+
+								if (e_dialog.run () == ResponseType.ACCEPT) {
+									try {
+										database.add_time_record (time_record.employee_id,
+										                          time_record.start,
+										                          time_record.end,
+										                          time_record.straight_time,
+										                          time_record.include_break,
+										                          true);
+
+										dialog.destroy ();
+									} catch (Error e) {
+										(dialog.transient_for as Window).show_error_dialog (dialog, _("Failed to add time record"), e.message);
+									}
+								}
+
+								e_dialog.destroy ();
+							} else {
+								(dialog.transient_for as Window).show_error_dialog (dialog, _("Failed to add time record"), e.message);
+							}
 						}
 					} else if (r == ResponseType.REJECT) {
 						dialog.destroy ();

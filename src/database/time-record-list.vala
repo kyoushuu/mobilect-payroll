@@ -51,11 +51,13 @@ namespace Mobilect {
 			}
 
 			public new void add (TimeRecord time_record) {
-				time_record.list = this;
 				time_record.notify.connect ((o, p) => {
 					TreeIter iter;
 					create_iter (out iter, o as TimeRecord);
 					row_changed (get_path (iter), iter);
+				});
+				time_record.removed.connect (() => {
+					remove (time_record);
 				});
 				(this as ArrayList<TimeRecord>).add (time_record);
 
@@ -69,7 +71,6 @@ namespace Mobilect {
 				create_iter (out iter, time_record);
 				row_deleted (get_path (iter));
 
-				time_record.list = null;
 				(this as ArrayList<TimeRecord>).remove (time_record);
 			}
 

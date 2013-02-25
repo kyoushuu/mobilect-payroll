@@ -60,7 +60,10 @@ namespace Mobilect {
 			public bool include_break { default = true; get; set; }
 
 			internal weak Database database { get; private set; }
-			internal weak TimeRecordList list { get; set; }
+
+
+			public signal void removed ();
+
 
 			public TimeRecord (int id, Database database, Employee? employee) {
 				this.id = id;
@@ -162,9 +165,7 @@ namespace Mobilect {
 				Set stmt_params;
 				Value value_id = this.id;
 
-				if (list != null) {
-					list.remove (this);
-				}
+				removed ();
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("DELETE FROM time_records" +

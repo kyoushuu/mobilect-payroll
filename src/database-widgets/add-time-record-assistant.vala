@@ -201,7 +201,8 @@ namespace Mobilect {
 										                  date.start,
 										                  date.end,
 										                  time_record.straight_time,
-										                  time_record.include_break);
+										                  time_record.include_break,
+								                          true);
 							} catch (Error e) {
 								this.parent_window.show_error_dialog (this, _("Failed to add time record"), e.message);
 							}

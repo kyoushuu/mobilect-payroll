@@ -18,7 +18,7 @@
 
 
 using Gda;
-using Config;
+using Gee;
 
 
 namespace Mobilect {
@@ -42,14 +42,10 @@ namespace Mobilect {
 			public AdministratorList administrator_list { get; private set; }
 
 
-			public Database (Application app) throws Error {
-				/* Create config directory with permission 0754 */
-				var db_dir = Path.build_filename (Environment.get_user_config_dir (), PACKAGE);
-				DirUtils.create_with_parents (db_dir, 0754);
-
+			public Database (string cnc_string) throws Error {
 				/* Connect to database */
-				cnc = Connection.open_from_string (app.settings.main.get_string ("database-provider"),
-				                                   "DB_DIR=%s;DB_NAME=%s".printf (db_dir, PACKAGE),
+				cnc = Connection.open_from_string (null,
+				                                   cnc_string,
 				                                   null,
 				                                   ConnectionOptions.NONE);
 
@@ -118,7 +114,7 @@ namespace Mobilect {
 				             ")");
 
 				/* Create a default administrator if nothing exists */
-				Set stmt_params;
+				Gda.Set stmt_params;
 				var stmt = cnc.parse_sql_string ("SELECT id" +
 				                                 "  FROM administrators",
 				                                 null);
@@ -173,7 +169,7 @@ namespace Mobilect {
 			}
 
 			public void add_branch (string name) throws DatabaseError {
-				Set stmt_params, last_insert_row;
+				Gda.Set stmt_params, last_insert_row;
 
 				foreach (var branch in branch_list) {
 					if (branch.name == name) {
@@ -215,7 +211,7 @@ namespace Mobilect {
 			}
 
 			public void add_administrator (string username, string password) throws DatabaseError {
-				Set stmt_params, last_insert_row;
+				Gda.Set stmt_params, last_insert_row;
 
 				foreach (var administrator in administrator_list) {
 					if (administrator.username == username) {
@@ -258,7 +254,7 @@ namespace Mobilect {
 			}
 
 			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate, Branch branch, bool regular) throws DatabaseError {
-				Set stmt_params, last_insert_row;
+				Gda.Set stmt_params, last_insert_row;
 
 				Value value_rate = rate;
 				Value value_branch_id = branch.id;
@@ -318,7 +314,7 @@ namespace Mobilect {
 				}
 
 				try {
-					Set stmt_params;
+					Gda.Set stmt_params;
 					var stmt = cnc.parse_sql_string (stmt_str, out stmt_params);
 
 					Value value;
@@ -380,7 +376,7 @@ namespace Mobilect {
 				var list = new TimeRecordList (this);
 
 				try {
-					Set stmt_params;
+					Gda.Set stmt_params;
 					var stmt = cnc.parse_sql_string ("SELECT id FROM time_records" +
 					                                 "  WHERE employee_id=##employee_id::int",
 					                                 out stmt_params);
@@ -404,8 +400,8 @@ namespace Mobilect {
 				return list;
 			}
 
-			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time, bool include_break) throws DatabaseError {
-				Set stmt_params;
+			public void add_time_record (int employee_id, DateTime start, DateTime? end, bool straight_time, bool include_break, bool merge) throws DatabaseError {
+				Gda.Set stmt_params;
 				Value value_id = employee_id;
 				Value value_year = (int) start.get_year ();
 				Value value_month = (int) start.get_month ();
@@ -413,27 +409,54 @@ namespace Mobilect {
 				Value value_straight_time = (bool) straight_time;
 				Value value_include_break = (bool) include_break;
 
+				var ostart = start;
+				var oend = end;
+
 				if (end != null) {
 					Date startd = Date (), endd = Date ();
-					startd.set_dmy ((DateDay) start.get_day_of_month (),
-					                (DateMonth) start.get_month (),
-					                (DateYear) start.get_year ());
-					endd.set_dmy ((DateDay) end.get_day_of_month (),
-					              (DateMonth) end.get_month (),
-					              (DateYear) end.get_year ());
+					startd.set_dmy ((DateDay) ostart.get_day_of_month (),
+					                (DateMonth) ostart.get_month (),
+					                (DateYear) ostart.get_year ());
+					endd.set_dmy ((DateDay) oend.get_day_of_month (),
+					              (DateMonth) oend.get_month (),
+					              (DateYear) oend.get_year ());
 
+					LinkedList<TimeRecord> conflicts = new LinkedList<TimeRecord> ();
 					foreach (var time_record in get_time_records_within_date (startd, endd)) {
 						if (time_record.employee.id != employee_id) {
 							continue;
 						}
 
 						/* Check if the time records overlap */
-						if (time_record.end.compare (start) > 0 &&
-						    time_record.start.compare (end) < 0) {
-							throw new DatabaseError.TIME_RECORD_CONFLICT (_("Conflict with another time record:\nEmployee Name: %s\nStart: %s\nEnd: %s"),
-							                                              time_record.employee.get_name (),
-							                                              time_record.start.format (_("%a, %d %b, %Y %I:%M %p")),
-							                                              time_record.end.format (_("%a, %d %b, %Y %I:%M %p")));
+						if (time_record.end.compare (ostart) > 0 &&
+						    time_record.start.compare (oend) < 0) {
+							conflicts.add (time_record);
+						}
+					}
+
+					if (conflicts.size > 0) {
+						if (merge) {
+							foreach (var time_record in conflicts) {
+								if (time_record.start.compare (ostart) < 0) {
+									ostart = time_record.start;
+								}
+								if (time_record.end.compare (oend) > 0) {
+									oend = time_record.end;
+								}
+
+								time_record.remove ();
+							}
+						} else {
+							var msg = _("Conflict with another time record:");
+
+							foreach (var time_record in conflicts) {
+								msg += "\n\n" + _("Employee Name: %s\nStart: %s\nEnd: %s")
+									.printf (time_record.employee.get_name (),
+									         time_record.start.format (_("%a, %d %b, %Y %I:%M %p")),
+									         time_record.end.format (_("%a, %d %b, %Y %I:%M %p")));
+							}
+
+							throw new DatabaseError.TIME_RECORD_CONFLICT (msg);
 						}
 					}
 				}
@@ -446,8 +469,8 @@ namespace Mobilect {
 					stmt_params.get_holder ("year").set_value (value_year);
 					stmt_params.get_holder ("month").set_value (value_month);
 					stmt_params.get_holder ("day").set_value (value_day);
-					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.format ("%F %T"));
-					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
+					stmt_params.get_holder ("start").set_value_str (this.dh_string, ostart.format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (this.dh_string, oend != null? oend.format ("%F %T") : null);
 					stmt_params.get_holder ("straight_time").set_value (value_straight_time);
 					stmt_params.get_holder ("include_break").set_value (value_include_break);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);

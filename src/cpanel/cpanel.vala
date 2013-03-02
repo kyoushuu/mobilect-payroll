@@ -98,6 +98,18 @@ namespace Mobilect {
 				tab.show ();
 			}
 
+			public CPanelTab? get_page_with_type (Type type) {
+				for (var i = 0; i < get_n_pages (); i++) {
+					var page = get_nth_page (i);
+
+					if (page.get_type ().is_a (type)) {
+						return page as CPanelTab;
+					}
+				}
+
+				return null;
+			}
+
 			public override void switch_page (Widget page, uint page_num) {
 				base.switch_page (page, page_num);
 

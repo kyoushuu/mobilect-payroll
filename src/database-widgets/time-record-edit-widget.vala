@@ -37,6 +37,8 @@ namespace Mobilect {
 			public CheckButton straight_time_check { public get; private set; }
 			public CheckButton include_break_check { public get; private set; }
 
+			public Entry total_time_entry { public get; private set; }
+
 			private TimeRecord _time_record;
 			public TimeRecord time_record {
 				public get {
@@ -47,6 +49,9 @@ namespace Mobilect {
 
 					if (value != null) {
 						var dt = new DateTime.now_local ();
+						dt = dt.add_full (0, 0, 0, 0,
+						                  -dt.get_minute (),
+						                  -dt.get_second ());
 						start_spin.set_date_time (value.start?? dt);
 						end_spin.set_date_time (value.end?? start_spin.get_date_time ());
 
@@ -166,6 +171,22 @@ namespace Mobilect {
 				include_break_check.show ();
 
 
+				var total_time_label = new Label.with_mnemonic (_("Total time:"));
+				total_time_label.xalign = 0.0f;
+				grid.add (total_time_label);
+				total_time_label.show ();
+
+				total_time_entry = new Entry ();
+				total_time_entry.editable = false;
+				start_spin.value_changed.connect (() => { update_total_time (); });
+				end_spin.value_changed.connect (() => { update_total_time (); });
+				grid.attach_next_to (total_time_entry,
+				                     total_time_label,
+				                     PositionType.RIGHT,
+				                     1, 1);
+				total_time_entry.show ();
+
+
 				pop_composite_child ();
 
 
@@ -186,6 +207,29 @@ namespace Mobilect {
 					this._time_record.end = (this.open_end_check.active)? null : this.end_spin.get_date_time ();
 					this._time_record.straight_time = straight_time_check.active;
 					this._time_record.include_break = include_break_check.active;
+				}
+			}
+
+			public void update_total_time () {
+				var diff = end_spin.get_date_time ().difference (start_spin.get_date_time ());
+
+				if (diff > 0) {
+					var diff_array = new string[0];
+
+					if (diff > TimeSpan.HOUR) {
+						diff_array += _("%d hours").printf (diff / TimeSpan.HOUR);
+						diff %= TimeSpan.HOUR;
+					}
+
+					if (diff > TimeSpan.MINUTE) {
+						diff_array += _("%d minutes").printf (diff / TimeSpan.MINUTE);
+						diff %= TimeSpan.MINUTE;
+					}
+
+					diff_array += null;
+					total_time_entry.text = string.joinv (" ", diff_array);
+				} else {
+					total_time_entry.text = _("empty");
 				}
 			}
 

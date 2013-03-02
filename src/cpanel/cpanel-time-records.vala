@@ -41,6 +41,8 @@ namespace Mobilect {
 			public TreeModelSort sort { get; private set; }
 			public TimeRecordList list;
 
+			private int last_used_employee_id;
+
 
 			public CPanelTimeRecords (CPanel cpanel) {
 				base (cpanel, ACTION, "/com/mobilectpower/Payroll/mobilect-payroll-cpanel-time-records-ui.xml");
@@ -335,6 +337,8 @@ namespace Mobilect {
 				var database = this.cpanel.window.app.database;
 				var time_record = new TimeRecord (0, database, null);
 
+				time_record.employee_id = last_used_employee_id;
+
 				var dialog = new TimeRecordEditDialog (_("Add Time Record"),
 				                                       this.cpanel.window,
 				                                       time_record);
@@ -380,6 +384,7 @@ namespace Mobilect {
 							                          time_record.straight_time,
 							                          time_record.include_break,
 							                          false);
+							last_used_employee_id = time_record.employee_id;
 
 							dialog.destroy ();
 						} catch (Error e) {

@@ -41,7 +41,7 @@ namespace Mobilect {
 
 				adjustment = new Adjustment ((dt.get_hour () * 60) + dt.get_minute (),
 				                             0, (24 * 60) - 1,
-				                             1, 15,
+				                             15, 60,
 				                             0);
 				digits = 5;
 				wrap = true;

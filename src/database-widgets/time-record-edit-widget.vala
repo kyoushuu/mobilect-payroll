@@ -37,7 +37,7 @@ namespace Mobilect {
 			public CheckButton straight_time_check { public get; private set; }
 			public CheckButton include_break_check { public get; private set; }
 
-			public Entry total_time_entry { public get; private set; }
+			public Label total_time_value_label { public get; private set; }
 
 			private TimeRecord _time_record;
 			public TimeRecord time_record {
@@ -63,13 +63,33 @@ namespace Mobilect {
 						include_break_check.active = value.include_break;
 
 						var employees = time_record.database.employee_list;
-						employee_combobox.model = employees;
+
+						var sort = new TreeModelSort.with_model (employees);
+						sort.set_default_sort_func ((model, a, b) => {
+							var employee1 = a.user_data as Employee;
+							var employee2 = b.user_data as Employee;
+
+							if (employee1.regular != employee2.regular) {
+								if (employee1.regular) {
+									return -1;
+								} else {
+									return 1;
+								}
+							}
+
+							return strcmp (employee1.get_name (),
+							               employee2.get_name ());
+						});
+
+						employee_combobox.model = sort;
 
 						if (_time_record.employee != null) {
-							TreeIter iter;
+							TreeIter iter, sort_iter;
 
 							if (employees.get_iter_with_id (out iter, _time_record.employee.id)) {
-								employee_combobox.set_active_iter (iter);
+								if (sort.convert_child_iter_to_iter (out sort_iter, iter)) {
+									employee_combobox.set_active_iter (sort_iter);
+								}
 							}
 						}
 					}
@@ -176,15 +196,15 @@ namespace Mobilect {
 				grid.add (total_time_label);
 				total_time_label.show ();
 
-				total_time_entry = new Entry ();
-				total_time_entry.editable = false;
+				total_time_value_label = new Label (_("empty"));
+				total_time_value_label.xalign = 0.0f;
 				start_spin.value_changed.connect (() => { update_total_time (); });
 				end_spin.value_changed.connect (() => { update_total_time (); });
-				grid.attach_next_to (total_time_entry,
+				grid.attach_next_to (total_time_value_label,
 				                     total_time_label,
 				                     PositionType.RIGHT,
 				                     1, 1);
-				total_time_entry.show ();
+				total_time_value_label.show ();
 
 
 				pop_composite_child ();
@@ -216,20 +236,24 @@ namespace Mobilect {
 				if (diff > 0) {
 					var diff_array = new string[0];
 
-					if (diff > TimeSpan.HOUR) {
-						diff_array += _("%d hours").printf (diff / TimeSpan.HOUR);
+					if (diff >= TimeSpan.HOUR) {
+						var hours = diff / TimeSpan.HOUR;
+						diff_array += ngettext("%d hour", "%d hours", (int) hours)
+							.printf (hours);
 						diff %= TimeSpan.HOUR;
 					}
 
-					if (diff > TimeSpan.MINUTE) {
-						diff_array += _("%d minutes").printf (diff / TimeSpan.MINUTE);
+					if (diff >= TimeSpan.MINUTE) {
+						var minutes = diff / TimeSpan.MINUTE;
+						diff_array += ngettext("%d minute", "%d minutes", (int) minutes)
+							.printf (minutes);
 						diff %= TimeSpan.MINUTE;
 					}
 
 					diff_array += null;
-					total_time_entry.text = string.joinv (" ", diff_array);
+					total_time_value_label.label = string.joinv (" ", diff_array);
 				} else {
-					total_time_entry.text = _("empty");
+					total_time_value_label.label = _("empty");
 				}
 			}
 

@@ -95,7 +95,7 @@ namespace Mobilect {
 			public override bool output () {
 				char s[64];
 
-				date.strftime (s, _("%a, %d %B, %Y"));
+				date.strftime (s, _("%a, %d %b, %Y"));
 				text = (string) s;
 
 				return true;

@@ -68,9 +68,7 @@ dnl ***************************************************************************
 dnl Internationalization
 dnl ***************************************************************************
 
-IT_PROG_INTLTOOL([0.40.1])
-
-AM_GNU_GETTEXT_VERSION([0.17])
+AM_GNU_GETTEXT_VERSION([0.19])
 AM_GNU_GETTEXT([external])
 
 GETTEXT_PACKAGE="$PACKAGE"
@@ -128,7 +126,6 @@ src/mobilect-payroll.rc
 vapi/Makefile
 data/Makefile
 data/mobilect-payroll.desktop.in
-data/com.mobilectpower.payroll.gschema.xml.in
 data/icons/Makefile
 help/Makefile
 po/Makefile.in

@@ -124,7 +124,7 @@ namespace Mobilect {
 				});
 				tree_view.append_column (column);
 
-				var holiday_type_model = new ListStore (1, typeof (string));
+				var holiday_type_model = new Gtk.ListStore (1, typeof (string));
 				holiday_type_model.insert_with_values (null, -1, 0, _("Non-Holiday"));
 				holiday_type_model.insert_with_values (null, -1, 0, _("Special Holiday"));
 				holiday_type_model.insert_with_values (null, -1, 0, _("Regular Holiday"));

@@ -47,7 +47,7 @@ namespace Mobilect {
 			public ReportAssistantConfirmPage (ReportAssistant assistant) {
 				base (assistant);
 
-				var actions = new ListStore (Columns.NUM, typeof (string), typeof (string), typeof (string));
+				var actions = new Gtk.ListStore (Columns.NUM, typeof (string), typeof (string), typeof (string));
 
 				actions.insert_with_values (null, Actions.SAVE,
 				                            Columns.TITLE, _("Save"),

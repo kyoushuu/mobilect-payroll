@@ -7,15 +7,12 @@ desktop_in_files = \
 	mobilect-payroll.desktop.in
 desktopdir 	 = $(datadir)/applications
 desktop_DATA 	 = $(desktop_in_files:.desktop.in=.desktop)
+$(desktop_DATA): $(desktop_in_files)
+	$(AM_V_GEN) $(MSGFMT) --desktop --template $< -d $(top_srcdir)/po -o $@
 
-@INTLTOOL_DESKTOP_RULE@
 
-
-gschema_xml_in_files = \
+gsettings_SCHEMAS = \
 	com.mobilectpower.payroll.gschema.xml
-gsettings_SCHEMAS = $(gschema_xml_in_files:.gschema.xml.in=.gschema.xml)
-
-@INTLTOOL_XML_NOMERGE_RULE@
 
 @GSETTINGS_RULES@
 

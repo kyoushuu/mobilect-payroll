@@ -1,0 +1,101 @@
+<schemalist>
+
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll" path="/com/mobilectpower/payroll/">
+
+    <child name="report" schema="com.mobilectpower.payroll.report"/>
+
+    <key type="s" name="database-provider">
+      <default>'SQLite'</default>
+      <summary>Database Provider</summary>
+      <description>GNOME Data Access provider to use for the database. Usually SQLite or SQLCipher.</description>
+    </key>
+
+  </schema>
+
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.view" path="/com/mobilectpower/payroll/view/">
+
+    <key type="b" name="toolbar-visible">
+      <default>true</default>
+      <summary>Toolbar is Visible</summary>
+      <description>Whether the toolbar should be visible.</description>
+    </key>
+
+    <key type="b" name="statusbar-visible">
+      <default>true</default>
+      <summary>Statusbar is Visible</summary>
+      <description>Whether the statusbar should be visible.</description>
+    </key>
+
+    <key type="b" name="employee-log-in">
+      <default>false</default>
+      <summary>Employee Log In</summary>
+      <description>Whether employees are allowed to log in to record time in and out.</description>
+    </key>
+
+  </schema>
+
+  <schema gettext-domain="@GETTEXT_PACKAGE@" id="com.mobilectpower.payroll.report" path="/com/mobilectpower/payroll/report/">
+
+    <key type="d" name="padding">
+      <default>1.0</default>
+      <summary>Report Padding</summary>
+      <description>The padding used for tables and lines in reports, in pixels.</description>
+    </key>
+
+    <key type="s" name="title-font">
+      <default l10n="messages">'Sans Bold 14'</default>
+      <summary>Title Font</summary>
+      <description>A custom font that will be used for the title of the report.</description>
+    </key>
+
+    <key type="s" name="company-name-font">
+      <default l10n="messages">'Sans Bold 12'</default>
+      <summary>Company Name Font</summary>
+      <description>A custom font that will be used for the company name in the report.</description>
+    </key>
+
+    <key type="s" name="header-font">
+      <default l10n="messages">'Sans Bold 9'</default>
+      <summary>Header Font</summary>
+      <description>A custom font that will be used for the headers of tables in the report.</description>
+    </key>
+
+    <key type="s" name="text-font">
+      <default l10n="messages">'Sans 9'</default>
+      <summary>Text Font</summary>
+      <description>A custom font that will be used for texts in the report.</description>
+    </key>
+
+    <key type="s" name="number-font">
+      <default l10n="messages">'Monospace 9'</default>
+      <summary>Number Font</summary>
+      <description>A custom font that will be used for numbers in the report.</description>
+    </key>
+
+    <key type="s" name="emphasized-number-font">
+      <default l10n="messages">'Monospace Bold 9'</default>
+      <summary>Emphasized Number Font</summary>
+      <description>A custom font that will be used for emphasized numbers in the report. These are usually used in columns for total.</description>
+    </key>
+
+    <key type="s" name="preparer">
+      <default l10n="messages">'Maybelen R. Bajo'</default>
+      <summary>Preparer Name</summary>
+      <description>The name of the preparer.</description>
+    </key>
+
+    <key type="s" name="approver">
+      <default l10n="messages">'Joe Arlin Divinagracia'</default>
+      <summary>Approver Name</summary>
+      <description>The name of the approver.</description>
+    </key>
+
+    <key type="s" name="approver-position">
+      <default l10n="messages">'President'</default>
+      <summary>Approver Position</summary>
+      <description>The company position of the approver.</description>
+    </key>
+
+  </schema>
+
+</schemalist>

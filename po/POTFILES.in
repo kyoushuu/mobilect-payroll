@@ -4,9 +4,6 @@
 # Desktop file
 data/mobilect-payroll.desktop.in.in
 
-# Schema file
-data/com.mobilectpower.payroll.gschema.xml.in.in
-
 # Should use C source file, because of multi-line license string
 src/main/window.c
 
@@ -48,14 +45,9 @@ src/login/employee-login-page.vala
 src/login/login-page.vala
 src/main/application.vala
 src/main/mobilect-payroll.vala
-src/main/preferences-dialog.vala
 # src/main/window.vala
 src/report/overtime-report.vala
 src/report/regular-report.vala
 src/report/report.vala
 src/settings/settings.vala
-src/widgets/find-dialog.vala
-src/widgets/find-widget.vala
-src/widgets/password-dialog.vala
-src/widgets/password-widget.vala
 src/widgets/sort-tree-view-dialog.vala

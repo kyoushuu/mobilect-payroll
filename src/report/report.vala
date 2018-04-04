@@ -767,7 +767,7 @@ namespace Mobilect {
 
 			public override bool preview (PrintOperationPreview preview,
 			                              PrintContext context,
-			                              Gtk.Window parent) {
+			                              Gtk.Window? parent) {
 
 				var window = new PrintPreviewWindow (this, context, parent);
 

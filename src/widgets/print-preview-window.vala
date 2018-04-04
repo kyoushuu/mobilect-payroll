@@ -297,7 +297,7 @@ namespace Mobilect {
 				screen_dpi = (screen.get_width () * 25.4) / screen.get_width_mm ();
 			}
 
-			private void screen_changed_handler (Widget widget, Screen previous_screen) {
+			private void screen_changed_handler (Widget widget, Screen? previous_screen) {
 				/* Remove update from previous screen */
 				if (previous_screen != null) {
 					previous_screen.disconnect (handler);

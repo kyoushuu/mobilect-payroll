@@ -220,7 +220,7 @@ namespace Mobilect {
 						page_setup.set_orientation (settings.get_orientation ());
 					}
 
-					unowned PaperSize paper_size = settings.get_paper_size ();
+					PaperSize paper_size = settings.get_paper_size ();
 					if (paper_size != null) {
 						page_setup.set_paper_size (paper_size);
 					}

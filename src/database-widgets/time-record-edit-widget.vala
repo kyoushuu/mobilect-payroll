@@ -239,14 +239,14 @@ namespace Mobilect {
 					if (diff >= TimeSpan.HOUR) {
 						var hours = diff / TimeSpan.HOUR;
 						diff_array += ngettext("%d hour", "%d hours", (int) hours)
-							.printf (hours);
+							.printf ((int) hours);
 						diff %= TimeSpan.HOUR;
 					}
 
 					if (diff >= TimeSpan.MINUTE) {
 						var minutes = diff / TimeSpan.MINUTE;
 						diff_array += ngettext("%d minute", "%d minutes", (int) minutes)
-							.printf (minutes);
+							.printf ((int) minutes);
 						diff %= TimeSpan.MINUTE;
 					}
 

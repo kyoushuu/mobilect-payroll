@@ -110,7 +110,6 @@ mobilect_payroll_VALAFLAGS = \
 	--pkg libxml-2.0 \
 	--pkg libgda-5.0 \
 	--pkg $(GEE_MODULE) \
-	--pkg cairo-extension \
 	--debug
 
 mobilect_payroll_LDFLAGS =

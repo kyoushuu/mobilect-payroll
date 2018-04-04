@@ -112,7 +112,8 @@ mobilect_payroll_VALAFLAGS = \
 	--pkg $(GEE_MODULE) \
 	--debug
 
-mobilect_payroll_LDFLAGS =
+mobilect_payroll_LDFLAGS = \
+	-lm
 
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \

@@ -21,7 +21,7 @@ AC_SUBST(MOBILECT_PAYROLL_MICRO_VERSION)
 AC_SUBST(MOBILECT_PAYROLL_VERSION)
 
 
-AM_INIT_AUTOMAKE([-Wall -Werror gnu no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([-Wall -Werror gnu no-dist-gzip dist-xz subdir-objects])
 
 AM_SILENT_RULES([yes])
 

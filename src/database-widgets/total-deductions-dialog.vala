@@ -36,7 +36,7 @@ namespace Mobilect {
 
 				var content_area = this.get_content_area ();
 
-				var list = new ListStore (2, typeof (string), typeof (string));
+				var list = new Gtk.ListStore (2, typeof (string), typeof (string));
 				list.insert_with_values (null, -1,
 				                         0, period % 2 == 0? _("Tax") : _("SSS Premiums"),
 				                         1, _("%.2lf").printf (deduction.get_total_deductions_with_category (Deductions.Category.TAX)));

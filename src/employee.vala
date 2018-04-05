@@ -210,6 +210,8 @@ namespace Mobilect {
 
 							/* Get hours in between, per 30 mins each */
 							hours_span += (int) (span_end.difference (span_start)/(TimeSpan.HOUR / 2)) / 2.0;
+
+							stdout.printf ("Hours: %lf\n", (int) (span_end.difference (span_start)/(TimeSpan.HOUR / 2)) / 2.0);
 						}
 					}
 				}

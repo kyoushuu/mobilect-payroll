@@ -260,7 +260,7 @@ namespace Mobilect {
 				list.database = this;
 
 				try {
-					var stmt = cnc.parse_sql_string ("SELECT id" +
+					var stmt = cnc.parse_sql_string ("SELECT id, employee_id, start, end" +
 						                             "  FROM time_records",
 						                             null);
 					var data_model = cnc.statement_execute_select (stmt, null);

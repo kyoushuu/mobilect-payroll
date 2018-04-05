@@ -135,7 +135,7 @@ namespace Mobilect {
 					                                      "  WHERE id=##id::int",
 					                                      out stmt_params);
 					stmt_params.get_holder ("id").set_value (record_id);
-					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_local ().format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_utc ().format ("%F %T"));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
 					throw new ApplicationError.EMPLOYEE_NOT_FOUND (_("Not logged in.").printf (id));

@@ -168,6 +168,17 @@ namespace Mobilect {
 				if (this.list.get_iter_first (out iter)) {
 					this.name_combobox.set_active_iter (iter);
 				}
+
+				var start_date = Date ();
+				var end_date = Date ();
+
+				start_date.set_dmy (16, DateMonth.APRIL, 2012);
+				end_date.set_dmy (20, DateMonth.APRIL, 2012);
+
+				foreach (var employee in this.list) {
+					stdout.printf ("Employee: %s, Hours: %lf\n", employee.get_name (), employee.get_hours (8, 8, start_date, end_date));
+				}
+				stdout.printf ("\n");
 			}
 
 		}

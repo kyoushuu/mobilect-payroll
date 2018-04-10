@@ -161,11 +161,10 @@ namespace Mobilect {
 
 			private DateTime date_time_marginalize (DateTime dt) {
 				int min = dt.get_minute ();
-				double period = Math.round (min / 30.0);
 
 				return dt
 					.add_seconds (-dt.get_seconds ())
-					.add_minutes (((int) period * 30) - min);
+					.add_minutes (((int) Math.round (min / 30.0) * 30) - min);
 			}
 
 			public double get_hours (Filter filter) {

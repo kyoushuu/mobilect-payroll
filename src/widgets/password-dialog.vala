@@ -28,19 +28,33 @@ namespace Mobilect {
 
 			public PasswordWidget widget { get; private set; }
 
+
 			public PasswordDialog (string title, Window parent) {
 				Object (title: title,
 				        transient_for: parent);
 
-				this.add_buttons (Stock.OK, ResponseType.ACCEPT,
-				                  Stock.CANCEL, ResponseType.REJECT);
+				this.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+				                  Stock.SAVE, ResponseType.ACCEPT);
 				this.set_default_response (ResponseType.ACCEPT);
 
-				widget = new PasswordWidget ();
-				this.get_content_area ().add (widget);
 
-				this.show_all ();
-				this.hide ();
+				var content_area = this.get_content_area ();
+				var action_area = this.get_action_area ();
+
+				this.border_width = 5;
+				content_area.spacing = 2; /* 2 * 5 + 2 = 12 */
+				(action_area as Container).border_width = 5;
+
+
+				push_composite_child ();
+
+				widget = new PasswordWidget ();
+				widget.border_width = 5;
+				content_area.add (widget);
+
+				widget.show ();
+
+				pop_composite_child ();
 			}
 
 		}

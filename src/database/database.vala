@@ -30,7 +30,10 @@ namespace Mobilect {
 			public Connection cnc { get; private set; }
 			public DataHandler dh_string { get; private set; }
 
-			public Database () throws ApplicationError {
+			public EmployeeList employee_list { get; private set; }
+			public AdministratorList administrator_list { get; private set; }
+
+			public Database () {
 				try {
 					/* Create config directory with permission 0754 */
 					var db_dir = "%s/%s".printf (Environment.get_user_config_dir (), PACKAGE);
@@ -38,7 +41,7 @@ namespace Mobilect {
 
 					/* Connect to database */
 					cnc = Connection.open_from_string ("SQLite",
-					                                   "DB_DIR=%s;DB_NAME=%s".printf(db_dir, PACKAGE),
+					                                   "DB_DIR=%s;DB_NAME=%s".printf (db_dir, PACKAGE),
 					                                   null,
 					                                   ConnectionOptions.NONE);
 
@@ -101,22 +104,29 @@ namespace Mobilect {
 						cnc.statement_execute_non_select (stmt, stmt_params, null);
 					}
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to initialize database contents: %s", e.message);
 				}
+
+				employee_list = new EmployeeList ();
+				employee_list.database = this;
+				update_employees ();
+
+				administrator_list = new AdministratorList ();
+				administrator_list.database = this;
+				update_administrators ();
 			}
 
-			private void execute_sql (string sql) throws Error {
+			private void execute_sql (string sql) {
 				try {
 					var stmt = cnc.parse_sql_string (sql, null);
 					cnc.statement_execute_non_select (stmt, null, null);
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to execute SQL: %s", e.message);
 				}
 			}
 
-			public AdministratorList get_administrators () {
-				var list = new AdministratorList ();
-				list.database = this;
+			public void update_administrators () {
+				administrator_list.remove_all ();
 
 				try {
 					var stmt = cnc.parse_sql_string ("SELECT id" +
@@ -125,64 +135,15 @@ namespace Mobilect {
 					var data_model = cnc.statement_execute_select (stmt, null);
 
 					for (int i = 0; i < data_model.get_n_rows (); i++) {
-						list.add (get_administrator (data_model.get_value_at (0, i).get_int ()));
+						administrator_list.add (new Administrator (data_model.get_value_at (0, i).get_int (), this));
 					}
 				} catch (Error e) {
-					list = new AdministratorList ();
-					list.database = this;
-				}
-
-				return list;
-			}
-
-			public Administrator? get_administrator (int id) {
-				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (id);
-
-				try {
-					var stmt = cnc.parse_sql_string ("SELECT id" +
-					                                 "  FROM administrators" +
-					                                 "  WHERE id=##id::int",
-					                                 out stmt_params);
-					stmt_params.get_holder ("id").set_value (value_id);
-					var data_model = cnc.statement_execute_select (stmt, stmt_params);
-
-					if (data_model.get_n_rows () > 0) {
-						return new Administrator (id, this);
-					} else {
-						return null;
-					}
-				} catch (Error e) {
-					return null;
+					critical ("Failed to update administrator list: %s", e.message);
 				}
 			}
 
-			public Administrator? get_administrator_with_username (string username) {
-				Set stmt_params;
-
-				try {
-					var stmt = cnc.parse_sql_string ("SELECT id" +
-					                                 "  FROM administrators" +
-					                                 "  WHERE username=##username::string",
-					                                 out stmt_params);
-					stmt_params.get_holder ("username").set_value_str (null, username);
-					var data_model = cnc.statement_execute_select (stmt, stmt_params);
-
-					if (data_model.get_n_rows () > 0) {
-						return new Administrator (data_model.get_value_at (0, 0).get_int (), this);
-					} else {
-						return null;
-					}
-				} catch (Error e) {
-					return null;
-				}
-			}
-
-			public void add_administrator (string username, string password) throws ApplicationError {
-				Set stmt_params;
-
+			public void add_administrator (string username, string password) {
+				Set stmt_params, last_insert_row;
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO administrators (username, password)" +
@@ -190,15 +151,19 @@ namespace Mobilect {
 					                                 out stmt_params);
 					stmt_params.get_holder ("username").set_value_str (null, username);
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
-					cnc.statement_execute_non_select (stmt, stmt_params, null);
+					cnc.statement_execute_non_select (stmt, stmt_params, out last_insert_row);
+					if (last_insert_row != null) {
+						administrator_list.add (new Administrator (last_insert_row.get_holder_value ("+0").get_int (), this));
+					} else {
+						update_administrators ();
+					}
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to add administrator to database: %s", e.message);
 				}
 			}
 
-			public EmployeeList get_employees () {
-				var list = new EmployeeList ();
-				list.database = this;
+			public void update_employees () {
+				employee_list.remove_all ();
 
 				try {
 					var stmt = cnc.parse_sql_string ("SELECT id" +
@@ -207,45 +172,18 @@ namespace Mobilect {
 					var data_model = cnc.statement_execute_select (stmt, null);
 
 					for (int i = 0; i < data_model.get_n_rows (); i++) {
-						list.add (get_employee (data_model.get_value_at (0, i).get_int ()));
+						employee_list.add (new Employee (data_model.get_value_at (0, i).get_int (), this));
 					}
 				} catch (Error e) {
-					list = new EmployeeList ();
-					list.database = this;
-				}
-
-				return list;
-			}
-
-			public Employee? get_employee (int id) {
-				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (id);
-
-				try {
-					var stmt = cnc.parse_sql_string ("SELECT id" +
-					                                 "  FROM employees" +
-					                                 "  WHERE id=##id::int",
-					                                 out stmt_params);
-					stmt_params.get_holder ("id").set_value (value_id);
-					var data_model = cnc.statement_execute_select (stmt, stmt_params);
-
-					if (data_model.get_n_rows () > 0) {
-						return new Employee (id, this);
-					} else {
-						return null;
-					}
-				} catch (Error e) {
-					return null;
+					critical ("Failed to update employee list: %s", e.message);
 				}
 			}
 
-			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate) throws ApplicationError {
-				Set stmt_params;
+			public void add_employee (string lastname, string firstname, string middlename, string tin, string password, int rate) {
+				Set stmt_params, last_insert_row;
+
 				var value_rate = Value (typeof (int));
 				value_rate.set_int (rate);
-
 
 				try {
 					var stmt = cnc.parse_sql_string ("INSERT INTO employees (lastname, firstname, middlename, tin, password, rate)" +
@@ -257,34 +195,15 @@ namespace Mobilect {
 					stmt_params.get_holder ("tin").set_value_str (null, tin);
 					stmt_params.get_holder ("password").set_value_str (null, Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
 					stmt_params.get_holder ("rate").set_value (value_rate);
-					cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
-				}
-			}
-
-			public TimeRecordList get_time_records () {
-				var list = new TimeRecordList ();
-				list.database = this;
-
-				try {
-					var stmt = cnc.parse_sql_string ("SELECT id, employee_id, start, end" +
-						                             "  FROM time_records",
-						                             null);
-					var data_model = cnc.statement_execute_select (stmt, null);
-
-					for (int i = 0; i < data_model.get_n_rows (); i++) {
-						Value cell_data = data_model.get_value_at (0, i);
-						var time_record = new TimeRecord (cell_data.get_int (), this, null);
-
-						list.add (time_record);
+					cnc.statement_execute_non_select (stmt, stmt_params, out last_insert_row);
+					if (last_insert_row != null) {
+						employee_list.add (new Employee (last_insert_row.get_holder_value ("+0").get_int (), this));
+					} else {
+						update_employees ();
 					}
 				} catch (Error e) {
-					list = new TimeRecordList ();
-					list.database = this;
+					critical ("Failed to add employee to database: %s", e.message);
 				}
-
-				return list;
 			}
 
 			public TimeRecordList get_time_records_within_date (Date start, Date end) {
@@ -317,29 +236,41 @@ namespace Mobilect {
 					var value = Value (typeof (int));
 					Holder holder;
 
-					value.set_int (start.get_year ());
 					holder = stmt_params.get_holder ("start_year");
-					if (holder != null) holder.set_value (value);
+					if (holder != null) {
+						value = (int) start.get_year ();
+						holder.set_value (value);
+					}
 
-					value.set_int (start.get_month ());
 					holder = stmt_params.get_holder ("start_month");
-					if (holder != null) holder.set_value (value);
+					if (holder != null) {
+						value = (int) start.get_month ();
+						holder.set_value (value);
+					}
 
-					value.set_int (start.get_day ());
 					holder = stmt_params.get_holder ("start_day");
-					if (holder != null) holder.set_value (value);
+					if (holder != null) {
+						value = (int) start.get_day ();
+						holder.set_value (value);
+					}
 
-					value.set_int (end.get_year ());
 					holder = stmt_params.get_holder ("end_year");
-					if (holder != null) holder.set_value (value);
+					if (holder != null) {
+						value = (int) end.get_year ();
+						holder.set_value (value);
+					}
 
-					value.set_int (end.get_month ());
 					holder = stmt_params.get_holder ("end_month");
-					if (holder != null) holder.set_value (value);
+					if (holder != null) {
+						value = (int) end.get_month ();
+						holder.set_value (value);
+					}
 
-					value.set_int (end.get_day ());
 					holder = stmt_params.get_holder ("end_day");
-					if (holder != null) holder.set_value (value);
+					if (holder != null) {
+						value = (int) end.get_day ();
+						holder.set_value (value);
+					}
 
 					var data_model = cnc.statement_execute_select (stmt, stmt_params);
 
@@ -352,12 +283,13 @@ namespace Mobilect {
 				} catch (Error e) {
 					list = new TimeRecordList ();
 					list.database = this;
+					critical ("Failed to get time records fro database: %s", e.message);
 				}
 
 				return list;
 			}
 
-			public void add_time_record (int employee_id, DateTime start, DateTime? end) throws ApplicationError {
+			public void add_time_record (int employee_id, DateTime start, DateTime? end) {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 				var value_year = Value (typeof (int));
@@ -377,13 +309,11 @@ namespace Mobilect {
 					stmt_params.get_holder ("year").set_value (value_year);
 					stmt_params.get_holder ("month").set_value (value_month);
 					stmt_params.get_holder ("day").set_value (value_day);
-					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.to_utc ().format ("%F %T"));
-					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.to_utc ().format ("%F %T") : null);
+					stmt_params.get_holder ("start").set_value_str (this.dh_string, start.format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (this.dh_string, end != null? end.format ("%F %T") : null);
 					cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (ApplicationError e) {
-					throw e;
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to add time record to database: %s", e.message);
 				}
 			}
 

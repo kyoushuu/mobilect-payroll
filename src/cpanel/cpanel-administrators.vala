@@ -38,21 +38,20 @@ namespace Mobilect {
 			public CPanelAdministrators (CPanel cpanel) {
 				base (cpanel, ACTION);
 
-				this.changed_to.connect (() => {
-					reload ();
-				});
+				this.list = this.cpanel.window.app.database.administrator_list;
 
 				tree_view = new TreeView ();
+				tree_view.model = this.list;
 				tree_view.get_selection ().mode = SelectionMode.MULTIPLE;
 				tree_view.rubber_banding = true;
 				tree_view.row_activated.connect ((t, p, c) => {
-					edit ();
+					edit_action ();
 				});
 				this.add (tree_view);
 
 				var column = new TreeViewColumn.with_attributes (_("Username"),
 				                                                 new CellRendererText (),
-				                                                 "text", AdministratorList.Columns.NAME,
+				                                                 "text", AdministratorList.Columns.USERNAME,
 				                                                 null);
 				tree_view.append_column (column);
 
@@ -99,46 +98,7 @@ namespace Mobilect {
 						accelerator = _("<Control>plus"),
 						tooltip = _("Add an administrator to database"),
 						callback = (a) => {
-							var administrator = new Administrator (0, list.database);
-
-							var dialog = new AdministratorEditDialog (_("Add Administrator"),
-							                                          this.cpanel.window,
-							                                          administrator);
-
-							var password_label = new Label (_("_Password:"));
-							password_label.use_underline = true;
-							password_label.xalign = 0.0f;
-							dialog.widget.grid.add (password_label);
-
-							var password_entry = new Entry ();
-							password_entry.hexpand = true;
-							password_entry.activates_default = true;
-							password_entry.visibility = false;
-							dialog.widget.grid.attach_next_to (password_entry,
-							                                   password_label,
-							                                   PositionType.RIGHT,
-							                                   2, 1);
-
-							dialog.response.connect((d, r) => {
-								if (r == ResponseType.ACCEPT) {
-									try {
-										this.list.database.add_administrator (administrator.username,
-										                                      password_entry.text);
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-															              MessageType.ERROR, ButtonsType.CLOSE,
-															              _("Failed to add administrator."));
-										e_dialog.secondary_text = e.message;
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
-
-									reload ();
-								}
-
-								d.destroy ();
-							});
-							dialog.show_all ();
+							add_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -148,67 +108,7 @@ namespace Mobilect {
 						accelerator = _("<Control>minus"),
 						tooltip = _("Remove the selected administrators from database"),
 						callback = (a) => {
-							var selection = tree_view.get_selection ();
-							int selected_count = selection.count_selected_rows ();
-
-							if (selected_count <= 0) {
-								var e_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.ERROR,
-								                                  ButtonsType.OK,
-								                                  _("No administrator selected."));
-								e_dialog.secondary_text = _("Select atleast one administrator first.");
-								e_dialog.run ();
-								e_dialog.destroy ();
-
-								return;
-							}
-
-							if (this.list.size - selected_count < 1) {
-								var e_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.ERROR,
-								                                  ButtonsType.OK,
-								                                  ngettext("Can't remove selected administrator.",
-								                                           "Can't remove selected administrators.",
-								                                           selected_count));
-								e_dialog.secondary_text = _("There should be atleast one administrator.");
-								e_dialog.run ();
-								e_dialog.destroy ();
-
-								return;
-							}
-
-							var m_dialog = new MessageDialog (this.cpanel.window,
-							                                  DialogFlags.MODAL,
-							                                  MessageType.INFO,
-							                                  ButtonsType.YES_NO,
-							                                  ngettext("Are you sure you want to remove the selected administrator?",
-							                                           "Are you sure you want to remove the %d selected administrators?",
-							                                           selected_count).printf (selected_count));
-							m_dialog.secondary_text = _("The changes will be permanent.");
-
-							if (m_dialog.run () == ResponseType.YES) {
-								selection.selected_foreach ((m, p, i) => {
-									Administrator administrator;
-									this.list.get (i, AdministratorList.Columns.OBJECT, out administrator);
-									try {
-										administrator.remove ();
-									} catch (ApplicationError e) {
-										var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-										                                  MessageType.ERROR, ButtonsType.CLOSE,
-										                                  ngettext("Failed to remove selected administrator.",
-										                                           "Failed to remove selected administrators.",
-										                                           selected_count));
-										e_dialog.secondary_text = e.message;
-										e_dialog.run ();
-										e_dialog.destroy ();
-									}
-								});
-								reload ();
-							}
-
-							m_dialog.destroy ();
+							remove_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -218,7 +118,7 @@ namespace Mobilect {
 						accelerator = _("<Control>E"),
 						tooltip = _("Edit information about the selected administrators"),
 						callback = (a) => {
-							edit ();
+							edit_action ();
 						}
 					},
 					Gtk.ActionEntry () {
@@ -227,60 +127,7 @@ namespace Mobilect {
 						label = _("_Change Password"),
 						tooltip = _("Change password of selected administrators"),
 						callback = (a) => {
-							var selection = tree_view.get_selection ();
-							int selected_count = selection.count_selected_rows ();
-
-							if (selected_count <= 0) {
-								var e_dialog = new MessageDialog (this.cpanel.window,
-								                                  DialogFlags.MODAL,
-								                                  MessageType.ERROR,
-								                                  ButtonsType.OK,
-								                                  _("No administrator selected."));
-								e_dialog.secondary_text = _("Select atleast one administrator first.");
-								e_dialog.run ();
-								e_dialog.destroy ();
-
-								return;
-							}
-
-							selection.selected_foreach ((m, p, i) => {
-								Administrator administrator;
-								this.list.get (i, AdministratorList.Columns.OBJECT, out administrator);
-
-								var dialog = new PasswordDialog (_("Change Administrator Password"),
-								                                 this.cpanel.window);
-
-								dialog.response.connect((d, r) => {
-									if (r == ResponseType.ACCEPT) {
-										var password = dialog.widget.get_password ();
-
-										if (password == null) {
-											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-											                                  MessageType.ERROR, ButtonsType.CLOSE,
-											                                  _("Failed to change password."));
-											e_dialog.secondary_text = _("Passwords didn't match.");
-											e_dialog.run ();
-											e_dialog.destroy ();
-
-											return;
-										}
-
-										try {
-											administrator.change_password (password);
-										} catch (ApplicationError e) {
-											var e_dialog = new MessageDialog (this.cpanel.window, DialogFlags.DESTROY_WITH_PARENT,
-											                                  MessageType.ERROR, ButtonsType.CLOSE,
-											                                  _("Failed to change password."));
-											e_dialog.secondary_text = e.message;
-											e_dialog.run ();
-											e_dialog.destroy ();
-										}
-									}
-
-									d.destroy ();
-								});
-								dialog.show_all ();
-							});
+							change_password_action ();
 						}
 					}
 				};
@@ -297,54 +144,159 @@ namespace Mobilect {
 				});
 			}
 
-			public void edit () {
-				var selection = tree_view.get_selection ();
-				int selected_count = selection.count_selected_rows ();
 
+			private GLib.List<Administrator> get_selected (TreeSelection selection) {
+				var administrators = new GLib.List<Administrator>();
+
+				int selected_count = selection.count_selected_rows ();
 				if (selected_count <= 0) {
-					var e_dialog = new MessageDialog (this.cpanel.window,
-					                                  DialogFlags.MODAL,
-					                                  MessageType.ERROR,
-					                                  ButtonsType.OK,
-					                                  _("No administrator selected."));
-					e_dialog.secondary_text = _("Select atleast one administrator first.");
-					e_dialog.run ();
-					e_dialog.destroy ();
+					this.cpanel.window.show_error_dialog (_("No administrator selected"),
+					                                      _("Select at least one administrator first."));
+
+					return administrators;
+				}
+
+				foreach (var p in selection.get_selected_rows (null)) {
+					Administrator administrator;
+					TreeIter iter;
+					list.get_iter (out iter, p);
+					this.list.get (iter, AdministratorList.Columns.OBJECT, out administrator);
+					administrators.append (administrator);
+				}
+
+				return administrators;
+			}
+
+			private void add_action () {
+				var database = this.cpanel.window.app.database;
+				var administrator = new Administrator (0, database);
+
+				var dialog = new AdministratorEditDialog (_("Add Administrator"),
+				                                          this.cpanel.window,
+				                                          administrator);
+
+				var password_label = new Label (_("_Password:"));
+				password_label.use_underline = true;
+				password_label.xalign = 0.0f;
+				dialog.widget.grid.add (password_label);
+
+				var password_entry = new Entry ();
+				password_entry.hexpand = true;
+				password_entry.activates_default = true;
+				password_entry.visibility = false;
+				dialog.widget.grid.attach_next_to (password_entry,
+				                                   password_label,
+				                                   PositionType.RIGHT,
+				                                   2, 1);
+
+				dialog.response.connect ((d, r) => {
+					d.hide ();
+
+					if (r == ResponseType.ACCEPT) {
+						database.add_administrator (administrator.username,
+						                            password_entry.text);
+					}
+
+					d.destroy ();
+				});
+				dialog.show_all ();
+			}
+
+			private void remove_action () {
+				var selection = tree_view.get_selection ();
+				var administrators = get_selected (selection);
+
+				int selected_count = selection.count_selected_rows ();
+				if (selected_count < 1) {
+					return;
+				}
+
+				if (this.list.size - selected_count < 1) {
+					this.cpanel.window.show_error_dialog (ngettext ("Can't remove selected administrator",
+					                                                "Can't remove selected administrators",
+					                                                selected_count),
+					                                      _("There should be at least one administrator."));
 
 					return;
 				}
 
-				selection.selected_foreach ((m, p, i) => {
-					Administrator administrator;
-					this.list.get (i, AdministratorList.Columns.OBJECT, out administrator);
+				var m_dialog = new MessageDialog (this.cpanel.window,
+				                                  DialogFlags.MODAL,
+				                                  MessageType.WARNING,
+				                                  ButtonsType.NONE,
+				                                  ngettext ("Are you sure you want to remove the selected administrator?",
+				                                            "Are you sure you want to remove the %d selected administrators?",
+				                                            selected_count).printf (selected_count));
+				m_dialog.secondary_text = ngettext ("All information about this administrator will be deleted and cannot be restored.",
+				                                    "All information about these administrators will be deleted and cannot be restored.",
+				                                    selected_count);
+				m_dialog.add_buttons (Stock.CANCEL, ResponseType.REJECT,
+				                      Stock.DELETE, ResponseType.ACCEPT);
 
-					var dialog = new AdministratorEditDialog (_("Administrator \"%s\" Properties").printf (administrator.username),
+				if (m_dialog.run () == ResponseType.ACCEPT) {
+					foreach (var administrator in administrators) {
+						administrator.remove ();
+					}
+				}
+
+				m_dialog.destroy ();
+			}
+
+			private void edit_action () {
+				var selection = tree_view.get_selection ();
+				var administrators = get_selected (selection);
+
+				foreach (var administrator in administrators) {
+					var dialog = new AdministratorEditDialog (_("Administrator Properties"),
 					                                          this.cpanel.window,
 					                                          administrator);
 					dialog.response.connect ((d, r) => {
-						if (r == ResponseType.ACCEPT) {
-							try {
-								dialog.administrator.update ();
-							} catch (Error e) {
-								stderr.printf (_("Error: %s\n"), e.message);
-							}
+						d.hide ();
 
-							reload ();
+						if (r == ResponseType.ACCEPT) {
+							dialog.administrator.update ();
 						}
 
 						d.destroy ();
 					});
 					dialog.show_all ();
-				});
+				}
 			}
 
-			public void reload () {
-				this.list = this.cpanel.window.app.database.get_administrators ();
-				this.tree_view.model = this.list ;
+			private void change_password_action () {
+				var selection = tree_view.get_selection ();
+				var administrators = get_selected (selection);
+				Administrator administrator;
+
+				foreach (var a in administrators) {
+					administrator = a;
+
+					var dialog = new PasswordDialog (_("Change Password"),
+					                                 this.cpanel.window);
+
+					dialog.response.connect ((d, r) => {
+						d.hide ();
+
+						if (r == ResponseType.ACCEPT) {
+							var password = dialog.widget.get_password ();
+
+							if (password == null) {
+								this.cpanel.window.show_error_dialog (_("Failed to change password"),
+								                                      _("Passwords didn't match."));
+
+								return;
+							}
+
+							administrator.change_password (password);
+						}
+
+						d.destroy ();
+					});
+					dialog.show_all ();
+				}
 			}
 
 		}
 
 	}
-
 }

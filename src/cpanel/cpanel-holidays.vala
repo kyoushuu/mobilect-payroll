@@ -75,7 +75,7 @@ namespace Mobilect {
 					string text;
 
 					m.get_value (i, MonthInfo.Columns.WEEKDAY, out value);
-					var wd = (DateWeekday) value.get_int ();
+					var wd = (DateWeekday) value;
 					switch (wd) {
 						case DateWeekday.SUNDAY:
 							text = _("Sun");
@@ -140,7 +140,7 @@ namespace Mobilect {
 					TreeIter iter;
 					string text;
 					m.get_value (i, MonthInfo.Columns.HOLIDAY_TYPE, out value);
-					holiday_type_model.iter_nth_child (out iter, null, value.get_int ());
+					holiday_type_model.iter_nth_child (out iter, null, (MonthInfo.HolidayType) value);
 					holiday_type_model.get (iter, 0, out text);
 					(r as CellRendererText).text = text;
 				});

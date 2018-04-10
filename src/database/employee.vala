@@ -76,7 +76,7 @@ namespace Mobilect {
 						var cell_data_rate = data_model.get_value_at (4, 0);
 						this.rate = cell_data_rate.get_int ();
 					} catch (Error e) {
-						stderr.printf (_("Error: %s\n"), e.message);
+						critical ("Failed to get employee data from database: %s", e.message);
 					}
 				}
 			}
@@ -85,7 +85,7 @@ namespace Mobilect {
 				return lastname + ", " + firstname + " " + middlename;
 			}
 
-			public int get_open_time_records_num () throws ApplicationError {
+			public int get_open_time_records_num () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -102,15 +102,16 @@ namespace Mobilect {
 
 					return data_model.get_n_rows ();
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to get open time records of employee from database: %s", e.message);
+					return -1;
 				}
 			}
 
-			public void log_employee_in () throws ApplicationError {
+			public void log_employee_in () {
 				database.add_time_record (this.id, new DateTime.now_local (), null);
 			}
 
-			public void log_employee_out () throws ApplicationError {
+			public void log_employee_out () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -132,12 +133,10 @@ namespace Mobilect {
 					                                      "  WHERE id=##id::int",
 					                                      out stmt_params);
 					stmt_params.get_holder ("id").set_value (record_id);
-					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_utc ().format ("%F %T"));
+					stmt_params.get_holder ("end").set_value_str (database.dh_string, new DateTime.now_local ().format ("%F %T"));
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (DataModelError.ROW_OUT_OF_RANGE_ERROR e) {
-					throw new ApplicationError.EMPLOYEE_NOT_FOUND (_("Not logged in.").printf (id));
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to update time record in database for employee logout: %s", e.message);
 				}
 			}
 
@@ -191,7 +190,6 @@ namespace Mobilect {
 							range_end = range_end.add_minutes (minutes);
 
 							var time_record = new TimeRecord (data_model.get_value_at (0, i).get_int (), database, this);
-							time_record.employee = this;
 
 							if (time_record.end == null) {
 								continue;
@@ -263,7 +261,7 @@ namespace Mobilect {
 						}
 					}
 				} catch (Error e) {
-					stderr.printf (_("Error: %s\n"), e.message);
+					critical ("Failed to get time record of employee from database: %s", e.message);
 				}
 
 				this.cached_filter = filter.duplicate ();
@@ -272,29 +270,7 @@ namespace Mobilect {
 				return hours_span;
 			}
 
-			public void change_password (string password) throws ApplicationError {
-				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
-
-				try {
-					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
-					                                          "  SET password=##password::string" +
-					                                          "  WHERE id=##id::int",
-					                                          out stmt_params);
-					stmt_params.get_holder ("id").set_value (value_id);
-					stmt_params.get_holder ("password").set_value_str (database.dh_string,
-					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
-					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (ApplicationError e) {
-					throw e;
-				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
-				}
-			}
-
-			public void update () throws ApplicationError {
+			public void update () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 				var value_rate = Value (typeof (int));
@@ -318,18 +294,20 @@ namespace Mobilect {
 					stmt_params.get_holder ("tin").set_value_str (database.dh_string, this.tin);
 					stmt_params.get_holder ("rate").set_value (value_rate);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (ApplicationError e) {
-					throw e;
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to update employee in database: %s", e.message);
 				}
 			}
 
-			public void remove () throws ApplicationError {
+			public void remove () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
 				value_id.set_int (this.id);
+
+				if (list != null) {
+					list.remove (this);
+				}
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("DELETE FROM employees WHERE id=##id::int",
@@ -342,11 +320,11 @@ namespace Mobilect {
 					stmt_params.get_holder ("employee_id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to remove employee from database: %s", e.message);
 				}
 			}
 
-			public string get_password_checksum () throws ApplicationError {
+			public string? get_password_checksum () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -363,7 +341,28 @@ namespace Mobilect {
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to get employee password from database: %s", e.message);
+					return null;
+				}
+			}
+
+			public void change_password (string password) {
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (this.id);
+
+				try {
+					var stmt = database.cnc.parse_sql_string ("UPDATE employees" +
+					                                          "  SET password=##password::string" +
+					                                          "  WHERE id=##id::int",
+					                                          out stmt_params);
+					stmt_params.get_holder ("id").set_value (value_id);
+					stmt_params.get_holder ("password").set_value_str (database.dh_string,
+					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
+					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (Error e) {
+					critical ("Failed to update employee password in database: %s", e.message);
 				}
 			}
 

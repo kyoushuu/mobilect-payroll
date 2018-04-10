@@ -31,7 +31,6 @@ namespace Mobilect {
 			public int stamp { get; private set; }
 
 			internal weak Database database { get; set; }
-			public Filter filter { get; set; }
 
 
 			public enum Columns {
@@ -44,7 +43,6 @@ namespace Mobilect {
 				TIN,
 				RATE,
 				HOURRATE,
-				HOURS,
 				NUM
 			}
 
@@ -55,7 +53,37 @@ namespace Mobilect {
 
 			public new void add (Employee employee) {
 				employee.list = this;
+				employee.notify.connect ((o, p) => {
+					TreeIter iter;
+					create_iter (out iter, o as Employee);
+					row_changed (get_path (iter), iter);
+				});
 				(this as ArrayList<Employee>).add (employee);
+
+				TreeIter iter;
+				create_iter (out iter, employee);
+				row_inserted (get_path (iter), iter);
+			}
+
+			public new void remove (Employee employee) {
+				TreeIter iter;
+				create_iter (out iter, employee);
+				row_deleted (get_path (iter));
+
+				employee.list = null;
+				(this as ArrayList<Employee>).remove (employee);
+			}
+
+			public new void remove_all () {
+				var list = new Employee[0];
+
+				foreach (var employee in this) {
+					list += employee;
+				}
+
+				foreach (var employee in list) {
+					remove (employee);
+				}
 			}
 
 			public bool contains_id (int id) {
@@ -111,10 +139,6 @@ namespace Mobilect {
 						return typeof (string);
 					case Columns.RATE:
 						return typeof (int);
-					case Columns.HOURRATE:
-						return typeof (double);
-					case Columns.HOURS:
-						return typeof (double);
 					default:
 						return Type.INVALID;
 				}
@@ -127,10 +151,10 @@ namespace Mobilect {
 			public bool get_iter (out TreeIter iter, TreePath path) {
 				/* we do not allow children */
 				/* depth 1 = top level; a list only has top level nodes and no children */
-				assert (path.get_depth() == 1);
+				assert (path.get_depth () == 1);
 
 				/* the n-th top level row */
-				return get_iter_with_index (out iter, path.get_indices()[0]);
+				return get_iter_with_index (out iter, path.get_indices ()[0]);
 			}
 
 			public int get_n_columns () {
@@ -145,39 +169,38 @@ namespace Mobilect {
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
-				value = Value (get_column_type (column));
 				var record = iter.user_data as Employee;
 
 				switch (column) {
 					case Columns.OBJECT:
-						value.set_object (record);
+						value = record;
 						break;
 					case Columns.ID:
-						value.set_int (record.id);
+						value = record.id;
 						break;
 					case Columns.LASTNAME:
-						value.set_string (record.lastname);
+						value = record.lastname;
 						break;
 					case Columns.FIRSTNAME:
-						value.set_string (record.firstname);
+						value = record.firstname;
 						break;
 					case Columns.MIDDLENAME:
-						value.set_string (record.middlename);
+						value = record.middlename;
 						break;
 					case Columns.NAME:
-						value.set_string (record.get_name ());
+						value = record.get_name ();
 						break;
 					case Columns.TIN:
-						value.set_string (record.tin);
+						value = record.tin;
 						break;
 					case Columns.RATE:
-						value.set_int (record.rate);
+						value = record.rate;
 						break;
 					case Columns.HOURRATE:
-						value.set_double (record.rate_per_hour);
+						value = record.rate_per_hour;
 						break;
-					case Columns.HOURS:
-						value.set_double (filter != null? record.get_hours (filter) : 0);
+					default:
+						value = Value (Type.INVALID);
 						break;
 				}
 			}

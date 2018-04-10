@@ -29,11 +29,12 @@ namespace Mobilect {
 			public Entry username_entry { get; private set; }
 			public Entry password_entry { get; private set; }
 
-			public Button button_ok { get; private set; }
+			public Button button_login { get; private set; }
 			public Button button_cancel { get; private set; }
 
+
 			public AdminLoginPage (Window window) {
-				base (window, _("Administrator Login"));
+				base (window, _("Administrator Log In"));
 
 				var username_label = new Label (_("_Username:"));
 				username_label.use_underline = true;
@@ -62,16 +63,16 @@ namespace Mobilect {
 				                     PositionType.RIGHT,
 				                     2, 1);
 
-				button_ok = new Button.from_stock (Stock.OK);
-				button_ok.can_default = true;
-				button_box.add (button_ok);
+				button_login = new Button.with_mnemonic (_("Log _In"));
+				button_login.can_default = true;
+				button_box.add (button_login);
 
 				button_cancel = new Button.from_stock (Stock.CANCEL);
 				button_box.add (button_cancel);
 
-				button_ok.clicked.connect ((t) => {
+				button_login.clicked.connect ((t) => {
 					try {
-						var administrator = (this.window.application as Application).database.get_administrator_with_username (this.username_entry.text);
+						var administrator = (this.window.application as Application).database.administrator_list.get_with_username (this.username_entry.text);
 
 						if (administrator == null) {
 							throw new ApplicationError.USERNAME_NOT_FOUND (_("Username not found."));
@@ -86,12 +87,7 @@ namespace Mobilect {
 								throw new ApplicationError.WRONG_PASSWORD (_("Wrong password."));
 							}
 					} catch (Error e) {
-						var e_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
-						                                  MessageType.ERROR, ButtonsType.CLOSE,
-						                                  _("Failed to login."));
-						e_dialog.secondary_text = e.message;
-						e_dialog.run ();
-						e_dialog.destroy ();
+						this.window.show_error_dialog (_("Failed to log in"), e.message);
 					}
 				});
 

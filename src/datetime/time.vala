@@ -60,10 +60,6 @@ namespace Mobilect {
 				this.minute = minute;
 			}
 
-			public Time duplicate () {
-				return new Time (hour, minute);
-			}
-
 			public bool is_equal (Time time) {
 				return
 					time.hour == this.hour &&

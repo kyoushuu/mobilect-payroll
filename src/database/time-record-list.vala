@@ -39,9 +39,6 @@ namespace Mobilect {
 				EMPLOYEE_ID,
 				START,
 				END,
-				EMPLOYEE_STRING,
-				START_STRING,
-				END_STRING,
 				NUM
 			}
 
@@ -51,7 +48,37 @@ namespace Mobilect {
 
 			public new void add (TimeRecord time_record) {
 				time_record.list = this;
+				time_record.notify.connect ((o, p) => {
+					TreeIter iter;
+					create_iter (out iter, o as TimeRecord);
+					row_changed (get_path (iter), iter);
+				});
 				(this as ArrayList<TimeRecord>).add (time_record);
+
+				TreeIter iter;
+				create_iter (out iter, time_record);
+				row_inserted (get_path (iter), iter);
+			}
+
+			public new void remove (TimeRecord time_record) {
+				TreeIter iter;
+				create_iter (out iter, time_record);
+				row_deleted (get_path (iter));
+
+				time_record.list = null;
+				(this as ArrayList<TimeRecord>).remove (time_record);
+			}
+
+			public new void remove_all () {
+				var list = new TimeRecord[0];
+
+				foreach (var time_record in this) {
+					list += time_record;
+				}
+
+				foreach (var time_record in list) {
+					remove (time_record);
+				}
 			}
 
 			public bool contains_id (int id) {
@@ -99,12 +126,6 @@ namespace Mobilect {
 						return typeof (DateTime);
 					case Columns.END:
 						return typeof (DateTime);
-					case Columns.EMPLOYEE_STRING:
-						return typeof (string);
-					case Columns.START_STRING:
-						return typeof (string);
-					case Columns.END_STRING:
-						return typeof (string);
 					default:
 						return Type.INVALID;
 				}
@@ -117,10 +138,10 @@ namespace Mobilect {
 			public bool get_iter (out TreeIter iter, TreePath path) {
 				/* we do not allow children */
 				/* depth 1 = top level; a list only has top level nodes and no children */
-				assert (path.get_depth() == 1);
+				assert (path.get_depth () == 1);
 
 				/* the n-th top level row */
-				return get_iter_with_index (out iter, path.get_indices()[0]);
+				return get_iter_with_index (out iter, path.get_indices ()[0]);
 			}
 
 			public int get_n_columns () {
@@ -135,36 +156,29 @@ namespace Mobilect {
 			}
 
 			public void get_value (TreeIter iter, int column, out Value value) requires (iter.stamp == this.stamp) requires (iter.user_data != null) {
-				value = Value (get_column_type (column));
 				var time_record = iter.user_data as TimeRecord;
 
 				switch (column) {
 					case Columns.OBJECT:
-						value.set_object (time_record);
+						value = time_record;
 						break;
 					case Columns.ID:
-						value.set_int (time_record.id);
+						value = time_record.id;
 						break;
 					case Columns.EMPLOYEE:
-						value.set_object (time_record.employee);
+						value = time_record.employee;
 						break;
 					case Columns.EMPLOYEE_ID:
-						value.set_int (time_record.employee_id);
+						value = time_record.employee_id;
 						break;
 					case Columns.START:
-						value.set_pointer (time_record.start);
+						value = time_record.start;
 						break;
 					case Columns.END:
-						value.set_pointer (time_record.end);
+						value = time_record.end;
 						break;
-					case Columns.EMPLOYEE_STRING:
-						value.set_string (time_record.employee != null? time_record.employee.get_name () : null);
-						break;
-					case Columns.START_STRING:
-						value.set_string (time_record.get_start_string (true));
-						break;
-					case Columns.END_STRING:
-						value.set_string (time_record.get_end_string (true)?? _("Open"));
+					default:
+						value = Value (Type.INVALID);
 						break;
 				}
 			}

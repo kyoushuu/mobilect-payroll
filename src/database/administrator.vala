@@ -60,34 +60,12 @@ namespace Mobilect {
 						var cell_data_username = data_model.get_value_at (0, 0);
 						this.username = database.dh_string.get_str_from_value (cell_data_username);
 					} catch (Error e) {
-						stderr.printf (_("Error: %s\n"), e.message);
+						critical ("Failed to get administrator data from database: %s", e.message);
 					}
 				}
 			}
 
-			public void change_password (string password) throws ApplicationError {
-				Set stmt_params;
-				var value_id = Value (typeof (int));
-
-				value_id.set_int (this.id);
-
-				try {
-					var stmt = database.cnc.parse_sql_string ("UPDATE administrators" +
-					                                          "  SET password=##password::string" +
-					                                          "  WHERE id=##id::int",
-					                                          out stmt_params);
-					stmt_params.get_holder ("id").set_value (value_id);
-					stmt_params.get_holder ("password").set_value_str (database.dh_string,
-					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
-					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (ApplicationError e) {
-					throw e;
-				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
-				}
-			}
-
-			public void update () throws ApplicationError {
+			public void update () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -101,18 +79,20 @@ namespace Mobilect {
 					stmt_params.get_holder ("id").set_value (value_id);
 					stmt_params.get_holder ("username").set_value_str (database.dh_string, this.username);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
-				} catch (ApplicationError e) {
-					throw e;
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to update administrator in database: %s", e.message);
 				}
 			}
 
-			public void remove () throws ApplicationError {
+			public void remove () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
 				value_id.set_int (this.id);
+
+				if (list != null) {
+					list.remove (this);
+				}
 
 				try {
 					var stmt = database.cnc.parse_sql_string ("DELETE FROM administrators WHERE id=##id::int",
@@ -120,11 +100,11 @@ namespace Mobilect {
 					stmt_params.get_holder ("id").set_value (value_id);
 					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to remove administrator from database: %s", e.message);
 				}
 			}
 
-			public string get_password_checksum () throws ApplicationError {
+			public string? get_password_checksum () {
 				Set stmt_params;
 				var value_id = Value (typeof (int));
 
@@ -141,7 +121,28 @@ namespace Mobilect {
 					var cell_data = data_model.get_value_at (0, 0);
 					return cell_data.get_string ();
 				} catch (Error e) {
-					throw new ApplicationError.UNKNOWN (_("Unknown error occured: %s").printf (e.message));
+					critical ("Failed to get administrator password from database: %s", e.message);
+					return null;
+				}
+			}
+
+			public void change_password (string password) {
+				Set stmt_params;
+				var value_id = Value (typeof (int));
+
+				value_id.set_int (this.id);
+
+				try {
+					var stmt = database.cnc.parse_sql_string ("UPDATE administrators" +
+					                                          "  SET password=##password::string" +
+					                                          "  WHERE id=##id::int",
+					                                          out stmt_params);
+					stmt_params.get_holder ("id").set_value (value_id);
+					stmt_params.get_holder ("password").set_value_str (database.dh_string,
+					                                                   Checksum.compute_for_string (ChecksumType.SHA256, password, -1));
+					database.cnc.statement_execute_non_select (stmt, stmt_params, null);
+				} catch (Error e) {
+					critical ("Failed to update administrator password in database: %s", e.message);
 				}
 			}
 

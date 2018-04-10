@@ -146,7 +146,7 @@ namespace Mobilect {
 					this.add_accel_group (ui_manager.get_accel_group ());
 					box.add (ui_manager.get_widget ("/menubar"));
 				} catch (Error e) {
-					stderr.printf (_("Error: %s\n"), e.message);
+					error ("Failed to add UI to UI Manager: %s", e.message);
 				}
 
 				var toolbar = ui_manager.get_widget ("/toolbar");
@@ -186,7 +186,7 @@ namespace Mobilect {
 				/* Grab default */
 				emp_login_page.button_admin.clicked.connect ((t) => {
 					admin_login_page.username_entry.grab_focus ();
-					admin_login_page.button_ok.grab_default ();
+					admin_login_page.button_login.grab_default ();
 				});
 
 				admin_login_page.button_cancel.clicked.connect ((t) => {
@@ -194,8 +194,44 @@ namespace Mobilect {
 					emp_login_page.button_login.grab_default ();
 				});
 
-				admin_login_page.username_entry.grab_focus ();
-				admin_login_page.button_ok.grab_default ();
+				emp_login_page.name_combobox.grab_focus ();
+				emp_login_page.button_login.grab_default ();
+
+				Log.set_handler ("Mobilect-Payroll",
+				                 LogLevelFlags.LEVEL_CRITICAL |
+				                 LogLevelFlags.LEVEL_WARNING |
+				                 LogLevelFlags.LEVEL_MESSAGE,
+				                 (d, l, m) => {
+													 var text = m;
+													 MessageType type = MessageType.INFO;
+													 if (l == LogLevelFlags.LEVEL_CRITICAL) {
+														 text = _("Critical Error");
+														 type = MessageType.ERROR;
+													 } else if (l == LogLevelFlags.LEVEL_WARNING) {
+														 text = _("Warning");
+														 type = MessageType.WARNING;
+													 }
+
+													 var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT,
+													                                 type, ButtonsType.OK,
+													                                 text);
+
+													 if (l != LogLevelFlags.LEVEL_MESSAGE) {
+														 dialog.secondary_text = m;
+													 }
+
+													 dialog.run ();
+													 dialog.destroy ();
+												 });
+			}
+
+			public void show_error_dialog (string primary, string secondary) {
+				var e_dialog = new MessageDialog (this, DialogFlags.MODAL,
+				                                  MessageType.ERROR, ButtonsType.OK,
+				                                  primary);
+				e_dialog.secondary_text = secondary;
+				e_dialog.run ();
+				e_dialog.destroy ();
 			}
 
 		}

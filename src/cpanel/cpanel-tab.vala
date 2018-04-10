@@ -31,20 +31,19 @@ namespace Mobilect {
 			public string ui_def { get; internal set; }
 			public Gtk.ActionGroup action_group { get; internal set; }
 
-			public signal void changed_to ();
-			public signal void changed_from ();
+
+			public virtual signal void changed_to () {
+					this.action_group.visible = true;
+			}
+
+			public virtual signal void changed_from () {
+					this.action_group.visible = false;
+			}
+
 
 			public CPanelTab (CPanel cpanel, string name) {
 				this.cpanel = cpanel;
 				this.action_group = new Gtk.ActionGroup (name);
-
-				this.changed_to.connect (() => {
-					this.action_group.visible = true;
-				});
-
-				this.changed_from.connect (() => {
-					this.action_group.visible = false;
-				});
 			}
 
 		}

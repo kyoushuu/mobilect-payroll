@@ -14,7 +14,9 @@ if [ -n "$GNOME2_DIR" ]; then
 	export LD_LIBRARY_PATH
 fi
 
-(test -f $srcdir/configure.ac) || {
+(test -f $srcdir/configure.ac \
+  && test -f $srcdir/README \
+  && test -d $srcdir/src) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
     echo " top-level package directory"
     exit 1

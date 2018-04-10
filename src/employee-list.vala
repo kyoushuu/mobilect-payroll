@@ -48,12 +48,6 @@ namespace Mobilect {
 
 			public EmployeeList () {
 				stamp = (int) Random.next_int ();
-
-				filter = new Filter ();
-				filter.time_start.set (8, 0);
-				filter.time_end.set (17, 0);
-				filter.date_start.set_dmy (16, DateMonth.APRIL, 2012);
-				filter.date_end.set_dmy (16, DateMonth.MAY, 2012);
 			}
 
 			public new void add (Employee employee) {

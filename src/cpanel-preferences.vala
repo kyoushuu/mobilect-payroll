@@ -32,9 +32,12 @@ namespace Mobilect {
 
 			public DateTimeEntry start_entry { get; private set; }
 			public DateTimeEntry end_entry { get; private set; }
+			public SpinButton hour_rate_spin { get; private set; }
+
 
 			public CPanelPreferences (CPanel cpanel) {
 				base (cpanel, ACTION);
+
 				grid = new Grid ();
 				grid.orientation = Orientation.VERTICAL;
 				grid.row_spacing = 3;
@@ -62,6 +65,24 @@ namespace Mobilect {
 				end_entry.set_date_time (this.cpanel.filter.get_end_as_date_time ());
 				grid.attach_next_to (end_entry,
 				                     end_label,
+				                     PositionType.RIGHT,
+				                     2, 1);
+
+				var hour_rate_label = new Label (_("_Rate per Hour:"));
+				hour_rate_label.use_underline = true;
+				hour_rate_label.xalign = 0.0f;
+				grid.add (hour_rate_label);
+
+				hour_rate_spin = new SpinButton (new Adjustment (this.cpanel.hour_rate,
+				                                                 0, 1000000,
+				                                                 1, 10,
+				                                                 0),
+				                                 1, 2);
+				hour_rate_spin.value_changed.connect ((s) => {
+					this.cpanel.hour_rate = s.value;
+				});
+				grid.attach_next_to (hour_rate_spin,
+				                     hour_rate_label,
 				                     PositionType.RIGHT,
 				                     2, 1);
 			}

@@ -31,6 +31,7 @@ namespace Mobilect {
 			public Gtk.ActionGroup action_group { get; internal set; }
 
 			public Filter filter { get; set; }
+			public double hour_rate { get; set; }
 
 
 			public CPanel (Window window) {
@@ -133,11 +134,14 @@ namespace Mobilect {
 				                              date.get_month (),
 				                              (DateYear) date.get_year ());
 
-				this.add_page (new CPanelEmployees (this), _("Employees"));
-				this.add_page (new CPanelAdministrators (this), _("Administrators"));
-				this.add_page (new CPanelTimeRecords (this), _("Time Records"));
-				this.add_page (new CPanelPreferences (this), _("Preferences"));
+				this.hour_rate = 40;
+
+				this.add_page (new CPanelPreferences (this), _("_Preferences"));
+				this.add_page (new CPanelEmployees (this), _("_Employees"));
+				this.add_page (new CPanelAdministrators (this), _("_Administrators"));
+				this.add_page (new CPanelTimeRecords (this), _("_Time Records"));
 				this.add_page (new CPanelHolidays (this), _("_Holidays"));
+				this.add_page (new CPanelReport (this), _("_Report"));
 			}
 
 			public void add_page (CPanelTab tab, string title) {

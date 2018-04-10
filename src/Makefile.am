@@ -9,6 +9,9 @@ AM_CPPFLAGS = \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
 	$(GTK_CFLAGS) \
+	$(PANGO_CFLAGS) \
+	$(CAIRO_CFLAGS) \
+	$(PANGOCAIRO_CFLAGS) \
 	$(GDA_CFLAGS) \
 	$(XML_CFLAGS) \
 	$(GEE_CFLAGS) \
@@ -43,6 +46,7 @@ mobilect_payroll_SOURCES = \
 	cpanel-preferences.vala \
 	cpanel-time-records.vala \
 	cpanel-holidays.vala \
+	cpanel-report.vala \
 	password-widget.vala \
 	password-dialog.vala \
 	administrator-edit-widget.vala \
@@ -58,10 +62,15 @@ mobilect_payroll_SOURCES = \
 	pay-group.vala \
 	pay-period.vala \
 	time-period.vala \
+	print-report.vala \
+	date-entry.vala \
 	config.vapi
 
 mobilect_payroll_VALAFLAGS = \
 	--pkg gtk+-3.0 \
+	--pkg pango \
+	--pkg cairo \
+	--pkg pangocairo \
 	--pkg libxml-2.0 \
 	--pkg libgda-5.0 \
 	--pkg gee-1.0 \
@@ -69,6 +78,9 @@ mobilect_payroll_VALAFLAGS = \
 
 mobilect_payroll_LDADD = \
 	$(GTK_LIBS) \
+	$(PANGO_LIBS) \
+	$(CAIRO_LIBS) \
+	$(PANGOCAIRO_LIBS) \
 	$(GDA_LIBS) \
 	$(XML_LIBS) \
 	$(GEE_LIBS)

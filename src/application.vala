@@ -45,7 +45,7 @@ namespace Mobilect {
 				try {
 					database = new Database ();
 				} catch (Error e) {
-					var m_dialog = new MessageDialog (this.window, DialogFlags.DESTROY_WITH_PARENT,
+					var m_dialog = new MessageDialog (null, DialogFlags.MODAL,
 					                                  MessageType.ERROR, ButtonsType.CLOSE,
 					                                  _("Error: %s"), e.message);
 					m_dialog.run ();

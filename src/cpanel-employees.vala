@@ -18,6 +18,9 @@
 
 
 using Gtk;
+using Pango;
+using Cairo;
+using Gee;
 
 
 namespace Mobilect {
@@ -34,6 +37,8 @@ namespace Mobilect {
 			public const string ACTION_REMOVE = "cpanel-employees-remove";
 			public const string ACTION_EDIT = "cpanel-employees-edit";
 			public const string ACTION_PASSWORD = "cpanel-employees-password";
+			public const string ACTION_PRINT = "cpanel-employees-print";
+			public const string ACTION_PRINT_PREVIEW = "cpanel-employees-print-preview";
 
 			public CPanelEmployees (CPanel cpanel) {
 				base (cpanel, ACTION);
@@ -116,6 +121,9 @@ namespace Mobilect {
 					"          <separator />" +
 					"          <menuitem name=\"EditEmployee\" action=\"" + ACTION_EDIT + "\" />" +
 					"          <menuitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
+					"          <separator />" +
+					"          <menuitem name=\"PrintEmployee\" action=\"" + ACTION_PRINT + "\" />" +
+					"          <menuitem name=\"PrintPreviewEmployee\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
 					"        </menu>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -128,6 +136,9 @@ namespace Mobilect {
 					"          <toolitem name=\"RemoveEmployee\" action=\"" + ACTION_REMOVE + "\" />" +
 					"          <toolitem name=\"EditEmployee\" action=\"" + ACTION_EDIT + "\" />" +
 					"          <toolitem name=\"PasswordEmployee\" action=\"" + ACTION_PASSWORD + "\" />" +
+					"          <separator />" +
+					"          <toolitem name=\"PrintEmployee\" action=\"" + ACTION_PRINT + "\" />" +
+					"          <toolitem name=\"PrintPreviewEmployee\" action=\"" + ACTION_PRINT_PREVIEW + "\" />" +
 					"        </placeholder>" +
 					"      </placeholder>" +
 					"    </placeholder>" +
@@ -290,6 +301,24 @@ namespace Mobilect {
 								e_dialog.run ();
 								e_dialog.destroy ();
 							}
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_PRINT,
+						stock_id = Stock.PRINT,
+						label = _("_Print"),
+						accelerator = _("<Control>P"),
+						tooltip = _("Print information about each employees for the current period selected"),
+						callback = (a) => {
+						}
+					},
+					Gtk.ActionEntry () {
+						name = ACTION_PRINT_PREVIEW,
+						stock_id = Stock.PRINT_PREVIEW,
+						label = _("Print Previe_w"),
+						accelerator = _("<Shift><Control>P"),
+						tooltip = _("Show print preview of information about each employees for the current period selected"),
+						callback = (a) => {
 						}
 					}
 				};

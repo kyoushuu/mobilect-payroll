@@ -125,7 +125,7 @@ namespace Mobilect {
 							                   "title", _("About Mobilect Payroll"),
 							                   "comments", _("Payroll application of Mobilect Power Corp."),
 							                   "website", PACKAGE_URL,
-							                   "copyright", _("Copyright © 2012 Mobilect Power Corp."),
+							                   "copyright", _("Copyright 2012 Mobilect Power Corp."),
 							                   "license-type", License.GPL_3_0,
 							                   "license", license,
 							                   "wrap-license", true,

@@ -29,6 +29,21 @@ operating systems.
   See the file 'INSTALL' for compiling instructions.
 
 
+                     Building for Microsoft Windows
+
+You need MinGW64, preferably using MSYS2 distribution. Install the
+following packages using pacman:
+
+- autoconf
+- automake
+- mingw-w64-ucrt-x86_64-gtk3
+- mingw-w64-ucrt-x86_64-libgda
+- mingw-w64-ucrt-x86_64-libgee
+- mingw-w64-ucrt-x86_64-vala
+- mingw-w64-ucrt-x86_64-gnome-common
+- mingw-w64-ucrt-x86_64-yelp-tools
+
+
                                 License
 
   This program is free software: you can redistribute it and/or modify

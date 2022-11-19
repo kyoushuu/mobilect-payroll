@@ -32,7 +32,7 @@ namespace Mobilect {
 			public ButtonBox button_box { get; private set; }
 
 
-			public LoginPage (Window window, string label) {
+			protected LoginPage (Window window, string label) {
 				this.window = window;
 
 				this.label = @"<b>$label</b>";

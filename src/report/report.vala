@@ -109,7 +109,7 @@ namespace Mobilect {
 			public signal void step ();
 
 
-			public Report (Date start, Date end) throws ReportError {
+			protected Report (Date start, Date end) throws ReportError {
 				this.start = start;
 				this.end = end;
 

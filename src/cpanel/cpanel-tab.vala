@@ -46,7 +46,7 @@ namespace Mobilect {
 			}
 
 
-			public CPanelTab (CPanel cpanel, string? action_name = null, string? ui_resource_path = null) {
+			protected CPanelTab (CPanel cpanel, string? action_name = null, string? ui_resource_path = null) {
 				this.cpanel = cpanel;
 				this.orientation = Orientation.VERTICAL;
 

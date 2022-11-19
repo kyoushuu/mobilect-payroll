@@ -28,7 +28,7 @@ namespace Mobilect {
 
 			public ReportAssistant assistant;
 
-			public ReportAssistantPage (ReportAssistant assistant) {
+			protected ReportAssistantPage (ReportAssistant assistant) {
 				this.assistant = assistant;
 				this.orientation = Orientation.VERTICAL;
 				this.spacing = 12;

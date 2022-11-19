@@ -222,7 +222,7 @@ namespace Mobilect {
 
 				public AddTimeRecordAssistant assistant;
 
-				public Page (AddTimeRecordAssistant assistant) {
+				protected Page (AddTimeRecordAssistant assistant) {
 					this.assistant = assistant;
 					this.orientation = Orientation.VERTICAL;
 					this.spacing = 12;

@@ -18,14 +18,11 @@ gsettings_SCHEMAS = \
 
 
 EXTRA_DIST = \
-	$(desktop_in_files) \
-	$(gschema_xml_in_files)
+	$(desktop_in_files)
 
 CLEANFILES = \
-	$(desktop_DATA) \
-	$(gsettings_SCHEMAS)
+	$(desktop_DATA)
 
 DISTCLEANFILES = \
-	$(desktop_DATA) \
-	$(gsettings_SCHEMAS)
+	$(desktop_DATA)
 

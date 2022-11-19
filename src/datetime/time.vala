@@ -26,7 +26,7 @@ namespace Mobilect {
 
 		public struct Time {
 
-			private int _hour;
+			int _hour;
 			public int hour {
 				public get {
 					return _hour;
@@ -38,7 +38,7 @@ namespace Mobilect {
 				}
 			}
 
-			private int _minute;
+			int _minute;
 			public int minute {
 				public get {
 					return _minute;
